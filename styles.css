@@ -642,6 +642,15 @@ h3 {
     rgba(13,13,13,0.98);
 }
 
+.exploded.is-3d {
+  --model-h: clamp(620px, 72vh, 860px);
+}
+
+.exploded.is-3d .viewer-3d {
+  display: block;
+  min-height: var(--model-h);
+}
+
 .model-stage {
   position: relative;
   min-height: 390px;
@@ -655,6 +664,12 @@ h3 {
   background-size: 42px 42px;
 }
 
+.exploded.is-3d .model-stage {
+  min-height: var(--model-h);
+  border-right: 0;
+  border-bottom: 0;
+}
+
 .model-stage::before {
   content: "";
   position: absolute;
@@ -665,6 +680,11 @@ h3 {
   z-index: 0;
 }
 
+.exploded.is-3d .model-stage::before {
+  inset: 8% 6% 10%;
+  transform: skewX(-10deg) rotate(-2deg);
+}
+
 .machine-model {
   position: relative;
   z-index: 1;
@@ -673,6 +693,12 @@ h3 {
   min-height: 390px;
   --poster-color: transparent;
   background: transparent;
+}
+
+.exploded.is-3d .machine-model,
+.exploded.is-3d .model-loading {
+  height: var(--model-h);
+  min-height: var(--model-h);
 }
 
 .model-loading {
@@ -790,6 +816,11 @@ h3 {
 .model-note span {
   color: var(--muted);
   line-height: 1.5;
+}
+
+.exploded.is-3d .model-note,
+.exploded.is-3d .exploded-caption {
+  display: none;
 }
 
 .exploded-caption {
@@ -1394,6 +1425,10 @@ footer span:first-child {
 
   .dark-band {
     padding-inline: 14px;
+  }
+
+  .exploded.is-3d {
+    --model-h: clamp(460px, 72svh, 620px);
   }
 
   .viewer-head {
