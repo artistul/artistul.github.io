@@ -143,20 +143,27 @@
             </div>
           </div>
           <div class="viewer-pane viewer-3d" id="machine-view-3d" data-pane="3d" role="tabpanel" hidden>
-            <div class="model-stage" aria-hidden="true">
-              <div class="model-wireframe">
-                <span class="model-bed"></span>
-                <span class="model-barrel"></span>
-                <span class="model-carriage"></span>
-                <span class="model-mold"></span>
-                <span class="model-rail model-rail-a"></span>
-                <span class="model-rail model-rail-b"></span>
-              </div>
-              <div class="model-status"><span></span>GLB-ready slot</div>
+            <div class="model-stage">
+              <model-viewer
+                class="machine-model"
+                src="assets/machine-assembly.glb"
+                alt="Interactive 3D model of the full InFlux machine assembly"
+                camera-controls
+                auto-rotate
+                rotation-per-second="14deg"
+                camera-orbit="32deg 68deg 2.3m"
+                field-of-view="30deg"
+                shadow-intensity="0.82"
+                exposure="1.12"
+                environment-image="neutral"
+                interaction-prompt="none">
+                <div class="model-loading" slot="poster">Loading 3D assembly</div>
+              </model-viewer>
+              <div class="model-status"><span></span>STEP converted to GLB</div>
             </div>
             <div class="model-note">
-              <strong>Interactive assembly slot</strong>
-              <span>Reserved for the complete web model once the Fusion export is ready.</span>
+              <strong>Interactive assembly</strong>
+              <span>Live web model generated from the Fusion 360 STEP export.</span>
             </div>
           </div>
           <div class="exploded-caption" data-caption>
@@ -362,6 +369,7 @@
       <span>Compact injection molding system with 3D printed water-cooled resin molds.</span>
     </footer>
 
+    <script type="module" src="assets/model-viewer.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

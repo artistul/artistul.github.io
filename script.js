@@ -63,7 +63,7 @@ const explodedData = {
 const viewerModeData = {
   "3d": {
     title: "Whole-machine 3D view",
-    text: "This pane is prepared for the full Fusion 360 assembly, with the 2D part views kept separate and stable."
+    text: "The Fusion 360 STEP assembly is converted to a web-ready GLB model for orbit, zoom, and inspection."
   }
 };
 
