@@ -60,28 +60,77 @@ const explodedData = {
   }
 };
 
+const viewerModeData = {
+  "3d": {
+    title: "Whole-machine 3D view",
+    text: "This pane is prepared for the full Fusion 360 assembly, with the 2D part views kept separate and stable."
+  }
+};
+
 document.querySelectorAll("[data-exploded]").forEach((exploded) => {
-  const buttons = exploded.querySelectorAll("[data-view]");
+  const modeButtons = exploded.querySelectorAll("[data-mode]");
+  const partButtons = exploded.querySelectorAll("[data-part]");
+  const panes = exploded.querySelectorAll("[data-pane]");
   const layers = exploded.querySelectorAll("[data-layer]");
   const caption = exploded.querySelector("[data-caption]");
+  let activePart = exploded.querySelector("[data-part].is-active")?.dataset.part || "frame";
 
-  buttons.forEach((button) => {
+  const setCaption = (data) => {
+    if (!caption || !data) return;
+    caption.innerHTML = `<strong>${data.title}</strong><span>${data.text}</span>`;
+  };
+
+  const setPart = (part) => {
+    activePart = part;
+
+    partButtons.forEach((candidate) => {
+      const active = candidate.dataset.part === part;
+      candidate.classList.toggle("is-active", active);
+      candidate.setAttribute("aria-selected", String(active));
+    });
+
+    layers.forEach((layer) => {
+      layer.hidden = layer.dataset.layer !== part;
+    });
+
+    if (exploded.dataset.currentMode !== "3d") {
+      setCaption(explodedData[part]);
+    }
+  };
+
+  const setMode = (mode) => {
+    exploded.dataset.currentMode = mode;
+    exploded.classList.toggle("is-3d", mode === "3d");
+
+    modeButtons.forEach((candidate) => {
+      const active = candidate.dataset.mode === mode;
+      candidate.classList.toggle("is-active", active);
+      candidate.setAttribute("aria-selected", String(active));
+    });
+
+    panes.forEach((pane) => {
+      const active = pane.dataset.pane === mode;
+      pane.classList.toggle("is-active", active);
+      pane.hidden = !active;
+    });
+
+    setCaption(mode === "3d" ? viewerModeData["3d"] : explodedData[activePart]);
+  };
+
+  partButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const view = button.dataset.view;
-      buttons.forEach((candidate) => {
-        const active = candidate === button;
-        candidate.classList.toggle("is-active", active);
-        candidate.setAttribute("aria-selected", String(active));
-      });
-
-      layers.forEach((layer) => {
-        layer.hidden = layer.dataset.layer !== view;
-      });
-
-      const data = explodedData[view];
-      caption.innerHTML = `<strong>${data.title}</strong><span>${data.text}</span>`;
+      setPart(button.dataset.part);
     });
   });
+
+  modeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setMode(button.dataset.mode);
+    });
+  });
+
+  setPart(activePart);
+  setMode(exploded.querySelector("[data-mode].is-active")?.dataset.mode || "2d");
 });
 
 const cycleItems = [

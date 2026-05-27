@@ -118,17 +118,46 @@
         </div>
 
         <div class="exploded reveal" data-exploded>
-          <div class="exploded-toolbar" role="tablist" aria-label="Machine views">
-            <button class="is-active" type="button" data-view="frame" role="tab" aria-selected="true">Frame</button>
-            <button type="button" data-view="mold" role="tab" aria-selected="false">Mold</button>
-            <button type="button" data-view="barrel" role="tab" aria-selected="false">Barrel</button>
-            <button type="button" data-view="motion" role="tab" aria-selected="false">Motion</button>
+          <div class="viewer-head">
+            <div class="viewer-title">
+              <span>Machine views</span>
+              <strong>Assembly viewer</strong>
+            </div>
+            <div class="viewer-modes" role="tablist" aria-label="View mode">
+              <button class="is-active" type="button" data-mode="2d" role="tab" aria-selected="true" aria-controls="machine-view-2d">2D</button>
+              <button type="button" data-mode="3d" role="tab" aria-selected="false" aria-controls="machine-view-3d">3D</button>
+            </div>
           </div>
-          <div class="exploded-media">
-            <img src="assets/machine-frame.webp" alt="InFlux structural frame render" data-layer="frame" />
-            <img src="assets/machine-mold.webp" alt="InFlux mold movement assembly render" data-layer="mold" hidden />
-            <img src="assets/machine-barrel.webp" alt="InFlux injection barrel render" data-layer="barrel" hidden />
-            <img src="assets/machine-steppers.webp" alt="InFlux stepper and movement system render" data-layer="motion" hidden />
+          <div class="part-tabs" role="tablist" aria-label="2D assembly views">
+            <button class="is-active" type="button" data-part="frame" role="tab" aria-selected="true">Frame</button>
+            <button type="button" data-part="mold" role="tab" aria-selected="false">Mold</button>
+            <button type="button" data-part="barrel" role="tab" aria-selected="false">Barrel</button>
+            <button type="button" data-part="motion" role="tab" aria-selected="false">Motion</button>
+          </div>
+          <div class="viewer-pane is-active" id="machine-view-2d" data-pane="2d" role="tabpanel">
+            <div class="exploded-media">
+              <img src="assets/machine-frame.webp" alt="InFlux structural frame render" data-layer="frame" />
+              <img src="assets/machine-mold.webp" alt="InFlux mold movement assembly render" data-layer="mold" hidden />
+              <img src="assets/machine-barrel.webp" alt="InFlux injection barrel render" data-layer="barrel" hidden />
+              <img src="assets/machine-steppers.webp" alt="InFlux stepper and movement system render" data-layer="motion" hidden />
+            </div>
+          </div>
+          <div class="viewer-pane viewer-3d" id="machine-view-3d" data-pane="3d" role="tabpanel" hidden>
+            <div class="model-stage" aria-hidden="true">
+              <div class="model-wireframe">
+                <span class="model-bed"></span>
+                <span class="model-barrel"></span>
+                <span class="model-carriage"></span>
+                <span class="model-mold"></span>
+                <span class="model-rail model-rail-a"></span>
+                <span class="model-rail model-rail-b"></span>
+              </div>
+              <div class="model-status"><span></span>GLB-ready slot</div>
+            </div>
+            <div class="model-note">
+              <strong>Interactive assembly slot</strong>
+              <span>Reserved for the complete web model once the Fusion export is ready.</span>
+            </div>
           </div>
           <div class="exploded-caption" data-caption>
             <strong>Frame and guide rails</strong>
@@ -257,7 +286,16 @@
           </p>
         </div>
         <div class="proof-layout reveal">
-          <img src="assets/workbench.webp" alt="Workbench testing and thermal validation setup for InFlux" />
+          <div class="proof-media">
+            <figure class="proof-image proof-image-main">
+              <img src="assets/workbench.webp" alt="Workbench testing and thermal validation setup for InFlux" />
+              <figcaption>Bench validation setup</figcaption>
+            </figure>
+            <figure class="proof-image proof-image-thermal">
+              <img src="assets/thermal-camera.webp" alt="FLUKE thermal camera view of the heated InFlux barrel and nozzle" />
+              <figcaption>Thermal camera pass on the heated barrel and nozzle</figcaption>
+            </figure>
+          </div>
           <div class="proof-points">
             <article>
               <span>108.6 min</span>
