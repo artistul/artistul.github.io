@@ -15,6 +15,19 @@
   --header-h: 74px;
 }
 
+:root[data-theme="light"] {
+  --bg: #f2f0eb;
+  --surface: #ffffff;
+  --surface-high: #e8e5df;
+  --surface-higher: #ddd9d2;
+  --line: #ccc6bd;
+  --text: #111111;
+  --muted: #5d5a56;
+  --soft: #85817b;
+  --red: #d80f24;
+  --red-dim: #f4d9dc;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -42,6 +55,10 @@ body {
   overflow-x: hidden;
 }
 
+:root[data-theme="light"] body {
+  background: var(--bg);
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -56,6 +73,14 @@ body::before {
   background-size: 72px 72px, 72px 72px, auto, auto;
 }
 
+:root[data-theme="light"] body::before {
+  background:
+    linear-gradient(90deg, rgba(17,17,17,0.04) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(17,17,17,0.03) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(216,15,36,0.08) 0%, rgba(216,15,36,0.025) 18%, transparent 44%);
+  background-size: 72px 72px, 72px 72px, auto;
+}
+
 body::after {
   content: "";
   position: fixed;
@@ -65,6 +90,10 @@ body::after {
   background:
     linear-gradient(110deg, rgba(9,9,9,0.08), rgba(9,9,9,0.88) 52%, rgba(9,9,9,0.22)),
     linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0));
+}
+
+:root[data-theme="light"] body::after {
+  background: linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
 }
 
 img {
@@ -141,9 +170,18 @@ button {
   transition: background 200ms ease, border-color 200ms ease;
 }
 
+:root[data-theme="light"] .site-header {
+  background: rgba(242,240,235,0.82);
+  border-color: rgba(17,17,17,0.1);
+}
+
 .site-header.is-scrolled {
   background: rgba(9,9,9,0.92);
   border-color: rgba(225,25,44,0.28);
+}
+
+:root[data-theme="light"] .site-header.is-scrolled {
+  background: rgba(242,240,235,0.95);
 }
 
 .brand,
@@ -220,6 +258,29 @@ button {
   font-weight: 800;
 }
 
+.theme-switch {
+  min-width: 76px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.theme-switch span {
+  color: var(--red);
+  font-size: 16px;
+}
+
 .action-icon {
   font-size: 17px;
   line-height: 1;
@@ -275,13 +336,13 @@ h1 {
 
 h2 {
   margin-bottom: 20px;
-  font-size: clamp(32px, 5vw, 70px);
-  line-height: 0.98;
+  font-size: clamp(30px, 4vw, 54px);
+  line-height: 1;
   letter-spacing: 0;
 }
 
 h3 {
-  font-size: clamp(23px, 3vw, 38px);
+  font-size: clamp(22px, 2.6vw, 34px);
   line-height: 1.02;
 }
 
@@ -1445,6 +1506,28 @@ h3 {
   color: var(--text);
 }
 
+:root[data-theme="light"] .doc-summary,
+:root[data-theme="light"] .doc-body {
+  border-color: var(--line);
+  background: var(--line);
+}
+
+:root[data-theme="light"] .doc-summary div,
+:root[data-theme="light"] .doc-toc,
+:root[data-theme="light"] .doc-section {
+  border-color: var(--line);
+  background: rgba(255,255,255,0.88);
+}
+
+:root[data-theme="light"] .doc-toc a {
+  border-color: rgba(17,17,17,0.09);
+}
+
+:root[data-theme="light"] .secondary-button {
+  border-color: var(--line);
+  background: rgba(255,255,255,0.62);
+}
+
 .doc-team span {
   color: var(--muted);
 }
@@ -1555,6 +1638,16 @@ footer span:first-child {
 
   .header-action {
     padding-inline: 12px;
+  }
+
+  .theme-switch {
+    min-width: 40px;
+    width: 40px;
+    padding: 0;
+  }
+
+  .theme-switch b {
+    display: none;
   }
 
   .hero {

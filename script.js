@@ -44,8 +44,26 @@ const header = document.querySelector("[data-header]");
 const meter = document.querySelector(".scroll-meter span");
 const menu = document.querySelector("[data-menu]");
 const nav = document.querySelector("#primary-nav");
+const themeToggle = document.querySelector("[data-theme-toggle]");
+const themeLabel = document.querySelector("[data-theme-label]");
 const panels = [...document.querySelectorAll("[data-panel]")];
 const navButtons = [...document.querySelectorAll("[data-nav]")];
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.colorScheme = theme;
+  if (themeLabel) themeLabel.textContent = theme === "light" ? "Dark" : "Light";
+  themeToggle?.setAttribute("aria-label", `Switch to ${theme === "light" ? "dark" : "light"} mode`);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f2f0eb" : "#080808");
+}
+
+applyTheme(document.documentElement.dataset.theme || "dark");
+
+themeToggle?.addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  localStorage.setItem("influx-theme", next);
+  applyTheme(next);
+});
 
 function currentTabFromUrl() {
   const candidate = new URLSearchParams(window.location.search).get("tab");

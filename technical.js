@@ -1,5 +1,23 @@
 const header = document.querySelector("[data-header]");
 const meter = document.querySelector(".scroll-meter");
+const themeToggle = document.querySelector("[data-theme-toggle]");
+const themeLabel = document.querySelector("[data-theme-label]");
+
+function applyTheme(theme) {
+  const resolved = theme === "light" ? "light" : "dark";
+  document.documentElement.dataset.theme = resolved;
+  document.documentElement.style.colorScheme = resolved;
+  themeLabel.textContent = resolved === "dark" ? "Light" : "Dark";
+  themeToggle.setAttribute("aria-label", `Switch to ${resolved === "dark" ? "light" : "dark"} mode`);
+  document.querySelector('meta[name="theme-color"]').setAttribute("content", resolved === "dark" ? "#090909" : "#f2f0eb");
+}
+
+applyTheme(document.documentElement.dataset.theme);
+themeToggle.addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  localStorage.setItem("influx-theme", next);
+  applyTheme(next);
+});
 
 function updateScrollState() {
   const max = document.documentElement.scrollHeight - window.innerHeight;

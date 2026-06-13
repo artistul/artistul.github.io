@@ -8,9 +8,18 @@
       content="Public technical dossier for the InFlux Origin MK1 desktop injection molding prototype."
     />
     <meta name="theme-color" content="#090909" />
+    <meta name="color-scheme" content="dark light" />
     <title>Technical Dossier | InFlux Origin MK1</title>
     <link rel="icon" href="assets/logo-mark.webp" />
-    <link rel="stylesheet" href="technical.css?v=hub-v1" />
+    <script>
+      (() => {
+        const saved = localStorage.getItem("influx-theme");
+        const resolved = saved || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+        document.documentElement.dataset.theme = resolved;
+        document.documentElement.style.colorScheme = resolved;
+      })();
+    </script>
+    <link rel="stylesheet" href="technical.css?v=ux-v2" />
   </head>
   <body class="technical-page">
     <div class="scroll-meter" aria-hidden="true"></div>
@@ -25,6 +34,9 @@
         <a href="index.html?tab=proof">Proof</a>
         <a href="index.html?tab=downloads">Downloads</a>
       </nav>
+      <button class="theme-switch" type="button" data-theme-toggle aria-label="Switch color theme">
+        <span aria-hidden="true">◐</span><b data-theme-label>Light</b>
+      </button>
       <a class="header-action" href="assets/influx-origin-technical-notebook.pdf" download>PDF</a>
     </header>
 
@@ -240,6 +252,6 @@
       <span>InFlux Origin MK1</span>
       <span>Public technical dossier / integrated prototype in active calibration.</span>
     </footer>
-    <script src="technical.js?v=hub-v1"></script>
+    <script src="technical.js?v=ux-v2"></script>
   </body>
 </html>
