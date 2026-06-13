@@ -8,18 +8,28 @@
       content="Public technical dossier for the InFlux Origin MK1 desktop injection molding prototype."
     />
     <meta name="theme-color" content="#090909" />
-    <meta name="color-scheme" content="dark light" />
+    <link rel="canonical" href="https://artistul.github.io/technical.html" />
+    <meta property="og:title" content="Technical Dossier | InFlux Origin MK1" />
+    <meta property="og:description" content="Public technical dossier for the InFlux Origin MK1 desktop injection molding prototype." />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://artistul.github.io/technical.html" />
+    <meta property="og:image" content="assets/machine-origin-render.png" />
+    <meta name="twitter:card" content="summary_large_image" />
     <title>Technical Dossier | InFlux Origin MK1</title>
     <link rel="icon" href="assets/logo-mark.webp" />
-    <script>
-      (() => {
-        const saved = localStorage.getItem("influx-theme");
-        const resolved = saved || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-        document.documentElement.dataset.theme = resolved;
-        document.documentElement.style.colorScheme = resolved;
-      })();
+    <link rel="stylesheet" href="technical.css?v=2026-06-13-p3" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechnicalArticle",
+        "headline": "InFlux Origin MK1 Technical Dossier",
+        "description": "Public technical dossier for the InFlux Origin MK1 desktop injection molding prototype.",
+        "dateModified": "2026-06-13",
+        "author": { "@type": "Organization", "name": "Volta Circuits" },
+        "about": { "@type": "Product", "name": "InFlux Origin MK1" },
+        "url": "https://artistul.github.io/technical.html"
+      }
     </script>
-    <link rel="stylesheet" href="technical.css?v=ux-v2" />
   </head>
   <body class="technical-page">
     <div class="scroll-meter" aria-hidden="true"></div>
@@ -34,9 +44,6 @@
         <a href="index.html?tab=proof">Proof</a>
         <a href="index.html?tab=downloads">Downloads</a>
       </nav>
-      <button class="theme-switch" type="button" data-theme-toggle aria-label="Switch color theme">
-        <span aria-hidden="true">◐</span><b data-theme-label>Light</b>
-      </button>
       <a class="header-action" href="assets/influx-origin-technical-notebook.pdf" download>PDF</a>
     </header>
 
@@ -65,18 +72,22 @@
 
       <section class="doc-shell">
         <aside class="doc-toc reveal" aria-label="Contents">
-          <span>Contents</span>
-          <a href="#definition">1. Project definition</a>
-          <a href="#architecture">2. System architecture</a>
-          <a href="#mechanical">3. Mechanical system</a>
-          <a href="#thermal">4. Thermal system</a>
-          <a href="#controls">5. Electronics and controls</a>
-          <a href="#software">6. Firmware and operator stack</a>
-          <a href="#safety">7. Safety position</a>
-          <a href="#validation">8. Validation evidence</a>
-          <a href="#limits">9. Current limits</a>
-          <a href="#roadmap">10. Product direction</a>
-          <a href="#team">11. Team</a>
+          <button class="doc-toc-toggle" type="button" aria-expanded="false" aria-controls="doc-toc-list" data-toc-toggle>
+            <span>Contents</span><strong data-toc-current>1. Project definition</strong>
+          </button>
+          <div class="doc-toc-list" id="doc-toc-list">
+            <a href="#definition">1. Project definition</a>
+            <a href="#architecture">2. System architecture</a>
+            <a href="#mechanical">3. Mechanical system</a>
+            <a href="#thermal">4. Thermal system</a>
+            <a href="#controls">5. Electronics and controls</a>
+            <a href="#software">6. Firmware and operator stack</a>
+            <a href="#safety">7. Safety position</a>
+            <a href="#validation">8. Validation evidence</a>
+            <a href="#limits">9. Current limits</a>
+            <a href="#roadmap">10. Product direction</a>
+            <a href="#team">11. Team</a>
+          </div>
         </aside>
 
         <article class="doc-body reveal">
@@ -113,6 +124,15 @@
               The ESP bridge translates same-network operator requests into the machine command protocol.
               The Android application presents status and sends supported commands.
             </p>
+            <h3>Confirmed platform summary</h3>
+            <dl class="spec-grid">
+              <div><dt>Machine controller</dt><dd>NUCLEO-H753ZI</dd></div>
+              <div><dt>Communication bridge</dt><dd>ESP32-C6 / local HTTP to acknowledged UART commands</dd></div>
+              <div><dt>Operator interface</dt><dd>Android application for status and supported commands</dd></div>
+              <div><dt>Thermal sensing</dt><dd>Multiple K-type thermocouples across the heated barrel</dd></div>
+              <div><dt>Tooling direction</dt><dd>3D-printed photopolymer resin molds with controlled water cooling</dd></div>
+              <div><dt>Current status</dt><dd>Supervised integrated prototype in active calibration</dd></div>
+            </dl>
           </section>
 
           <section class="doc-section" id="mechanical">
@@ -146,6 +166,7 @@
               compared cases. These results guide insulation, sensor placement, nozzle design, cooling,
               and safe timing decisions.
             </p>
+            <p class="source-note">Evidence source: barrel-tuning campaign recorded April 16, 2026 and summarized in the public technical notebook.</p>
           </section>
 
           <section class="doc-section" id="controls">
@@ -206,6 +227,7 @@
               are useful because they identify the next work in venting, fill behavior, tooling, and process
               calibration.
             </p>
+            <p class="source-note">Validation record: public technical notebook, centralized June 11, 2026, with original measurements and active software/firmware sources retained.</p>
           </section>
 
           <section class="doc-section" id="limits">
@@ -252,6 +274,6 @@
       <span>InFlux Origin MK1</span>
       <span>Public technical dossier / integrated prototype in active calibration.</span>
     </footer>
-    <script src="technical.js?v=ux-v2"></script>
+    <script src="technical.js?v=2026-06-13-p3"></script>
   </body>
 </html>

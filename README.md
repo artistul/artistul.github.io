@@ -1,23 +1,37 @@
-# InFlux Origin Public Hub
+# InFlux Origin MK1 Website
 
-Public GitHub Pages hub for the InFlux Origin desktop injection molding platform.
-
-## Included
-
-- Home, Machine Versions, Other Projects, Team, Proof, Downloads, and Links views
-- Interactive web-ready machine assembly
-- Public technical dossier and downloadable technical notebook
-- Clearly labeled prototype operator APK
-- Responsive black, red, and white visual identity
+Static GitHub Pages showcase for the InFlux compact injection molding project.
 
 ## Local Preview
 
-Serve the repository with any static HTTP server:
+Open `index.html` directly in a browser, or serve the folder with any static server.
+
+Run the static website checks:
 
 ```powershell
-python -m http.server 4173
+.\scripts\check-website.ps1
 ```
 
-Then open `http://127.0.0.1:4173`.
+Run responsive interaction and screenshot regression tests:
 
-No build step or third-party package installation is required.
+```powershell
+npm install
+npm run test:update
+npm test
+```
+
+Responsive verification targets:
+
+- `320x568`
+- `390x844`
+- `768x1024`
+- `1440x900`
+
+The interactive 3D assembly is intentionally loaded only after explicit user action.
+
+## Included
+
+- Product-style landing page
+- Compressed project media from `C:\Users\toneg\Desktop\InFlux\General Media`
+- Latest InFlux Operator APK as `assets/influx-operator-latest.apk`
+- No build step
