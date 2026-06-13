@@ -21,6 +21,7 @@ test("hidden media and 3D load only when requested", async ({ page }) => {
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await expect(page.locator('script[src*="model-viewer"]')).toHaveCount(0);
   await page.getByRole("tab", { name: "Machine Versions" }).click();
+  await expect(page.locator(".version-timeline img.media-loading")).toHaveCount(3);
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await page.getByRole("button", { name: "Load interactive 3D" }).click();
   await expect(page.locator("model-viewer")).toHaveAttribute("src", "assets/machine-assembly-optimized.glb");

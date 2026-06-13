@@ -7,6 +7,8 @@
   --red: #e1192c;
   --max: 1180px;
   --header-h: 74px;
+  --doc-display: clamp(54px, 9vw, 118px);
+  --doc-section-space: clamp(30px, 4vw, 46px);
 }
 
 * { box-sizing: border-box; }
@@ -14,8 +16,7 @@ html { scroll-behavior: smooth; background: var(--bg); }
 body {
   margin: 0;
   overflow-x: hidden;
-  background:
-    linear-gradient(180deg, #090909 0%, #12090b 11%, #090909 24%, #16090d 39%, #090909 54%, #13090c 70%, #090909 84%, #15090c 100%);
+  background: #090909;
   color: var(--text);
   font-family: "Segoe UI", Inter, system-ui, sans-serif;
 }
@@ -28,7 +29,7 @@ body::before {
   background:
     linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
     linear-gradient(0deg, rgba(255,255,255,.028) 1px, transparent 1px),
-    linear-gradient(135deg, rgba(225,25,44,.11), transparent 44%);
+    linear-gradient(135deg, rgba(225,25,44,.08), transparent 44%);
   background-size: 72px 72px, 72px 72px, auto;
 }
 a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
@@ -113,7 +114,7 @@ main::before {
 }
 .doc-hero {
   width: min(var(--max), calc(100% - 40px));
-  min-height: calc(100svh - var(--header-h));
+  min-height: min(760px, calc(88svh - var(--header-h)));
   margin-inline: auto;
   padding: calc(var(--header-h) + 72px) 0 64px;
   display: grid;
@@ -124,7 +125,10 @@ main::before {
 .doc-hero-copy h1 {
   max-width: 850px;
   margin: 0;
-  font-size: clamp(56px, 11vw, 144px);
+  font-family: Impact, "Arial Narrow", sans-serif;
+  font-size: var(--doc-display);
+  font-weight: 500;
+  letter-spacing: -.025em;
   line-height: .86;
   text-transform: uppercase;
 }
@@ -153,7 +157,7 @@ main::before {
   gap: 1px;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 24px;
+  border-radius: 0;
   background: rgba(255,255,255,.08);
 }
 .doc-summary div { padding: 20px; background: rgba(20,20,20,.9); }
@@ -185,7 +189,7 @@ main::before {
   overflow: auto;
   padding: 18px;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 0;
   background: rgba(20,20,20,.86);
 }
 .doc-toc-toggle {
@@ -221,16 +225,24 @@ main::before {
   gap: 1px;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 24px;
+  border-radius: 0;
   background: rgba(255,255,255,.08);
 }
 .doc-section {
   scroll-margin-top: calc(var(--header-h) + 24px);
-  padding: clamp(28px, 5vw, 56px);
+  padding: var(--doc-section-space);
   background: rgba(15,15,15,.94);
 }
 .doc-section h2, .doc-section h3, .doc-section p, .doc-section ul, .doc-section dl { max-width: 860px; }
-.doc-section h2 { margin: 0 0 22px; font-size: clamp(30px, 5vw, 56px); line-height: .98; }
+.doc-section h2 {
+  margin: 0 0 22px;
+  font-family: Impact, "Arial Narrow", sans-serif;
+  font-size: clamp(32px, 4.4vw, 50px);
+  font-weight: 500;
+  letter-spacing: -.015em;
+  line-height: .98;
+  text-transform: uppercase;
+}
 .doc-section h3 { margin: 34px 0 12px; color: var(--red); font-size: clamp(19px, 2vw, 26px); }
 .doc-section p, .doc-section li { color: var(--muted); font-size: 17px; line-height: 1.7; }
 .doc-section ul { margin: 16px 0 0; padding-left: 22px; }
@@ -242,7 +254,7 @@ main::before {
   margin: 20px 0 0;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 0;
   background: rgba(255,255,255,.08);
 }
 .spec-grid div { padding: 18px; background: rgba(20,20,20,.9); }

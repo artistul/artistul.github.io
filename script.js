@@ -59,8 +59,21 @@ function currentTabFromUrl() {
   return HUB.tabs[candidate] ? candidate : "home";
 }
 
+function registerMediaState(asset) {
+  if (!(asset instanceof HTMLImageElement)) return;
+  const settle = () => {
+    asset.classList.remove("media-loading");
+    asset.classList.add("media-loaded");
+  };
+  asset.classList.add("media-loading");
+  asset.addEventListener("load", settle, { once: true });
+  asset.addEventListener("error", settle, { once: true });
+  if (asset.complete && asset.currentSrc) settle();
+}
+
 function hydratePanel(panel) {
   panel.querySelectorAll("[data-src]").forEach((asset) => {
+    registerMediaState(asset);
     asset.src = asset.dataset.src;
     asset.removeAttribute("data-src");
   });
@@ -69,6 +82,8 @@ function hydratePanel(panel) {
     asset.removeAttribute("data-srcset");
   });
 }
+
+document.querySelectorAll("img[loading='lazy'], img[data-src]").forEach(registerMediaState);
 
 function closeMenu({ returnFocus = false } = {}) {
   nav?.classList.remove("is-open");
