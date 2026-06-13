@@ -1,202 +1,150 @@
-const header = document.querySelector("[data-header]");
-const meter = document.querySelector(".scroll-meter");
-
-const onScroll = () => {
-  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-  const progress = maxScroll > 0 ? (window.scrollY / maxScroll) * 100 : 0;
-  meter.style.width = `${progress}%`;
-  header.classList.toggle("is-scrolled", window.scrollY > 24);
+const HUB = {
+  tabs: {
+    home: { title: "InFlux Origin | Project Hub" },
+    versions: { title: "Machine Versions | InFlux Origin" },
+    projects: { title: "Other Projects | InFlux Origin" },
+    team: { title: "Team | InFlux Origin" },
+    proof: { title: "Proof | InFlux Origin" },
+    downloads: { title: "Download Hub | InFlux Origin" },
+    links: { title: "External Links | InFlux Origin" }
+  },
+  downloads: [
+    {
+      name: "InFlux Operator APK",
+      category: "Prototype operator artifact",
+      description: "Latest bundled Android operator build for supervised InFlux demonstrations.",
+      href: "assets/influx-operator-latest.apk",
+      download: true
+    },
+    {
+      name: "Technical Notebook",
+      category: "Public documentation / PDF",
+      description: "Ten-page public technical notebook covering the project, system, testing, and direction.",
+      href: "assets/influx-origin-technical-notebook.pdf",
+      download: true
+    },
+    {
+      name: "Extended Technical Dossier",
+      category: "Public documentation / web",
+      description: "Long-form project documentation with mechanics, control, testing, costs, and next steps.",
+      href: "technical.html",
+      download: false
+    },
+    {
+      name: "InFlux Origin Logo",
+      category: "Public brand asset / SVG",
+      description: "Scalable monochrome logo for project references and approved public coverage.",
+      href: "assets/influx-origin-logo.svg",
+      download: true
+    }
+  ]
 };
 
-window.addEventListener("scroll", onScroll, { passive: true });
-onScroll();
+const header = document.querySelector("[data-header]");
+const meter = document.querySelector(".scroll-meter span");
+const menu = document.querySelector("[data-menu]");
+const nav = document.querySelector("#primary-nav");
+const panels = [...document.querySelectorAll("[data-panel]")];
+const navButtons = [...document.querySelectorAll("[data-nav]")];
+
+function currentTabFromUrl() {
+  const candidate = new URLSearchParams(window.location.search).get("tab");
+  return HUB.tabs[candidate] ? candidate : "home";
+}
+
+function activateTab(tab, options = {}) {
+  const target = HUB.tabs[tab] ? tab : "home";
+
+  panels.forEach((panel) => {
+    const active = panel.dataset.panel === target;
+    panel.classList.toggle("is-active", active);
+    panel.setAttribute("aria-hidden", String(!active));
+  });
+
+  navButtons.forEach((button) => {
+    const active = button.dataset.nav === target;
+    button.classList.toggle("is-active", active);
+    if (button.getAttribute("role") === "tab") button.setAttribute("aria-selected", String(active));
+  });
+
+  document.title = HUB.tabs[target].title;
+  nav?.classList.remove("is-open");
+  menu?.setAttribute("aria-expanded", "false");
+
+  if (!options.fromHistory) {
+    const url = new URL(window.location.href);
+    if (target === "home") url.searchParams.delete("tab");
+    else url.searchParams.set("tab", target);
+    window.history.pushState({ tab: target }, "", url);
+  }
+
+  if (!options.keepScroll) window.scrollTo({ top: 0, behavior: options.instant ? "auto" : "smooth" });
+  requestAnimationFrame(revealVisibleContent);
+}
+
+navButtons.forEach((button) => {
+  button.addEventListener("click", () => activateTab(button.dataset.nav));
+});
+
+window.addEventListener("popstate", () => activateTab(currentTabFromUrl(), { fromHistory: true, instant: true }));
+
+menu?.addEventListener("click", () => {
+  const open = nav.classList.toggle("is-open");
+  menu.setAttribute("aria-expanded", String(open));
+});
+
+document.querySelector("[data-top]")?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+function updateScrollState() {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  meter.style.width = `${max > 0 ? (window.scrollY / max) * 100 : 0}%`;
+  header.classList.toggle("is-scrolled", window.scrollY > 16);
+}
+
+window.addEventListener("scroll", updateScrollState, { passive: true });
+updateScrollState();
 
 const revealObserver = new IntersectionObserver(
   (entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("is-visible");
-        revealObserver.unobserve(entry.target);
-      }
-    }
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) entry.target.classList.add("is-visible");
+    });
   },
-  { threshold: 0.18 }
+  { threshold: 0.12 }
 );
 
 document.querySelectorAll(".reveal").forEach((node) => revealObserver.observe(node));
 
-const tilt = document.querySelector("[data-tilt] .machine-glass");
-const tiltShell = document.querySelector("[data-tilt]");
+function revealVisibleContent() {
+  document.querySelectorAll(".tab-panel.is-active .reveal").forEach((node) => revealObserver.observe(node));
+}
 
-if (tilt && tiltShell && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  tiltShell.addEventListener("pointermove", (event) => {
-    const rect = tiltShell.getBoundingClientRect();
+const tilt = document.querySelector("[data-tilt]");
+if (tilt && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  tilt.addEventListener("pointermove", (event) => {
+    const rect = tilt.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width - 0.5;
     const y = (event.clientY - rect.top) / rect.height - 0.5;
-    tilt.style.transform = `rotateY(${x * 7}deg) rotateX(${-y * 5}deg)`;
+    tilt.style.transform = `perspective(1000px) rotateY(${x * 3.5}deg) rotateX(${-y * 2.5}deg)`;
   });
-
-  tiltShell.addEventListener("pointerleave", () => {
-    tilt.style.transform = "rotateY(0deg) rotateX(0deg)";
-  });
+  tilt.addEventListener("pointerleave", () => { tilt.style.transform = ""; });
 }
 
-const explodedData = {
-  frame: {
-    title: "Frame and guide rails",
-    text: "Alignment carries the process. The nozzle, plates, and mold must meet in the same place every cycle."
-  },
-  mold: {
-    title: "Water-cooled resin mold",
-    text: "The tool is fast to print, but the cooling channels make it useful for repeatable thermal behavior."
-  },
-  barrel: {
-    title: "Heating and injection barrel",
-    text: "A compact melt zone and piston shot keep volume, temperature, and hold time tied to the part geometry."
-  },
-  motion: {
-    title: "Stepper-driven motion",
-    text: "Movement is built around repeatable positions, service controls, and simple operator feedback."
-  }
-};
+function renderDownloads() {
+  const list = document.querySelector("#download-list");
+  if (!list) return;
 
-const viewerModeData = {
-  "3d": {
-    title: "Whole-machine 3D view",
-    text: "The Fusion 360 STEP assembly is converted to a web-ready GLB model for orbit, zoom, and inspection."
-  }
-};
-
-document.querySelectorAll("[data-exploded]").forEach((exploded) => {
-  const modeButtons = exploded.querySelectorAll("[data-mode]");
-  const partButtons = exploded.querySelectorAll("[data-part]");
-  const panes = exploded.querySelectorAll("[data-pane]");
-  const layers = exploded.querySelectorAll("[data-layer]");
-  const caption = exploded.querySelector("[data-caption]");
-  let activePart = exploded.querySelector("[data-part].is-active")?.dataset.part || "frame";
-
-  const setCaption = (data) => {
-    if (!caption || !data) return;
-    caption.innerHTML = `<strong>${data.title}</strong><span>${data.text}</span>`;
-  };
-
-  const setPart = (part) => {
-    activePart = part;
-
-    partButtons.forEach((candidate) => {
-      const active = candidate.dataset.part === part;
-      candidate.classList.toggle("is-active", active);
-      candidate.setAttribute("aria-selected", String(active));
-    });
-
-    layers.forEach((layer) => {
-      layer.hidden = layer.dataset.layer !== part;
-    });
-
-    if (exploded.dataset.currentMode !== "3d") {
-      setCaption(explodedData[part]);
-    }
-  };
-
-  const setMode = (mode) => {
-    exploded.dataset.currentMode = mode;
-    exploded.classList.toggle("is-3d", mode === "3d");
-
-    modeButtons.forEach((candidate) => {
-      const active = candidate.dataset.mode === mode;
-      candidate.classList.toggle("is-active", active);
-      candidate.setAttribute("aria-selected", String(active));
-    });
-
-    panes.forEach((pane) => {
-      const active = pane.dataset.pane === mode;
-      pane.classList.toggle("is-active", active);
-      pane.hidden = !active;
-    });
-
-    setCaption(mode === "3d" ? viewerModeData["3d"] : explodedData[activePart]);
-  };
-
-  partButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      setPart(button.dataset.part);
-    });
-  });
-
-  modeButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      setMode(button.dataset.mode);
-    });
-  });
-
-  setPart(activePart);
-  setMode(exploded.querySelector("[data-mode].is-active")?.dataset.mode || "2d");
-});
-
-const cycleItems = [
-  {
-    kicker: "Mount mold",
-    title: "Position the mold with repeatable alignment.",
-    text: "The resin tool is fixed between support plates so the cavity, nozzle, and guide system stay coordinated."
-  },
-  {
-    kicker: "Connect water",
-    title: "Stabilize the tool before the shot.",
-    text: "Inlet and outlet lines pull heat away from the active wall instead of letting the resin body accumulate it."
-  },
-  {
-    kicker: "Heat polymer",
-    title: "Bring the material into its flow window.",
-    text: "The melt zone targets stable temperature, because viscosity swings show up directly in fill behavior."
-  },
-  {
-    kicker: "Close and clamp",
-    title: "Carry force through structure, not fragile resin.",
-    text: "Guide rails and plates keep the mold closed while reducing flash and local stress in the printed tool."
-  },
-  {
-    kicker: "Inject and hold",
-    title: "Fill the cavity, then offset shrinkage.",
-    text: "A piston-driven shot controls volume, while a short hold stage reduces voids and local contraction."
-  },
-  {
-    kicker: "Cool and open",
-    title: "Reach the ejection window and learn from the part.",
-    text: "Water cooling and measured timing make each cycle comparable, so the next mold iteration is smarter."
-  }
-];
-
-const cycle = document.querySelector("[data-cycle]");
-if (cycle) {
-  const title = document.querySelector("[data-cycle-title]");
-  const kicker = document.querySelector("[data-cycle-kicker]");
-  const text = document.querySelector("[data-cycle-text]");
-  const meterBar = document.querySelector("[data-cycle-meter]");
-  const buttons = cycle.querySelectorAll("[data-step]");
-  let current = 0;
-  let timer;
-
-  const setCycle = (index) => {
-    current = index;
-    const item = cycleItems[index];
-    kicker.textContent = item.kicker;
-    title.textContent = item.title;
-    text.textContent = item.text;
-    meterBar.style.height = `${((index + 1) / cycleItems.length) * 100}%`;
-    buttons.forEach((button, i) => button.classList.toggle("is-active", i === index));
-  };
-
-  const startTimer = () => {
-    clearInterval(timer);
-    timer = setInterval(() => setCycle((current + 1) % cycleItems.length), 3600);
-  };
-
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      setCycle(Number(button.dataset.step));
-      startTimer();
-    });
-  });
-
-  startTimer();
+  list.innerHTML = HUB.downloads.map((file, index) => {
+    const download = file.download ? "download" : "";
+    return `
+      <a class="download-entry" href="${file.href}" ${download}>
+        <span class="file-index">${String(index + 1).padStart(2, "0")}</span>
+        <div><p class="section-index">${file.category}</p><h2>${file.name}</h2></div>
+        <p>${file.description}</p>
+        <span>↓</span>
+      </a>`;
+  }).join("");
 }
+
+renderDownloads();
+activateTab(currentTabFromUrl(), { fromHistory: true, instant: true, keepScroll: true });

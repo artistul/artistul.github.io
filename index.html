@@ -5,372 +5,365 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="InFlux Origin MK1 is a compact injection molding platform for functional thermoplastic prototypes and short-run validation."
+      content="InFlux Origin is a public project hub for a desktop injection molding platform, its evidence, software, team, and future direction."
     />
-    <meta name="theme-color" content="#090909" />
-    <meta property="og:title" content="InFlux Origin MK1" />
+    <meta name="theme-color" content="#050505" />
+    <meta property="og:title" content="InFlux Origin | Desktop manufacturing platform" />
     <meta
       property="og:description"
-      content="A compact injection molding bridge for water-cooled resin molds, real thermoplastic parts, and fast iteration."
+      content="An integrated desktop injection molding prototype in active calibration."
     />
-    <meta property="og:image" content="assets/machine-full.webp?v=3d-wide-logo" />
-    <title>InFlux Origin MK1</title>
-    <link rel="icon" href="assets/logo-mark.webp?v=3d-wide-logo" />
-    <link rel="stylesheet" href="styles.css?v=3d-wide-logo" />
+    <meta property="og:image" content="assets/machine-origin-render.png" />
+    <title>InFlux Origin | Project Hub</title>
+    <link rel="icon" href="assets/logo-mark.webp" />
+    <link rel="stylesheet" href="styles.css?v=hub-v1" />
+    <script>document.documentElement.classList.add("js");</script>
   </head>
   <body>
-    <div class="scroll-meter" aria-hidden="true"></div>
+    <div class="scroll-meter" aria-hidden="true"><span></span></div>
+    <div class="route-motif" aria-hidden="true">
+      <span class="route-line"></span>
+      <span class="route-node route-node-a"></span>
+      <span class="route-node route-node-b"></span>
+      <span class="route-node route-node-c"></span>
+    </div>
 
     <header class="site-header" data-header>
-      <a class="brand" href="#top" aria-label="InFlux Origin home">
-        <span class="brand-mark">
-          <img src="assets/logo-mark.webp?v=3d-wide-logo" alt="" />
-        </span>
-        <span class="brand-copy">
-          <strong>InFlux</strong>
-          <span>Origin MK1</span>
-        </span>
-      </a>
-      <nav class="nav-links" aria-label="Primary navigation">
-        <a href="#machine">Machine</a>
-        <a href="#operator">Operator</a>
-        <a href="#proof">Proof</a>
-        <a href="#download">Download</a>
+      <button class="brand" type="button" data-nav="home" aria-label="Open InFlux home">
+        <img src="assets/logo-mark.webp" alt="" />
+        <span><strong>InFlux</strong><small>Origin / Public Hub</small></span>
+      </button>
+
+      <button class="menu-toggle" type="button" data-menu aria-expanded="false" aria-controls="primary-nav">
+        <span></span><span></span>
+        <b>Menu</b>
+      </button>
+
+      <nav class="primary-nav" id="primary-nav" aria-label="Project views" role="tablist">
+        <div class="story-tabs">
+          <button class="is-active" type="button" data-nav="home" role="tab" aria-selected="true">Home</button>
+          <button type="button" data-nav="versions" role="tab" aria-selected="false">Machine Versions</button>
+          <button type="button" data-nav="projects" role="tab" aria-selected="false">Other Projects</button>
+          <button type="button" data-nav="team" role="tab" aria-selected="false">Team</button>
+          <button type="button" data-nav="proof" role="tab" aria-selected="false">Proof</button>
+        </div>
+        <div class="utility-tabs">
+          <button type="button" data-nav="downloads" role="tab" aria-selected="false">Downloads</button>
+          <button type="button" data-nav="links" role="tab" aria-selected="false">Links</button>
+        </div>
       </nav>
-      <a class="header-action" href="assets/influx-operator-latest.apk" download>
-        <span class="action-icon" aria-hidden="true">↓</span>
-        APK
-      </a>
     </header>
 
-    <main id="top">
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy reveal">
-          <p class="eyebrow">Compact injection molding system</p>
-          <h1 id="hero-title">InFlux Origin MK1</h1>
-          <p class="hero-lede">
-            A desktop-scale bridge between 3D printed prototypes and industrial tooling:
-            real thermoplastic shots, water-cooled resin molds, and operator-grade control.
-          </p>
-          <div class="hero-actions">
-            <a class="primary-button" href="#machine">Explore build</a>
-            <a class="secondary-button" href="#download">Get operator app</a>
+    <main>
+      <section class="tab-panel is-active" id="home" data-panel="home" aria-labelledby="home-title">
+        <div class="home-hero">
+          <div class="hero-copy reveal">
+            <p class="signal-label"><span></span> Integrated prototype / active calibration</p>
+            <h1 id="home-title"><span>Real</span> manufacturing.<br />Desktop scale.</h1>
+            <p class="hero-lede">
+              InFlux Origin bridges the gap between a 3D printed prototype and industrial tooling with
+              real thermoplastic shots, resin tooling, and a complete control stack.
+            </p>
+            <div class="action-row">
+              <button class="action action-primary" type="button" data-nav="proof">See the evidence</button>
+              <button class="action action-secondary" type="button" data-nav="versions">Explore the machine</button>
+            </div>
           </div>
+
+          <div class="hero-artifact reveal" data-tilt>
+            <div class="artifact-coordinates">
+              <span>ORIGIN.MK1</span><span>47.1585 N / 27.6014 E</span>
+            </div>
+            <img src="assets/machine-full.webp" alt="CAD render of the InFlux Origin MK1 machine" />
+            <div class="artifact-caption">
+              <strong>Origin MK1</strong>
+              <span>Mechanical / thermal / control integration</span>
+            </div>
+          </div>
+
+          <button class="proof-stamp reveal" type="button" data-nav="proof" aria-label="View proof of the first successful injected part">
+            <img src="assets/first-injected-part-angle.png" alt="First successful part injected by InFlux" />
+            <span><b>01 / First successful part</b><small>Proof over polish</small></span>
+          </button>
         </div>
 
-        <div class="hero-stage reveal" data-tilt>
-          <div class="machine-glass">
-            <img src="assets/machine-full.webp" alt="CAD render of the InFlux Origin MK1 injection molding machine" />
-          </div>
-          <div class="status-float top">
-            <span class="status-dot"></span>
-            READY / SIMULATED
-          </div>
-          <div class="status-float bottom">
-            <strong>Cycle target</strong>
-            <span>heat + clamp + inject + cool</span>
-          </div>
+        <div class="status-strip reveal" aria-label="Current project status">
+          <div><span>State</span><strong>Integrated prototype</strong></div>
+          <div><span>Current focus</span><strong>Repeatability + calibration</strong></div>
+          <div><span>Control path</span><strong>Operator → ESP bridge → Nucleo</strong></div>
+          <div><span>Next direction</span><strong>Safer, cleaner product enclosure</strong></div>
         </div>
-      </section>
 
-      <section class="quickline" aria-label="Project highlights">
-        <div>
-          <span>95%</span>
-          <p>estimated tooling-cost reduction in compared scenarios</p>
-        </div>
-        <div>
-          <span>97.8%</span>
-          <p>estimated mold lead-time reduction versus simple conventional routes</p>
-        </div>
-        <div>
-          <span>+/-8%</span>
-          <p>thermal model agreement against SimScale validation</p>
-        </div>
-        <div>
-          <span>6331</span>
-          <p>thermal samples captured in the lab heating campaign</p>
-        </div>
-      </section>
-
-      <section class="section split" id="machine" aria-labelledby="machine-title">
-        <div class="section-copy reveal">
-          <p class="eyebrow">The machine</p>
-          <h2 id="machine-title">Built for the moment before steel tooling makes sense.</h2>
+        <section class="home-statement reveal" aria-labelledby="home-statement-title">
+          <p class="section-index">00 / Why InFlux</p>
+          <h2 id="home-statement-title">The expensive middle ground should not be empty.</h2>
           <p>
-            InFlux targets small functional parts, fast design loops, and practical learning from real
-            injected plastic. It is not trying to replace industrial mass production. It is built for
-            the expensive middle ground where teams need evidence before committing to a metal mold.
+            Teams can print a model in hours or commit to industrial tooling. InFlux is built for the
+            critical space between them: process learning, functional evidence, and short-run validation
+            before steel makes sense.
           </p>
-          <dl class="compact-specs">
-            <div>
-              <dt>Tooling</dt>
-              <dd>3D printed resin molds with internal water cooling</dd>
+        </section>
+
+        <section class="proof-route reveal" aria-labelledby="proof-route-title">
+          <div class="route-heading">
+            <p class="section-index">01 / Evidence route</p>
+            <h2 id="proof-route-title">From a difficult idea to a measured machine.</h2>
+          </div>
+          <div class="route-steps">
+            <button type="button" data-nav="proof">
+              <span>01</span><strong>Thermal tested</strong><small>6,331 samples in the longest captured campaign.</small>
+            </button>
+            <button type="button" data-nav="projects">
+              <span>02</span><strong>Control stack built</strong><small>Firmware, Wi-Fi bridge, operator app, and diagnostics.</small>
+            </button>
+            <button type="button" data-nav="proof">
+              <span>03</span><strong>Part injected</strong><small>A real result that also exposes the next calibration work.</small>
+            </button>
+          </div>
+        </section>
+
+        <section class="home-close reveal">
+          <p class="section-index">02 / Public project</p>
+          <h2>Built to be inspected, questioned, and improved.</h2>
+          <button class="text-link" type="button" data-nav="team">Meet the team <span>↗</span></button>
+        </section>
+      </section>
+
+      <section class="tab-panel" id="versions" data-panel="versions" aria-labelledby="versions-title">
+        <header class="panel-hero reveal">
+          <p class="section-index">Machine Versions</p>
+          <h1 id="versions-title">One platform.<br />Three levels of maturity.</h1>
+          <p>Each version exists to remove a different kind of uncertainty.</p>
+        </header>
+
+        <div class="version-timeline reveal">
+          <article>
+            <div class="version-number">V0</div>
+            <div class="version-copy">
+              <span class="version-state">Research foundation / historical</span>
+              <h2>Bench architecture</h2>
+              <p>Early firmware, movement tests, thermal diagnostics, and the first complete system assumptions.</p>
+              <ul><li>Subsystem experiments</li><li>Active risk discovery</li><li>Architecture formation</li></ul>
             </div>
-            <div>
-              <dt>Injection</dt>
-              <dd>Compact piston-driven shot with hold and retract stages</dd>
+            <img src="assets/machine-wireframe.jpg" alt="Early InFlux wireframe studies" />
+          </article>
+          <article class="current-version">
+            <div class="version-number">MK1</div>
+            <div class="version-copy">
+              <span class="version-state">Current / integrated prototype</span>
+              <h2>Origin MK1</h2>
+              <p>The first coherent machine: structure, heating, injection motion, safety logic, operator control, and physical validation.</p>
+              <ul><li>Desktop-scale frame</li><li>Resin mold experiments</li><li>Active calibration</li></ul>
             </div>
-            <div>
-              <dt>Control</dt>
-              <dd>Machine firmware, bridge API, Android operator app</dd>
+            <img src="assets/machine-origin-render.png" alt="InFlux Origin MK1 integrated machine render" />
+          </article>
+          <article>
+            <div class="version-number">NEXT</div>
+            <div class="version-copy">
+              <span class="version-state">Product direction / not released</span>
+              <h2>Origin product path</h2>
+              <p>A safer and cleaner enclosure, stronger sensing, refined tooling workflow, and repeatability proven across longer runs.</p>
+              <ul><li>Enclosed power system</li><li>Process data + pressure sensing</li><li>Longer-life mold strategy</li></ul>
             </div>
-          </dl>
+            <img src="assets/packaging-concept.jpg" alt="InFlux packaging and productization concept" />
+          </article>
         </div>
 
-        <div class="exploded reveal" data-exploded>
-          <div class="viewer-head">
-            <div class="viewer-title">
-              <span>Machine views</span>
-              <strong>Assembly viewer</strong>
-            </div>
-            <div class="viewer-modes" role="tablist" aria-label="View mode">
-              <button class="is-active" type="button" data-mode="2d" role="tab" aria-selected="true" aria-controls="machine-view-2d">2D</button>
-              <button type="button" data-mode="3d" role="tab" aria-selected="false" aria-controls="machine-view-3d">3D</button>
-            </div>
+        <section class="machine-viewer reveal" aria-labelledby="viewer-title">
+          <div class="viewer-copy">
+            <p class="section-index">Interactive assembly</p>
+            <h2 id="viewer-title">Inspect the machine, not just the pitch.</h2>
+            <p>Orbit and zoom the web-ready model generated from the machine assembly.</p>
           </div>
-          <div class="part-tabs" role="tablist" aria-label="2D assembly views">
-            <button class="is-active" type="button" data-part="frame" role="tab" aria-selected="true">Frame</button>
-            <button type="button" data-part="mold" role="tab" aria-selected="false">Mold</button>
-            <button type="button" data-part="barrel" role="tab" aria-selected="false">Barrel</button>
-            <button type="button" data-part="motion" role="tab" aria-selected="false">Motion</button>
+          <div class="model-shell">
+            <model-viewer
+              src="assets/machine-assembly.glb"
+              alt="Interactive 3D assembly of InFlux Origin MK1"
+              camera-controls
+              auto-rotate
+              rotation-per-second="10deg"
+              camera-orbit="38deg 64deg 3.3m"
+              field-of-view="24deg"
+              shadow-intensity="0.85"
+              exposure="1.15"
+              environment-image="neutral"
+              interaction-prompt="none">
+              <div class="model-loading" slot="poster">Loading assembly</div>
+            </model-viewer>
+            <span class="model-tag">Live 3D / STEP → GLB</span>
           </div>
-          <div class="viewer-pane is-active" id="machine-view-2d" data-pane="2d" role="tabpanel">
-            <div class="exploded-media">
-              <img src="assets/machine-frame.webp?v=3d-wide-logo" alt="InFlux structural frame render" data-layer="frame" />
-              <img src="assets/machine-mold.webp?v=3d-wide-logo" alt="InFlux mold movement assembly render" data-layer="mold" hidden />
-              <img src="assets/machine-barrel.webp?v=3d-wide-logo" alt="InFlux injection barrel render" data-layer="barrel" hidden />
-              <img src="assets/machine-steppers.webp?v=3d-wide-logo" alt="InFlux stepper and movement system render" data-layer="motion" hidden />
-            </div>
-          </div>
-          <div class="viewer-pane viewer-3d" id="machine-view-3d" data-pane="3d" role="tabpanel" hidden>
-            <div class="model-stage">
-              <model-viewer
-                class="machine-model"
-                src="assets/machine-assembly.glb?v=3d-wide-logo"
-                alt="Interactive 3D model of the full InFlux machine assembly"
-                camera-controls
-                auto-rotate
-                rotation-per-second="14deg"
-                camera-orbit="38deg 64deg 3.3m"
-                camera-target="0m 0m 0m"
-                field-of-view="24deg"
-                shadow-intensity="0.82"
-                exposure="1.12"
-                environment-image="neutral"
-                interaction-prompt="none">
-                <div class="model-loading" slot="poster">Loading 3D assembly</div>
-              </model-viewer>
-              <div class="model-status"><span></span>STEP converted to GLB</div>
-            </div>
-            <div class="model-note">
-              <strong>Interactive assembly</strong>
-              <span>Live web model generated from the Fusion 360 STEP export.</span>
-            </div>
-          </div>
-          <div class="exploded-caption" data-caption>
-            <strong>Frame and guide rails</strong>
-            <span>Alignment carries the process. The nozzle, plates, and mold must meet in the same place every cycle.</span>
-          </div>
+        </section>
+      </section>
+
+      <section class="tab-panel" id="projects" data-panel="projects" aria-labelledby="projects-title">
+        <header class="panel-hero reveal">
+          <p class="section-index">Other Projects</p>
+          <h1 id="projects-title">The machine is only the center of the system.</h1>
+          <p>InFlux has grown into a connected set of software, electronics, tooling, and validation projects.</p>
+        </header>
+
+        <div class="project-ledger">
+          <article class="project-entry reveal">
+            <div class="project-meta"><span>01</span><b>Operator interface</b><small>Android / active</small></div>
+            <div class="project-copy"><h2>InFlux Operator</h2><p>A focused control surface for status, cycle control, service access, and same-network communication.</p></div>
+            <img src="assets/operator-app.jpg" alt="InFlux Operator Android application" />
+          </article>
+          <article class="project-entry reveal">
+            <div class="project-meta"><span>02</span><b>Control electronics</b><small>KiCad / prototype</small></div>
+            <div class="project-copy"><h2>Origin Motherboard</h2><p>A dedicated integration board designed to organize sensors, safety inputs, steppers, power control, and the machine controller.</p></div>
+            <img src="assets/motherboard-kicad.jpg" alt="InFlux Origin motherboard PCB layout" />
+          </article>
+          <article class="project-entry reveal">
+            <div class="project-meta"><span>03</span><b>Thermal validation</b><small>Data / ongoing</small></div>
+            <div class="project-copy"><h2>Thermal Lab</h2><p>Measured heat-up, stabilization, cooldown, sensor behavior, and hot spots used to guide the next machine iteration.</p></div>
+            <img src="assets/thermal-camera.webp" alt="Thermal camera evidence from InFlux testing" />
+          </article>
+          <article class="project-entry reveal">
+            <div class="project-meta"><span>04</span><b>Tooling research</b><small>Resin molds / experimental</small></div>
+            <div class="project-copy"><h2>Rapid Mold Program</h2><p>Water-cooled resin tooling experiments aimed at faster geometry validation before committing to conventional molds.</p></div>
+            <img src="assets/machine-mold.webp" alt="InFlux resin mold movement assembly" />
+          </article>
         </div>
       </section>
 
-      <section class="dark-band" aria-labelledby="cycle-title">
-        <div class="cycle-copy reveal">
-          <p class="eyebrow">Repeatable cycle</p>
-          <h2 id="cycle-title">A short, coherent process instead of a one-shot demo.</h2>
+      <section class="tab-panel" id="team" data-panel="team" aria-labelledby="team-title">
+        <header class="panel-hero reveal">
+          <p class="section-index">Team / Volta Circuits</p>
+          <h1 id="team-title">Three disciplines.<br />One physical result.</h1>
+          <p>InFlux is built at the intersection of engineering, analysis, business, and public communication.</p>
+        </header>
+
+        <div class="team-ledger">
+          <article class="team-member reveal">
+            <span class="member-index">01</span>
+            <div><p>Engineering lead</p><h2>Stefan Tonegari</h2></div>
+            <p class="member-role">Mechanical engineering, manufacturing, structures, Fusion 360, electrical integration, microcontrollers, and product development.</p>
+            <strong>Build the machine.</strong>
+          </article>
+          <article class="team-member reveal">
+            <span class="member-index">02</span>
+            <div><p>Team + business lead</p><h2>Fabian Volintiru</h2></div>
+            <p class="member-role">Marketing, sponsorships, economics, outward communication, project organization, and live presentation.</p>
+            <strong>Make the case.</strong>
+          </article>
+          <article class="team-member reveal">
+            <span class="member-index">03</span>
+            <div><p>Simulation + analysis lead</p><h2>Pintilei David</h2></div>
+            <p class="member-role">Math, SimScale, Unreal Engine simulations, Python models, machine learning, and data analysis.</p>
+            <strong>Prove the decisions.</strong>
+          </article>
         </div>
-        <div class="cycle-track reveal" data-cycle>
-          <button class="cycle-step is-active" type="button" data-step="0">
-            <span>01</span>
-            Mount mold
-          </button>
-          <button class="cycle-step" type="button" data-step="1">
-            <span>02</span>
-            Connect water
-          </button>
-          <button class="cycle-step" type="button" data-step="2">
-            <span>03</span>
-            Heat polymer
-          </button>
-          <button class="cycle-step" type="button" data-step="3">
-            <span>04</span>
-            Close and clamp
-          </button>
-          <button class="cycle-step" type="button" data-step="4">
-            <span>05</span>
-            Inject and hold
-          </button>
-          <button class="cycle-step" type="button" data-step="5">
-            <span>06</span>
-            Cool and open
-          </button>
-        </div>
-        <div class="cycle-panel reveal">
-          <div>
-            <span class="panel-kicker" data-cycle-kicker>Mount mold</span>
-            <h3 data-cycle-title>Position the mold with repeatable alignment.</h3>
-            <p data-cycle-text>
-              The resin tool is fixed between support plates so the cavity, nozzle, and guide system stay coordinated.
+
+        <section class="team-principle reveal">
+          <p class="section-index">Working principle</p>
+          <blockquote>Build it. Measure it. Explain it honestly. Then build the next version.</blockquote>
+        </section>
+      </section>
+
+      <section class="tab-panel" id="proof" data-panel="proof" aria-labelledby="proof-title">
+        <header class="proof-hero reveal">
+          <div class="proof-hero-copy">
+            <p class="section-index">Proof / Current evidence</p>
+            <h1 id="proof-title">The first part is not perfect.<br />That is why it matters.</h1>
+            <p>
+              It confirms that the system can heat, move, inject, and produce a physical result. Its
+              defects also identify the work ahead: venting, fill behavior, process tuning, and tool life.
             </p>
           </div>
-          <div class="cycle-meter" aria-hidden="true">
-            <span data-cycle-meter></span>
-          </div>
+          <figure>
+            <img src="assets/first-injected-part.png" alt="First successfully injected InFlux part" />
+            <figcaption><span>Evidence 01</span>First successful injected part / development result</figcaption>
+          </figure>
+        </header>
+
+        <div class="proof-facts reveal">
+          <article><span>6,331</span><p>samples in the longest captured thermal campaign</p></article>
+          <article><span>108.6 min</span><p>measured heat-up, stabilization, and cooldown coverage</p></article>
+          <article><span>±8%</span><p>thermal model agreement against SimScale validation</p></article>
+          <article><span>1 stack</span><p>operator app, bridge, firmware, motion, heating, and safety ownership</p></article>
         </div>
+
+        <section class="proof-feature reveal">
+          <img src="assets/thermal-lab.jpg" alt="InFlux thermal testing in the laboratory" />
+          <div>
+            <p class="section-index">Evidence 02 / Thermal campaign</p>
+            <h2>Measurements changed the design.</h2>
+            <p>Thermal camera passes and logged sensor data exposed heat loss, hot spots, and control behavior before those weaknesses became hidden inside an enclosure.</p>
+          </div>
+        </section>
+
+        <section class="proof-feature proof-feature-reverse reveal">
+          <img src="assets/motherboard-kicad.jpg" alt="InFlux dedicated motherboard design" />
+          <div>
+            <p class="section-index">Evidence 03 / Integrated control</p>
+            <h2>The system has an owner for every critical action.</h2>
+            <p>The Nucleo owns machine safety and cycle behavior. The ESP bridge stays narrow. The Android app presents state and sends supported commands.</p>
+          </div>
+        </section>
+
+        <section class="honesty-block reveal">
+          <p class="section-index">Prototype status</p>
+          <h2>What is not proven yet.</h2>
+          <div>
+            <p>Long-run mold life and stable multi-part repeatability remain active development targets.</p>
+            <p>The current machine is a supervised prototype, not a production release.</p>
+            <p>Venting, thermal insulation, enclosure safety, and process calibration remain priority work.</p>
+          </div>
+        </section>
       </section>
 
-      <section class="section operator-section" id="operator" aria-labelledby="operator-title">
-        <div class="phone-shell reveal" aria-label="InFlux Operator app preview">
-          <div class="phone-status">
-            <span>InFlux Operator 2.0</span>
-            <span class="pill"><i></i> Ready</span>
-          </div>
-          <div class="app-card machine-card">
-            <div>
-              <small>Machine status</small>
-              <strong>InFlux v1</strong>
-            </div>
-            <span class="signal">SIM</span>
-          </div>
-          <div class="app-grid">
-            <div class="app-card metric">
-              <small>State</small>
-              <strong>Ready</strong>
-            </div>
-            <div class="app-card metric accent">
-              <small>Cycles</small>
-              <strong>128</strong>
-            </div>
-          </div>
-          <div class="app-card thermal">
-            <div class="thermal-head">
-              <strong>Thermal</strong>
-              <span>Target 220 C</span>
-            </div>
-            <label>
-              Barrel
-              <span><i style="--w: 86%"></i></span>
-            </label>
-            <label>
-              Nozzle
-              <span><i style="--w: 79%"></i></span>
-            </label>
-            <label>
-              Mold
-              <span><i style="--w: 42%"></i></span>
-            </label>
-          </div>
-          <div class="app-actions">
-            <button type="button">Inject</button>
-            <button type="button">Heat</button>
-            <button type="button" class="ghost">Stop</button>
-          </div>
-        </div>
-
-        <div class="section-copy reveal">
-          <p class="eyebrow">Operator stack</p>
-          <h2 id="operator-title">The app looks like a product because it is part of the machine.</h2>
-          <p>
-            The Android operator app carries the same control language as the hardware: compact panels,
-            clear status, red action states, PIN-gated service controls, and direct communication through
-            the ESP bridge API.
+      <section class="tab-panel utility-panel" id="downloads" data-panel="downloads" aria-labelledby="downloads-title">
+        <header class="panel-hero reveal">
+          <p class="section-index">Download Hub</p>
+          <h1 id="downloads-title">Public files.<br />Clearly labeled.</h1>
+          <p>Use the right artifact for the right audience. Machine operation remains supervised and prototype-only.</p>
+        </header>
+        <div class="download-ledger reveal" id="download-list" aria-live="polite"></div>
+        <noscript>
+          <p class="noscript-note">
+            JavaScript is disabled. Direct files:
+            <a href="assets/influx-operator-latest.apk" download>Operator APK</a>,
+            <a href="assets/influx-origin-technical-notebook.pdf" download>technical notebook</a>,
+            <a href="assets/influx-origin-logo.svg" download>logo SVG</a>.
           </p>
-          <div class="feature-list">
-            <p><strong>Dashboard.</strong> Mode, cycle count, thermal state, current job, and alarms.</p>
-            <p><strong>Run control.</strong> Inject, heat, stop, cycle settings, and phase feedback.</p>
-            <p><strong>Service layer.</strong> Manual movement, IO, web exposure, snapshot export, and PIN access.</p>
-          </div>
-        </div>
+        </noscript>
+        <p class="download-warning reveal"><strong>Prototype notice:</strong> The public APK is a demonstration/operator artifact for the InFlux prototype. Do not use it as a general-purpose machine controller.</p>
       </section>
 
-      <section class="section proof" id="proof" aria-labelledby="proof-title">
-        <div class="section-copy reveal">
-          <p class="eyebrow">Validation</p>
-          <h2 id="proof-title">The pitch is backed by measurements, not just CAD.</h2>
-          <p>
-            Lab testing captured heating, stabilization, cooling, and sensor-noise behavior. Simulation
-            work compared an internal Python/OpenCL thermal model against SimScale to guide wall thickness,
-            cooling-channel placement, and material-specific timing.
-          </p>
-        </div>
-        <div class="proof-layout reveal">
-          <div class="proof-media">
-            <figure class="proof-image proof-image-main">
-              <img src="assets/workbench.webp" alt="Workbench testing and thermal validation setup for InFlux" />
-              <figcaption>Bench validation setup</figcaption>
-            </figure>
-            <figure class="proof-image proof-image-thermal">
-              <img src="assets/thermal-camera.webp" alt="FLUKE thermal camera view of the heated InFlux barrel and nozzle" />
-              <figcaption>Thermal camera pass on the heated barrel and nozzle</figcaption>
-            </figure>
-          </div>
-          <div class="proof-points">
-            <article>
-              <span>108.6 min</span>
-              <p>thermal campaign covering heat-up, stabilization, and cooldown behavior</p>
-            </article>
-            <article>
-              <span>135.5 C</span>
-              <p>measured severe hot spot around the nozzle-to-tube joint</p>
-            </article>
-            <article>
-              <span>PLA / ABS / ASA / PET / TPU</span>
-              <p>materials modeled for cooling and safe ejection windows</p>
-            </article>
-          </div>
-        </div>
-      </section>
+      <section class="tab-panel utility-panel" id="links" data-panel="links" aria-labelledby="links-title">
+        <header class="panel-hero reveal">
+          <p class="section-index">External Links + References</p>
+          <h1 id="links-title">Follow the work.<br />Check the sources.</h1>
+          <p>Public project destinations and technical references that informed the platform.</p>
+        </header>
 
-      <section class="section audience" aria-labelledby="audience-title">
-        <div class="section-copy reveal">
-          <p class="eyebrow">Who it is for</p>
-          <h2 id="audience-title">Fast proof for teams that cannot wait for a conventional mold.</h2>
-        </div>
-        <div class="audience-grid reveal">
-          <article>
-            <span>Startups</span>
-            <p>Validate geometry, fit, and manufacturability before ordering steel tooling.</p>
-          </article>
-          <article>
-            <span>Prototype labs</span>
-            <p>Move from display models to small functional thermoplastic parts.</p>
-          </article>
-          <article>
-            <span>Makerspaces</span>
-            <p>Offer lower-barrier access to real injection molding experiments.</p>
-          </article>
-          <article>
-            <span>Small producers</span>
-            <p>Run short batches and compare process choices without heavy tooling spend.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="download" id="download" aria-labelledby="download-title">
-        <div class="download-copy reveal">
-          <p class="eyebrow">Ready to use</p>
-          <h2 id="download-title">Show the project. Install the operator. Keep the story tight.</h2>
-          <p>
-            This site is the public showcase layer for the InFlux project. The latest Android operator APK
-            is bundled for quick installs and demo handoffs.
-          </p>
-          <div class="download-actions">
-            <a class="primary-button" href="assets/influx-operator-latest.apk" download>Download APK</a>
-            <a class="secondary-button" href="#top">Back to top</a>
-          </div>
-        </div>
-        <div class="download-brand reveal" aria-hidden="true">
-          <img src="assets/influx-origin-logo.svg" alt="" />
+        <div class="link-groups">
+          <section class="link-group reveal">
+            <div><span>01</span><h2>Project destinations</h2></div>
+            <a href="technical.html"><span>Technical documentation</span><small>Read the extended project dossier</small><b>↗</b></a>
+            <button type="button" data-nav="downloads"><span>Download hub</span><small>APK, notebook, and public brand files</small><b>↗</b></button>
+            <button type="button" data-nav="proof"><span>Evidence overview</span><small>Results, measurements, and current limits</small><b>↗</b></button>
+          </section>
+          <section class="link-group reveal">
+            <div><span>02</span><h2>Technical references</h2></div>
+            <a href="https://formlabs.com/white-papers/low-volume-rapid-injection-molding-with-3d-printed-molds/" target="_blank" rel="noopener"><span>Formlabs</span><small>Low-volume injection molding with 3D printed molds</small><b>↗</b></a>
+            <a href="https://www.protolabs.com/services/injection-molding/plastic-injection-molding/design-guidelines/" target="_blank" rel="noopener"><span>Protolabs</span><small>Plastic injection molding design guidelines</small><b>↗</b></a>
+            <a href="https://www.st.com/en/evaluation-tools/nucleo-h753zi.html" target="_blank" rel="noopener"><span>STMicroelectronics</span><small>NUCLEO-H753ZI product documentation</small><b>↗</b></a>
+            <a href="https://www.omega.com/en-us/resources/thermocouple-hub" target="_blank" rel="noopener"><span>OMEGA Engineering</span><small>Thermocouple fundamentals</small><b>↗</b></a>
+          </section>
         </div>
       </section>
     </main>
 
     <footer>
-      <span>InFlux Origin MK1</span>
-      <span>Compact injection molding system with 3D printed water-cooled resin molds.</span>
+      <button class="footer-brand" type="button" data-nav="home">
+        <img src="assets/influx-origin-logo.svg" alt="InFlux Origin" />
+      </button>
+      <p>Desktop injection molding platform / integrated prototype in active calibration.</p>
+      <button class="back-top" type="button" data-top>Back to top ↑</button>
     </footer>
 
-    <script type="module" src="assets/model-viewer.min.js?v=3d-wide-logo"></script>
-    <script src="script.js?v=3d-wide-logo"></script>
+    <script type="module" src="assets/model-viewer.min.js"></script>
+    <script src="script.js?v=hub-v1"></script>
   </body>
 </html>

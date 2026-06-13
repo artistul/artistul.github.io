@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Public technical dossier for the InFlux Origin MK1 desktop injection molding prototype."
+    />
+    <meta name="theme-color" content="#090909" />
+    <title>Technical Dossier | InFlux Origin MK1</title>
+    <link rel="icon" href="assets/logo-mark.webp" />
+    <link rel="stylesheet" href="technical.css?v=hub-v1" />
+  </head>
+  <body class="technical-page">
+    <div class="scroll-meter" aria-hidden="true"></div>
+    <header class="site-header" data-header>
+      <a class="brand" href="index.html" aria-label="InFlux Origin home">
+        <span class="brand-mark"><img src="assets/logo-mark.webp" alt="" /></span>
+        <span class="brand-copy"><strong>InFlux</strong><span>Origin MK1</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="index.html?tab=versions">Machine Versions</a>
+        <a href="index.html?tab=projects">Other Projects</a>
+        <a href="index.html?tab=proof">Proof</a>
+        <a href="index.html?tab=downloads">Downloads</a>
+      </nav>
+      <a class="header-action" href="assets/influx-origin-technical-notebook.pdf" download>PDF</a>
+    </header>
+
+    <main>
+      <section class="doc-hero">
+        <div class="doc-hero-copy reveal">
+          <p class="eyebrow">Public technical dossier</p>
+          <h1>InFlux Origin MK1</h1>
+          <p>
+            A desktop injection molding platform integrating mechanics, thermal control,
+            machine firmware, operator software, safety logic, and experimental tooling.
+          </p>
+          <div class="doc-actions">
+            <a class="primary-button" href="assets/influx-origin-technical-notebook.pdf" download>Download notebook</a>
+            <a class="secondary-button" href="index.html">Back to project hub</a>
+          </div>
+        </div>
+        <div class="doc-summary reveal">
+          <div><span>Current state</span><strong>Integrated prototype in active calibration</strong></div>
+          <div><span>Primary objective</span><strong>Repeatable small-part thermoplastic injection</strong></div>
+          <div><span>Tooling direction</span><strong>Rapid resin molds with controlled cooling</strong></div>
+          <div><span>Control path</span><strong>Android operator → ESP bridge → Nucleo firmware</strong></div>
+          <div><span>Team</span><strong>Volta Circuits</strong></div>
+        </div>
+      </section>
+
+      <section class="doc-shell">
+        <aside class="doc-toc reveal" aria-label="Contents">
+          <span>Contents</span>
+          <a href="#definition">1. Project definition</a>
+          <a href="#architecture">2. System architecture</a>
+          <a href="#mechanical">3. Mechanical system</a>
+          <a href="#thermal">4. Thermal system</a>
+          <a href="#controls">5. Electronics and controls</a>
+          <a href="#software">6. Firmware and operator stack</a>
+          <a href="#safety">7. Safety position</a>
+          <a href="#validation">8. Validation evidence</a>
+          <a href="#limits">9. Current limits</a>
+          <a href="#roadmap">10. Product direction</a>
+          <a href="#team">11. Team</a>
+        </aside>
+
+        <article class="doc-body reveal">
+          <section class="doc-section" id="definition">
+            <p class="eyebrow">01 / Project definition</p>
+            <h2>Manufacturing evidence before industrial tooling.</h2>
+            <p>
+              InFlux Origin MK1 is a desktop-scale injection molding prototype built to help teams learn
+              from real thermoplastic parts before committing to conventional production tooling. It is
+              intended for process learning, functional validation, education, and future short-run
+              experimentation.
+            </p>
+            <p>
+              The project does not claim to replace an industrial injection molding machine. Its purpose
+              is to reduce the distance between a 3D printed model and a professionally tooled production
+              part by making the molding process more accessible, measurable, and iterative.
+            </p>
+          </section>
+
+          <section class="doc-section" id="architecture">
+            <p class="eyebrow">02 / System architecture</p>
+            <h2>A complete machine, not an isolated mechanism.</h2>
+            <p>The platform is organized into six connected layers:</p>
+            <ul>
+              <li>Structural frame and aligned movement system.</li>
+              <li>Heated barrel, nozzle, and piston-driven injection path.</li>
+              <li>Mold support, closing movement, and rapid tooling package.</li>
+              <li>Power distribution, sensors, motion drivers, and emergency inputs.</li>
+              <li>Nucleo machine firmware and ESP32-C6 communication bridge.</li>
+              <li>Android operator interface and diagnostic support tools.</li>
+            </ul>
+            <p>
+              The Nucleo controller owns machine state, heating, motion, safety checks, and cycle behavior.
+              The ESP bridge translates same-network operator requests into the machine command protocol.
+              The Android application presents status and sends supported commands.
+            </p>
+          </section>
+
+          <section class="doc-section" id="mechanical">
+            <p class="eyebrow">03 / Mechanical system</p>
+            <h2>Alignment and load paths decide whether the process is repeatable.</h2>
+            <p>
+              The current structure uses aluminum extrusion, interface plates, linear guidance, lead-screw
+              movement, and a servo-driven injection axis. The architecture remains adjustable because the
+              prototype is still being calibrated around real component behavior and mold geometry.
+            </p>
+            <h3>Mechanical priorities</h3>
+            <ul>
+              <li>Keep the nozzle, mold entry, and moving plates aligned across repeated cycles.</li>
+              <li>Carry injection and clamping forces through structure rather than fragile tooling.</li>
+              <li>Make critical supports and service areas accessible during calibration.</li>
+              <li>Measure and reduce backlash, frame twist, and platen racking.</li>
+            </ul>
+          </section>
+
+          <section class="doc-section" id="thermal">
+            <p class="eyebrow">04 / Thermal system</p>
+            <h2>Temperature is a process variable, not a visual effect.</h2>
+            <p>
+              The barrel is heated in multiple zones and measured with K-type thermocouples. Logged tests
+              and thermal-camera passes are used to inspect heat-up, stabilization, cooldown, sensor
+              behavior, heat loss, and local hot spots.
+            </p>
+            <p>
+              The longest captured campaign contains 6,331 samples across approximately 108.6 minutes.
+              Thermal modeling was compared with SimScale, with reported agreement around ±8% for the
+              compared cases. These results guide insulation, sensor placement, nozzle design, cooling,
+              and safe timing decisions.
+            </p>
+          </section>
+
+          <section class="doc-section" id="controls">
+            <p class="eyebrow">05 / Electronics and controls</p>
+            <h2>Prototype flexibility with explicit machine ownership.</h2>
+            <p>
+              The integrated control stack is centered on a NUCLEO-H753ZI. It interfaces with thermocouple
+              modules, heater switching, stepper drivers, the injection servo path, safety inputs, and the
+              communication bridge.
+            </p>
+            <p>
+              A dedicated Origin motherboard has been designed in KiCad to organize the current prototype
+              wiring into a cleaner integration layer. It remains a prototype electronics project and is
+              not presented as a certified production controller.
+            </p>
+          </section>
+
+          <section class="doc-section" id="software">
+            <p class="eyebrow">06 / Firmware and operator stack</p>
+            <h2>Control remains close to the machine.</h2>
+            <ul>
+              <li>The Nucleo owns safety admission, heating, movement, and cycle sequencing.</li>
+              <li>The ESP32-C6 acts as a narrow same-network HTTP-to-command bridge.</li>
+              <li>The Android operator app presents status, supported actions, and service access.</li>
+              <li>A desktop serial monitor and diagnostic sketches support commissioning and fault analysis.</li>
+            </ul>
+            <p>
+              The public operator APK is a prototype artifact for supervised demonstrations. It is not a
+              general-purpose machine controller and should not be treated as a production release.
+            </p>
+          </section>
+
+          <section class="doc-section" id="safety">
+            <p class="eyebrow">07 / Safety position</p>
+            <h2>Current use is supervised and prototype-only.</h2>
+            <p>
+              The project combines mains-powered heating, hot surfaces, and powered motion. The current
+              machine is operated as a supervised prototype. Emergency-stop behavior, safe startup defaults,
+              fault handling, grounding, power isolation, and guarded access remain critical requirements.
+            </p>
+            <p>
+              A future product version requires a cleaner enclosure, stronger hardware isolation, validated
+              safety behavior, and a formal review appropriate to its intended users and environment.
+            </p>
+          </section>
+
+          <section class="doc-section" id="validation">
+            <p class="eyebrow">08 / Validation evidence</p>
+            <h2>The project has crossed from simulation into physical evidence.</h2>
+            <ul>
+              <li>A first successful injected part has been produced.</li>
+              <li>Thermal behavior has been measured with logged sensors and a thermal camera.</li>
+              <li>Major mechanical, electrical, firmware, and operator subsystems have been integrated.</li>
+              <li>A dedicated PCB and a complete operator/control stack have been developed.</li>
+            </ul>
+            <p>
+              The first part is evidence of system function, not proof of production readiness. Its defects
+              are useful because they identify the next work in venting, fill behavior, tooling, and process
+              calibration.
+            </p>
+          </section>
+
+          <section class="doc-section" id="limits">
+            <p class="eyebrow">09 / Current limits</p>
+            <h2>What remains unproven.</h2>
+            <ul>
+              <li>Stable multi-part repeatability across longer runs.</li>
+              <li>Long-run life and failure behavior of resin tooling.</li>
+              <li>Fully tuned filling, holding, venting, and ejection behavior.</li>
+              <li>Final enclosure safety and production-grade electrical integration.</li>
+              <li>Validated process windows across multiple material families.</li>
+            </ul>
+          </section>
+
+          <section class="doc-section" id="roadmap">
+            <p class="eyebrow">10 / Product direction</p>
+            <h2>Turn the experiment into a dependable platform.</h2>
+            <p>
+              The next Origin direction focuses on repeatability, stronger process sensing, better thermal
+              insulation, refined mold interfaces, safer enclosure design, cleaner electronics, and a
+              simpler operator workflow.
+            </p>
+            <p>
+              The long-term ambition is a useful workshop and education platform that can produce functional
+              small parts, teach the complete molding process, and help hardware teams make better tooling
+              decisions earlier.
+            </p>
+          </section>
+
+          <section class="doc-section doc-team" id="team">
+            <p class="eyebrow">11 / Team</p>
+            <h2>Volta Circuits</h2>
+            <ul>
+              <li><strong>Stefan Tonegari</strong><span>Engineering lead: mechanics, manufacturing, electronics, integration, and product development.</span></li>
+              <li><strong>Fabian Volintiru</strong><span>Team and business lead: strategy, economics, sponsorships, organization, and presentation.</span></li>
+              <li><strong>Pintilei David</strong><span>Simulation and analysis lead: SimScale, Python models, mathematics, and data analysis.</span></li>
+            </ul>
+          </section>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>InFlux Origin MK1</span>
+      <span>Public technical dossier / integrated prototype in active calibration.</span>
+    </footer>
+    <script src="technical.js?v=hub-v1"></script>
+  </body>
+</html>
