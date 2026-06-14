@@ -40,7 +40,8 @@ test("team portraits and evidence landscape render", async ({ page }) => {
 test("reference-led versions and project stages render", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=versions");
-  await expect(page.locator("#versions .panel-hero .section-index")).toHaveText("Three Levels");
+  await expect(page.locator("#versions-title span")).toHaveText("Three levels");
+  await expect(page.locator("#versions-title span")).toHaveCSS("color", "rgb(236, 23, 44)");
   await expect(page.getByText("No need to take our word for it, convince yourself. Take a look at the InFlux Origin Mk. 1.")).toBeVisible();
   await expect(page.locator(".model-tag")).toHaveCount(0);
   await expect(page.locator(".version-timeline .showcase-stage")).toHaveCount(3);

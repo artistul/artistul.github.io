@@ -380,6 +380,7 @@ h1, h2 {
   opacity: 1;
   transform: none;
 }
+#versions-title span { color: var(--red); }
 .proof-hero h1 { font-size: clamp(58px, 8vw, 126px); }
 .panel-hero > p:last-child { margin-bottom: 0; }
 
