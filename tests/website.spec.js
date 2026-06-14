@@ -21,7 +21,7 @@ test("hidden media and 3D load only when requested", async ({ page }) => {
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await expect(page.locator('script[src*="model-viewer"]')).toHaveCount(0);
   await page.getByRole("tab", { name: "Machine Versions" }).click();
-  await expect(page.locator(".version-timeline img.media-loading")).toHaveCount(3);
+  await expect(page.locator(".version-timeline img[src]")).toHaveCount(3);
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await page.getByRole("button", { name: "Load interactive 3D" }).click();
   await expect(page.locator("model-viewer")).toHaveAttribute("src", "assets/machine-assembly-optimized.glb");
@@ -47,7 +47,13 @@ test("reference-led versions and project stages render", async ({ page }) => {
   await expect(page.locator(".project-entry")).toHaveCount(3);
   await expect(page.getByText("Rapid Mold Program")).toHaveCount(0);
   await expect(page.locator(".operator-gallery img")).toHaveCount(3);
+  await expect(page.locator(".project-index a")).toHaveCount(3);
+  await expect(page.locator(".project-media-frame")).toHaveCount(3);
+  await expect(page.locator(".board-scene")).toBeVisible();
+  await expect(page.locator(".thermal-scene")).toBeVisible();
   await expect(page.locator(".project-operator")).toHaveScreenshot("project-operator-stage.png");
+  await expect(page.locator(".project-motherboard")).toHaveScreenshot("project-motherboard-stage.png");
+  await expect(page.locator(".project-thermal")).toHaveScreenshot("project-thermal-stage.png");
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/index.html?tab=versions");

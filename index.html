@@ -23,7 +23,7 @@
     <meta name="twitter:image" content="assets/machine-origin-render.png" />
     <title>InFlux Origin | Project Hub</title>
     <link rel="icon" href="assets/logo-mark.webp" />
-    <link rel="stylesheet" href="styles.css?v=2026-06-14-p4.1" />
+    <link rel="stylesheet" href="styles.css?v=2026-06-14-projects-v1" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -210,29 +210,49 @@
       <section class="tab-panel" id="projects" data-panel="projects" role="tabpanel" aria-labelledby="tab-projects" tabindex="0">
         <header class="panel-hero reveal">
           <p class="section-index">Other Projects</p>
-          <h1 id="projects-title">The machine is only the center of the system.</h1>
-          <p>InFlux has grown into a connected set of software, electronics, tooling, and validation projects.</p>
+          <h1 id="projects-title">Three systems. One machine.</h1>
+          <p>Control it. Coordinate it. Measure what happens next.</p>
         </header>
 
-        <div class="project-ledger">
-          <article class="project-entry showcase-stage project-operator reveal">
+        <nav class="project-index reveal" aria-label="Other project stages">
+          <a href="#project-operator"><span>01</span><strong>Operator</strong><small>Control surface</small></a>
+          <a href="#project-motherboard"><span>02</span><strong>Motherboard</strong><small>Control electronics</small></a>
+          <a href="#project-thermal"><span>03</span><strong>Thermal Lab</strong><small>Validation evidence</small></a>
+        </nav>
+
+        <div class="project-ledger project-cinematic">
+          <article class="project-entry showcase-stage project-operator reveal" id="project-operator">
             <div class="project-meta"><span>01</span><b>Operator interface</b><small>Android / active</small></div>
-            <div class="project-copy"><h2>InFlux Operator</h2><p>A focused control surface for status, cycle control, service access, and same-network communication.</p></div>
-            <div class="operator-gallery" aria-label="InFlux Operator application screens">
+            <div class="project-copy"><p class="project-thesis">One deliberate surface for every supervised action.</p><h2>InFlux Operator</h2><p>A focused control surface for status, cycle control, service access, and same-network communication.</p></div>
+            <div class="operator-gallery project-media-frame" aria-label="InFlux Operator application screens">
               <img data-src="assets/operator-dashboard.webp" alt="InFlux Operator dashboard screen" loading="lazy" decoding="async" />
               <img data-src="assets/operator-run.webp" alt="InFlux Operator production and thermal controls" loading="lazy" decoding="async" />
               <img data-src="assets/operator-movement.webp" alt="InFlux Operator machine movement screen" loading="lazy" decoding="async" />
             </div>
           </article>
-          <article class="project-entry showcase-stage reveal">
+          <article class="project-entry showcase-stage project-motherboard reveal" id="project-motherboard">
             <div class="project-meta"><span>02</span><b>Control electronics</b><small>KiCad / prototype</small></div>
-            <div class="project-copy"><h2>Origin Motherboard</h2><p>A dedicated integration board designed to organize sensors, safety inputs, steppers, power control, and the machine controller.</p></div>
-            <img class="project-landscape" data-src="assets/motherboard-kicad-landscape.webp" alt="Landscape view of the InFlux Origin motherboard PCB layout" loading="lazy" decoding="async" />
+            <div class="project-copy"><p class="project-thesis">The machine's decisions converge here.</p><h2>Origin Motherboard</h2><p>A dedicated integration board designed to organize sensors, safety inputs, steppers, power control, and the machine controller.</p></div>
+            <div class="project-media-frame board-scene" aria-label="Static annotated views of the Origin motherboard design">
+              <img class="board-main" data-src="assets/motherboard-kicad-landscape.webp" alt="Landscape view of the InFlux Origin motherboard PCB layout" loading="lazy" decoding="async" />
+              <img class="board-detail" data-src="assets/motherboard-kicad.jpg" alt="Detailed portrait view of the Origin motherboard PCB layout" loading="lazy" decoding="async" />
+              <span class="board-scan" aria-hidden="true"></span>
+              <div class="scene-label scene-label-a"><b>Controller carrier</b><small>STM32 control core</small></div>
+              <div class="scene-label scene-label-b"><b>Sensors + outputs</b><small>Dedicated routed control</small></div>
+              <span class="scene-caption">Static board-design evidence / KiCad V1</span>
+            </div>
           </article>
-          <article class="project-entry showcase-stage reveal">
+          <article class="project-entry showcase-stage project-thermal reveal" id="project-thermal">
             <div class="project-meta"><span>03</span><b>Thermal validation</b><small>Data / ongoing</small></div>
-            <div class="project-copy"><h2>Thermal Lab</h2><p>Measured heat-up, stabilization, cooldown, sensor behavior, and hot spots used to guide the next machine iteration.</p></div>
-            <img data-src="assets/thermal-camera.webp" alt="Thermal camera evidence from InFlux testing" loading="lazy" decoding="async" />
+            <div class="project-copy"><p class="project-thesis">Heat stops being a guess.</p><h2>Thermal Lab</h2><p>Measured heat-up, stabilization, cooldown, sensor behavior, and hot spots used to guide the next machine iteration.</p></div>
+            <div class="project-media-frame thermal-scene" aria-label="Static annotated thermal validation evidence">
+              <img class="thermal-main" data-src="assets/thermal-camera.webp" alt="Thermal camera evidence from InFlux testing" loading="lazy" decoding="async" />
+              <img class="thermal-context" data-src="assets/thermal-lab.jpg" alt="InFlux thermal validation equipment in use" loading="lazy" decoding="async" />
+              <span class="thermal-pulse" aria-hidden="true"></span>
+              <div class="thermal-readout"><span>Observed frame</span><strong>49.2°C</strong><small>Captured thermal evidence</small></div>
+              <div class="thermal-range" aria-label="Captured temperature range from 19.8 to 65.8 degrees Celsius"><span>19.8</span><i></i><span>65.8°C</span></div>
+              <span class="scene-caption">Static captured measurement / 16 Apr 2026</span>
+            </div>
           </article>
         </div>
       </section>
