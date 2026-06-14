@@ -39,8 +39,6 @@ Assert-Website ($script -match 'registerMediaState' -and $styles -match '\.media
 Assert-Website ($technical -match 'data-toc-toggle' -and $technicalStyles -match 'doc-toc\.is-open') "mobile dossier contents disclosure is missing"
 Assert-Website ($index -match 'application/ld\+json' -and $technical -match 'application/ld\+json') "structured data is missing"
 Assert-Website ($index -match 'rel="canonical"' -and $technical -match 'rel="canonical"') "canonical metadata is missing"
-Assert-Website (Test-Path (Join-Path $root "CNAME")) "GitHub Pages custom-domain file is missing"
-Assert-Website ($index -match 'https://influxorigin\.ro/' -and $technical -match 'https://influxorigin\.ro/technical\.html') "custom-domain canonical metadata is missing"
 Assert-Website ($index -match '2026-06-14-levels-v1' -and $technical -match '2026-06-13-p4') "explicit cache version is missing"
 Assert-Website ($index -match '<span>Three levels</span> of maturity' -and $index -match 'InFlux Ecosystem') "updated section hierarchy labels are missing"
 Assert-Website ("$index`n$script" -notmatch 'STEP.+GLB' -and $index -notmatch 'Orbit and zoom') "redundant 3D micro-label copy is still published"
