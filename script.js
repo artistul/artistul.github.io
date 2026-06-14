@@ -2,7 +2,7 @@ const HUB = {
   tabs: {
     home: { title: "InFlux Origin | Project Hub" },
     versions: { title: "Machine Versions | InFlux Origin" },
-    projects: { title: "Other Projects | InFlux Origin" },
+    projects: { title: "InFlux Ecosystem | InFlux Origin" },
     team: { title: "Team | InFlux Origin" },
     proof: { title: "Proof | InFlux Origin" },
     downloads: { title: "Download Hub | InFlux Origin" },
@@ -226,8 +226,7 @@ document.querySelector("[data-load-model]")?.addEventListener("click", async (ev
         field-of-view="24deg" shadow-intensity="0.85" exposure="1.15"
         environment-image="neutral" interaction-prompt="none">
         <div class="model-loading" slot="poster">Loading optimized assembly</div>
-      </model-viewer>
-      <span class="model-tag">Live 3D / STEP → GLB</span>`;
+      </model-viewer>`;
   } catch {
     event.currentTarget.disabled = false;
     event.currentTarget.textContent = "Retry interactive 3D";

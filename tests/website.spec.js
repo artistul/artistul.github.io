@@ -40,10 +40,14 @@ test("team portraits and evidence landscape render", async ({ page }) => {
 test("reference-led versions and project stages render", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=versions");
+  await expect(page.locator("#versions .panel-hero .section-index")).toHaveText("Three Levels");
+  await expect(page.getByText("No need to take our word for it, convince yourself. Take a look at the InFlux Origin Mk. 1.")).toBeVisible();
+  await expect(page.locator(".model-tag")).toHaveCount(0);
   await expect(page.locator(".version-timeline .showcase-stage")).toHaveCount(3);
   await expect(page.locator(".current-version")).toHaveScreenshot("version-current-stage.png");
 
   await page.goto("/index.html?tab=projects");
+  await expect(page.locator("#projects .panel-hero .section-index")).toHaveText("InFlux Ecosystem");
   await expect(page.locator(".project-entry")).toHaveCount(3);
   await expect(page.getByText("Rapid Mold Program")).toHaveCount(0);
   await expect(page.locator(".operator-gallery img")).toHaveCount(3);
