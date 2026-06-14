@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /output/
 
-Sitemap: https://artistul.github.io/sitemap.xml
+Sitemap: https://influxorigin.ro/sitemap.xml
