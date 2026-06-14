@@ -166,7 +166,7 @@ main, footer { position: relative; z-index: var(--z-content); }
 .signal-label, .section-index, .version-state {
   color: var(--red);
   font-family: Consolas, monospace;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: .2em;
   text-transform: uppercase;
@@ -409,7 +409,7 @@ h1, h2 {
 }
 .version-copy p, .project-copy p, .member-role, .proof-feature p {
   color: var(--muted);
-  font-size: 16px;
+  font-size: 20px;
   line-height: 1.6;
 }
 .version-copy li {
@@ -648,44 +648,223 @@ model-viewer { width: 100%; height: 650px; --poster-color: transparent; }
 .honesty-block { border-bottom: 1px solid var(--line); }
 .honesty-block h2 { max-width: 900px; }
 .honesty-block .proof-progress-list { display: grid; gap: 34px; padding-top: 30px; background: transparent; }
-.proof-progress { padding: 0 0 30px; border-bottom: 1px solid var(--line); }
-.proof-progress > div:first-child { display: flex; justify-content: space-between; gap: 24px; align-items: end; }
-.proof-progress h3 { margin: 0; font-size: clamp(30px, 4vw, 62px); line-height: .9; text-transform: uppercase; }
-.proof-progress > div:first-child span { color: var(--red); font: clamp(28px, 4vw, 60px)/.9 Impact, sans-serif; }
-.proof-progress p { min-height: 0; margin: 12px 0 18px; padding: 0; background: transparent; color: var(--muted); line-height: 1.5; }
-.liquid-track {
+/* SVG fluid validation meters */
+.proof-progress {
+  --fluid-progress: 0%;
+  padding: 0 0 30px;
+  border-bottom: 1px solid var(--line);
+}
+
+.proof-progress > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+}
+
+.proof-progress h3 {
+  margin: 0;
+  font-size: clamp(30px, 4vw, 62px);
+  line-height: .9;
+  text-transform: uppercase;
+}
+
+.proof-progress .proof-value {
+  color: var(--red);
+  font: clamp(28px, 4vw, 60px)/.9 Impact, sans-serif;
+  text-shadow: 0 0 0 rgba(236, 23, 44, 0);
+  transition: color 260ms ease, text-shadow 260ms ease;
+}
+
+.proof-progress.is-fluid-active .proof-value {
+  color: #ff1734;
+  text-shadow: 0 0 16px rgba(255, 23, 52, .42);
+}
+
+.proof-progress p {
+  min-height: 0;
+  margin: 12px 0 18px;
+  padding: 0;
+  background: transparent;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.fluid-meter {
   position: relative;
-  height: 28px;
+  min-width: 0;
+  padding-top: 34px;
+}
+
+.fluid-indicator,
+.fluid-goal {
+  position: absolute;
+  top: 0;
+  z-index: 4;
+  font-family: Consolas, monospace;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.fluid-indicator {
+  left: 0;
+  display: grid;
+  justify-items: center;
+  color: rgba(244, 241, 237, .88);
+  opacity: 0;
+  transform: translateX(-50%);
+  transition:
+    left 1800ms cubic-bezier(.2, .8, .2, 1),
+    opacity 180ms ease 140ms;
+}
+
+.proof-progress.is-fluid-active .fluid-indicator {
+  left: var(--fluid-progress);
+  opacity: 1;
+}
+
+.fluid-indicator b {
+  font: inherit;
+}
+
+.fluid-indicator i {
+  width: 0;
+  height: 0;
+  margin-top: 7px;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 9px solid #ff1734;
+  filter: drop-shadow(0 0 5px rgba(255, 23, 52, .72));
+}
+
+.fluid-goal {
+  right: 0;
+  max-width: 52%;
   overflow: hidden;
-  border: 1px solid rgba(236,23,44,.7);
-  background: rgba(255,255,255,.09);
+  color: rgba(244, 241, 237, .53);
+  text-align: right;
+  text-overflow: ellipsis;
 }
-.liquid-track span {
+
+.fluid-canvas {
+  display: block;
+  width: 100%;
+  height: clamp(42px, 4.25vw, 64px);
+  overflow: visible;
+  filter: drop-shadow(0 0 10px rgba(236, 23, 44, .15));
+}
+
+.fluid-track-back {
+  fill: rgba(255, 255, 255, .018);
+}
+
+.fluid-track-outline {
+  fill: none;
+  stroke: rgba(236, 23, 44, .9);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.fluid-body,
+.fluid-droplets {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.fluid-main,
+.fluid-head,
+.fluid-lobe,
+.fluid-drop {
+  shape-rendering: geometricPrecision;
+}
+
+.fluid-lobe,
+.fluid-drop {
+  fill: inherit;
+}
+
+.fluid-lobe,
+.fluid-drop,
+.fluid-sheen {
+  opacity: 0;
+}
+
+.proof-progress.is-fluid-ready .fluid-lobe,
+.proof-progress.is-fluid-ready .fluid-sheen {
+  opacity: 1;
+}
+
+.proof-progress.is-fluid-ready .fluid-lobe-a {
+  animation: fluid-lobe-a 2.9s ease-in-out infinite alternate;
+}
+
+.proof-progress.is-fluid-ready .fluid-lobe-b {
+  animation: fluid-lobe-b 3.4s ease-in-out -1.1s infinite alternate;
+}
+
+.proof-progress.is-fluid-ready .fluid-sheen {
+  animation: fluid-sheen 3.8s ease-in-out 1.2s infinite;
+}
+
+.proof-progress.is-fluid-ready .fluid-drop-a {
+  animation: fluid-drop-a 3.2s ease-out .15s infinite;
+}
+
+.proof-progress.is-fluid-ready .fluid-drop-b {
+  animation: fluid-drop-b 3.2s ease-out .75s infinite;
+}
+
+.proof-progress.is-fluid-ready .fluid-drop-c {
+  animation: fluid-drop-c 3.2s ease-out 1.35s infinite;
+}
+
+.fluid-progress-accessible {
   position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--progress);
-  background: linear-gradient(90deg, #76000e, var(--red) 82%, #ff4b5e);
-  transform-origin: left;
-  animation: progress-arrive 1200ms cubic-bezier(.2,.8,.2,1) both;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
-.liquid-track span::before, .liquid-track span::after {
-  content: "";
-  position: absolute;
-  right: -13px;
-  width: 35px;
-  height: 35px;
-  border-radius: 48% 52% 55% 45%;
-  background: var(--red);
-  filter: blur(.2px);
-  animation: liquid-lobe 2.6s ease-in-out infinite alternate;
+
+@keyframes fluid-lobe-a {
+  from { transform: translate(-5px, 4px) scale(.82, 1.1); }
+  to { transform: translate(6px, -3px) scale(1.1, .82); }
 }
-.liquid-track span::before { top: -16px; }
-.liquid-track span::after { bottom: -18px; right: -25px; animation-delay: -1.3s; }
-@keyframes progress-arrive { from { transform: scaleX(.05); } to { transform: scaleX(1); } }
-@keyframes liquid-lobe {
-  0% { transform: translate(-8px, 4px) scale(.72, 1.1) rotate(0); }
-  50% { transform: translate(4px, -1px) scale(1.1, .78) rotate(90deg); }
-  100% { transform: translate(13px, 3px) scale(.82, 1.18) rotate(180deg); }
+
+@keyframes fluid-lobe-b {
+  from { transform: translate(-4px, -2px) scale(1.08, .82); }
+  to { transform: translate(8px, 3px) scale(.82, 1.12); }
+}
+
+@keyframes fluid-sheen {
+  0%, 18% { transform: translateX(-115%); opacity: 0; }
+  35% { opacity: .58; }
+  72%, 100% { transform: translateX(760%); opacity: 0; }
+}
+
+@keyframes fluid-drop-a {
+  0%, 54%, 100% { opacity: 0; transform: translate(0, 3px) scale(.45); }
+  61% { opacity: .95; }
+  78% { opacity: 0; transform: translate(18px, -13px) scale(.8); }
+}
+
+@keyframes fluid-drop-b {
+  0%, 54%, 100% { opacity: 0; transform: translate(0, 4px) scale(.4); }
+  61% { opacity: .82; }
+  78% { opacity: 0; transform: translate(28px, -18px) scale(.72); }
+}
+
+@keyframes fluid-drop-c {
+  0%, 54%, 100% { opacity: 0; transform: translate(0, 2px) scale(.4); }
+  61% { opacity: .72; }
+  78% { opacity: 0; transform: translate(12px, -10px) scale(.65); }
 }
 
 .utility-panel .panel-hero { min-height: 62svh; }
@@ -917,11 +1096,44 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
   .operator-gallery img { max-height: 520px; scroll-snap-align: center; }
   .proof-progress > div:first-child { align-items: start; }
   .proof-progress h3 { max-width: 76%; }
-  .liquid-track { height: 24px; }
+}
+
+
+@media (max-width: 620px) {
+  .fluid-meter { padding-top: 50px; }
+  .fluid-goal {
+    top: 0;
+    max-width: 100%;
+    font-size: 9px;
+  }
+  .fluid-indicator {
+    top: 22px;
+    font-size: 9px;
+  }
+  .fluid-indicator i {
+    margin-top: 5px;
+    border-left-width: 6px;
+    border-right-width: 6px;
+    border-top-width: 8px;
+  }
+  .fluid-canvas { height: 52px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .liquid-track span, .liquid-track span::before, .liquid-track span::after { animation: none; }
+  .fluid-indicator { transition: none; }
+  .proof-progress.is-fluid-ready .fluid-lobe,
+  .proof-progress.is-fluid-ready .fluid-sheen,
+  .proof-progress.is-fluid-ready .fluid-drop {
+    animation: none !important;
+  }
+  .proof-progress.is-fluid-ready .fluid-lobe,
+  .proof-progress.is-fluid-ready .fluid-sheen {
+    opacity: .38;
+  }
+  .proof-progress.is-fluid-ready .fluid-drop { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
 }
 
 .project-entry .operator-gallery img {
@@ -1037,7 +1249,6 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
 .proof-progress { padding: 30px 0; }
 .proof-progress h3 { font-size: clamp(28px, 3vw, 48px); }
 .proof-progress > div:first-child span { font-size: clamp(28px, 3vw, 48px); }
-.liquid-track { height: 20px; }
 
 .utility-panel .panel-hero { min-height: 50svh; }
 .download-entry { min-height: 128px; }

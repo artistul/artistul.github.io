@@ -130,7 +130,6 @@ document.querySelectorAll("[data-nav-link]").forEach((link) => {
     activateTab(link.dataset.navLink);
   });
 });
-
 tabs.forEach((tab) => {
   tab.addEventListener("keydown", (event) => {
     const current = tabs.indexOf(tab);
@@ -247,3 +246,123 @@ function renderDownloads() {
 
 renderDownloads();
 activateTab(currentTabFromUrl(), { fromHistory: true, instant: true, keepScroll: true });
+
+function initFluidProgressMeters() {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  document.querySelectorAll(".proof-progress[data-progress]").forEach((card) => {
+    if (card.dataset.fluidInitialized === "true") return;
+    card.dataset.fluidInitialized = "true";
+
+    const target = Math.min(100, Math.max(0, Number(card.dataset.progress) || 0));
+    const value = card.querySelector(".proof-value");
+    const accessible = card.querySelector(".fluid-progress-accessible");
+    const gradient = card.querySelector("[data-fluid-gradient]");
+    const main = card.querySelector("[data-fluid-main]");
+    const head = card.querySelector("[data-fluid-head]");
+    const lobeA = card.querySelector("[data-fluid-lobe-a]");
+    const lobeB = card.querySelector("[data-fluid-lobe-b]");
+    const sheen = card.querySelector("[data-fluid-sheen]");
+    const drops = [
+      card.querySelector("[data-fluid-drop-a]"),
+      card.querySelector("[data-fluid-drop-b]"),
+      card.querySelector("[data-fluid-drop-c]")
+    ];
+
+    if (!value || !accessible || !gradient || !main || !head || !lobeA || !lobeB || !sheen || drops.some((drop) => !drop)) return;
+
+    const markerPercent = Math.min(94, Math.max(6, target));
+    card.style.setProperty("--fluid-progress", `${markerPercent}%`);
+    accessible.setAttribute("aria-valuenow", String(target));
+
+    const trackStart = 2;
+    const trackWidth = 996;
+    const targetX = trackStart + trackWidth * (target / 100);
+
+    function setFluidPosition(x) {
+      const safeX = Math.min(998, Math.max(trackStart, x));
+
+      // One user-space gradient is shared by the bar, head, lobes, and droplets.
+      // Its bright endpoint follows the liquid front, so overlapping shapes sample
+      // exactly the same red and visually merge into one continuous fluid body.
+      gradient.setAttribute("x1", String(trackStart));
+      gradient.setAttribute("x2", String(Math.max(trackStart + 1, safeX)));
+
+      main.setAttribute("width", String(Math.max(0, safeX + 26)));
+      head.setAttribute("cx", String(safeX));
+      lobeA.setAttribute("cx", String(Math.min(996, safeX + 7)));
+      lobeB.setAttribute("cx", String(Math.min(996, safeX + 14)));
+
+      const dropPositions = [
+        [Math.min(984, safeX + 10), 23],
+        [Math.min(990, safeX + 27), 16],
+        [Math.min(988, safeX + 38), 27]
+      ];
+
+      drops.forEach((drop, index) => {
+        drop.setAttribute("cx", String(dropPositions[index][0]));
+        drop.setAttribute("cy", String(dropPositions[index][1]));
+      });
+
+      sheen.setAttribute("x", String(Math.max(-260, safeX - 190)));
+    }
+
+    function finishFluid() {
+      setFluidPosition(targetX);
+      value.textContent = `${target}%`;
+      card.classList.add("is-fluid-ready");
+    }
+
+    function animateFluid() {
+      if (card.dataset.fluidAnimated === "true") return;
+      card.dataset.fluidAnimated = "true";
+      card.classList.add("is-fluid-active");
+
+      if (reduceMotion) {
+        finishFluid();
+        return;
+      }
+
+      value.textContent = "0%";
+      setFluidPosition(trackStart);
+
+      const duration = 1800;
+      const startedAt = performance.now();
+
+      function frame(now) {
+        const linear = Math.min((now - startedAt) / duration, 1);
+        const eased = 1 - Math.pow(1 - linear, 3);
+        const x = trackStart + (targetX - trackStart) * eased;
+
+        setFluidPosition(x);
+        value.textContent = `${Math.round(target * eased)}%`;
+
+        if (linear < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          finishFluid();
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    if (!("IntersectionObserver" in window)) {
+      animateFluid();
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        animateFluid();
+        observer.disconnect();
+      },
+      { threshold: 0.28 }
+    );
+
+    observer.observe(card);
+  });
+}
+
+initFluidProgressMeters();

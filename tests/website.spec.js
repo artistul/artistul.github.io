@@ -67,11 +67,12 @@ test("reference-led versions and project stages render", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
-test("proof progress bars and updated control copy render", async ({ page }) => {
+test("proof fluid meters and updated control copy render", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=proof");
   await expect(page.getByRole("heading", { name: "Every action has a supervisor." })).toBeVisible();
-  await expect(page.locator(".liquid-track")).toHaveCount(4);
+  await expect(page.locator(".fluid-meter")).toHaveCount(4);
+  await expect(page.getByRole("progressbar")).toHaveCount(4);
   await expect(page.locator(".honesty-block")).toHaveScreenshot("proof-progress-stage.png");
 });
 
