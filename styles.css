@@ -53,7 +53,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .scroll-meter span { display: block; width: 0; height: 100%; background: var(--red); box-shadow: 0 0 20px var(--red); }
 
-.route-motif { position: fixed; inset: 0; z-index: var(--z-motif); pointer-events: none; }
+.route-motif { display: none; }
 .route-line {
   position: absolute;
   top: 0;

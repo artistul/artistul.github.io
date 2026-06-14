@@ -39,7 +39,7 @@ Assert-Website ($script -match 'registerMediaState' -and $styles -match '\.media
 Assert-Website ($technical -match 'data-toc-toggle' -and $technicalStyles -match 'doc-toc\.is-open') "mobile dossier contents disclosure is missing"
 Assert-Website ($index -match 'application/ld\+json' -and $technical -match 'application/ld\+json') "structured data is missing"
 Assert-Website ($index -match 'rel="canonical"' -and $technical -match 'rel="canonical"') "canonical metadata is missing"
-Assert-Website ($index -match '2026-06-13-p4' -and $technical -match '2026-06-13-p4') "explicit cache version is missing"
+Assert-Website ($index -match '2026-06-14-p4\.1' -and $technical -match '2026-06-13-p4') "explicit cache version is missing"
 Assert-Website (Test-Path (Join-Path $root "robots.txt")) "robots.txt is missing"
 Assert-Website (Test-Path (Join-Path $root "sitemap.xml")) "sitemap.xml is missing"
 Assert-Website (Test-Path (Join-Path $root "assets\checksums.txt")) "artifact checksums are missing"
