@@ -1,9 +1,3 @@
-﻿[CmdletBinding()]
-param(
-  [Alias("Force", "PublishAnyway")]
-  [switch]$AllowFailedTests
-)
-
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $PSScriptRoot
@@ -129,15 +123,7 @@ foreach ($artifact in @("influx-operator-latest.apk", "influx-origin-technical-n
 }
 
 if ($failures.Count) {
-  Write-Host "`nWebsite checks failed ($($failures.Count)):" -ForegroundColor Red
-  $failures | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
-
-  if ($AllowFailedTests) {
-    Write-Warning "Static website checks failed, but the failed-test override is enabled. Continuing anyway."
-    exit 0
-  }
-
-  Write-Host "`nPublishing remains blocked. Run publish-website.ps1 and explicitly confirm the override, or use -AllowFailedTests." -ForegroundColor Yellow
+  $failures | ForEach-Object { Write-Error $_ }
   exit 1
 }
 

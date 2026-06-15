@@ -1,3 +1,11 @@
+﻿[CmdletBinding()]
+param(
+  [switch]$ValidateAfterUpdate,
+
+  [Alias("Force", "PublishAnyway")]
+  [switch]$AllowFailedTests
+)
+
 $ErrorActionPreference = "Stop"
 
 $repo = "C:\Users\Stefan\Documents\Influx"
@@ -30,5 +38,29 @@ if ($localChanges) {
 Invoke-Checked git fetch origin
 Invoke-Checked git pull --ff-only origin main
 
-Write-Host "`nLocal website is up to date." -ForegroundColor Green
+if ($ValidateAfterUpdate) {
+  Write-Host "`nValidating the downloaded website..." -ForegroundColor Cyan
 
+  $validationArguments = @(
+    "-NoProfile",
+    "-ExecutionPolicy", "Bypass",
+    "-File", "$repo\scripts\test-website-for-publish.ps1"
+  )
+
+  if ($AllowFailedTests) {
+    Write-Warning "The failed-test override is enabled for post-update validation."
+    $validationArguments += "-AllowFailedTests"
+  }
+
+  & powershell.exe @validationArguments
+  if ($LASTEXITCODE -ne 0) {
+    throw "The local website was updated, but validation failed."
+  }
+}
+elseif ($AllowFailedTests) {
+  Write-Warning "-AllowFailedTests has no effect unless -ValidateAfterUpdate is also used."
+}
+
+Write-Host "`nLocal website is up to date." -ForegroundColor Green
+Write-Host "Normal publish:   .\scripts\publish-website.ps1"
+Write-Host "Override publish: .\scripts\publish-website.ps1 -AllowFailedTests"
