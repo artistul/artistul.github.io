@@ -951,6 +951,11 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
 .reveal { transform: translateY(24px); transition: transform 600ms ease; }
 .reveal.is-visible { transform: none; }
 
+@media (min-width: 901px) {
+  .hero-artifact { left: clamp(22px, 3vw, 48px); }
+  .hero-artifact img { transform: translateY(clamp(24px, 3.2vh, 36px)); }
+}
+
 @media (max-width: 1180px) {
   .site-header { grid-template-columns: 170px minmax(0, 1fr); padding-inline: 24px; }
   .primary-nav { gap: 10px; }
@@ -1029,11 +1034,11 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
   .brand small { display: none; }
   .home-hero, .panel-hero, .proof-hero { padding-inline: 16px; }
   .home-hero { min-height: auto; padding-top: calc(var(--header-h) + 34px); padding-bottom: 60px; }
-  .signal-label { margin-bottom: 18px; }
-  .home-hero h1 { font-size: clamp(48px, 13.2vw, 64px); }
-  .home-hero .hero-lede { margin-bottom: 0; }
-  .home-hero .action-row { margin-top: 24px; }
-  .hero-artifact { min-height: 330px; margin: -12px 0 0; }
+  .signal-label { margin-bottom: 28px; }
+  .home-hero h1 { margin-bottom: 38px; font-size: clamp(48px, 13.2vw, 64px); line-height: .92; }
+  .home-hero .hero-lede { margin-bottom: 0; line-height: 1.68; }
+  .home-hero .action-row { gap: 12px; margin-top: 36px; }
+  .hero-artifact { min-height: 330px; margin: 10px 0 0; }
   .hero-artifact img { width: 126%; }
   .artifact-coordinates { display: none; }
   .artifact-caption { right: 4%; left: 4%; }
@@ -1081,10 +1086,10 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
 
 @media (max-width: 620px) and (max-height: 760px) {
   .home-hero { padding-top: calc(var(--header-h) + 22px); }
-  .signal-label { margin-bottom: 14px; }
+  .signal-label { margin-bottom: 22px; }
   .home-hero h1 { font-size: clamp(44px, 12.4vw, 52px); }
-  .hero-lede { font-size: 15px; line-height: 1.48; }
-  .home-hero .action-row { margin-top: 20px; }
+  .hero-lede { font-size: 15px; line-height: 1.58; }
+  .home-hero .action-row { margin-top: 28px; }
   .action { min-height: 48px; }
 }
 
