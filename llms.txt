@@ -1,6 +1,6 @@
 # InFlux Origin
 
-> InFlux Origin MK1 is a supervised desktop injection molding machine prototype developed by Volta Circuits. It integrates mechanics, multi-zone thermal control, Nucleo firmware, an ESP32-C6 communication bridge, an Android operator interface, and experimental resin tooling.
+> InFlux Origin MK1 is a supervised desktop injection molding machine prototype developed by Volta Circuits. It integrates mechanics, multi-zone thermal control, STM32 firmware, a wifi communication bridge, an Android operator interface, and experimental resin tooling.
 
 The project is an integrated prototype in active calibration. It has produced a first injected part and gathered physical thermal evidence, but it is not presented as a production-ready or certified machine.
 

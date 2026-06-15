@@ -19,13 +19,12 @@ The project does not claim to replace an industrial injection molding machine. I
 - Heated barrel, nozzle, and piston-driven injection path.
 - Mold support, closing movement, and rapid tooling package.
 - Power distribution, sensors, motion drivers, and emergency inputs.
-- NUCLEO-H753ZI machine controller.
-- ESP32-C6 same-network HTTP-to-command bridge.
+- STM32 machine controller.
 - Android InFlux Operator interface.
-- Multiple K-type thermocouples across the heated barrel.
-- Experimental 3D-printed photopolymer resin molds with controlled water cooling.
+- Multiple thermocouples across the heated barrel.
+- Experimental 3D-printed resin molds with controlled water cooling.
 
-The Nucleo controller owns machine state, heating, motion, safety admission, and cycle behavior. The ESP bridge translates supported operator requests into the machine command protocol. The Android application presents status and sends supported commands.
+The main controller owns machine state, heating, motion, safety admission, and cycle behavior. The wifi bridge translates supported operator requests into the machine command protocol. The Android application presents status and sends supported commands.
 
 ## Evidence and validation
 
