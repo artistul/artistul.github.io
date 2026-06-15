@@ -20,6 +20,7 @@ for (const viewport of viewports) {
 test("mobile hero essentials fit a Xiaomi-sized opening viewport", async ({ page }) => {
   await page.setViewportSize({ width: 407, height: 812 });
   await page.goto("/index.html");
+  await page.evaluate(() => document.fonts.ready);
 
   const heroFit = await page.evaluate(() => {
     const viewportWidth = document.documentElement.clientWidth;
@@ -34,6 +35,7 @@ test("mobile hero essentials fit a Xiaomi-sized opening viewport", async ({ page
     return {
       allInsideWidth: boxes.every((box) => box.left >= 0 && box.right <= viewportWidth),
       actionsInsideOpeningViewport: boxes.at(-1).bottom <= window.innerHeight,
+      displayFontLoaded: document.fonts.check('48px "InFlux Display"'),
       documentFitsWidth: document.documentElement.scrollWidth === viewportWidth
     };
   });
@@ -41,6 +43,7 @@ test("mobile hero essentials fit a Xiaomi-sized opening viewport", async ({ page
   expect(heroFit).toEqual({
     allInsideWidth: true,
     actionsInsideOpeningViewport: true,
+    displayFontLoaded: true,
     documentFitsWidth: true
   });
 });

@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "InFlux Display";
+  src: url("assets/fonts/anton-latin-400-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   --bg: #090909;
   --surface: #141414;
@@ -125,7 +133,7 @@ main::before {
 .doc-hero-copy h1 {
   max-width: 850px;
   margin: 0;
-  font-family: Impact, "Arial Narrow", sans-serif;
+  font-family: "InFlux Display", "Arial Narrow", "Roboto Condensed", "sans-serif-condensed", sans-serif;
   font-size: var(--doc-display);
   font-weight: 500;
   letter-spacing: -.025em;
@@ -236,7 +244,7 @@ main::before {
 .doc-section h2, .doc-section h3, .doc-section p, .doc-section ul, .doc-section dl { max-width: 860px; }
 .doc-section h2 {
   margin: 0 0 22px;
-  font-family: Impact, "Arial Narrow", sans-serif;
+  font-family: "InFlux Display", "Arial Narrow", "Roboto Condensed", "sans-serif-condensed", sans-serif;
   font-size: clamp(32px, 4.4vw, 50px);
   font-weight: 500;
   letter-spacing: -.015em;
