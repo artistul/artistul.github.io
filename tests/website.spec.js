@@ -158,6 +158,19 @@ test("proof fluid meters and updated control copy render", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Every action has a supervisor." })).toBeVisible();
   await expect(page.locator(".fluid-meter")).toHaveCount(4);
   await expect(page.getByRole("progressbar")).toHaveCount(4);
+  await expect.poll(() => page.locator(".proof-progress[data-progress]").evaluateAll((cards) =>
+    cards.every((card) => card.dataset.fluidPhysics)
+  )).toBe(true);
+  const fluidMotion = await page.locator(".proof-progress[data-progress]").evaluateAll((cards) => ({
+    profiles: cards.map((card) => card.dataset.fluidPhysics),
+    sheenHidden: cards.every((card) => getComputedStyle(card.querySelector(".fluid-sheen")).display === "none")
+  }));
+  expect(new Set(fluidMotion.profiles).size).toBe(4);
+  expect(fluidMotion.sheenHidden).toBe(true);
+  await page.locator(".honesty-block").scrollIntoViewIfNeeded();
+  await expect.poll(() => page.locator(".proof-progress[data-progress]").evaluateAll((cards) =>
+    cards.every((card) => card.classList.contains("is-fluid-ready"))
+  ), { timeout: 8000 }).toBe(true);
   await expect(page.locator(".honesty-block")).toHaveScreenshot("proof-progress-stage.png");
 });
 

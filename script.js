@@ -250,7 +250,7 @@ activateTab(currentTabFromUrl(), { fromHistory: true, instant: true, keepScroll:
 function initFluidProgressMeters() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  document.querySelectorAll(".proof-progress[data-progress]").forEach((card) => {
+  document.querySelectorAll(".proof-progress[data-progress]").forEach((card, cardIndex) => {
     if (card.dataset.fluidInitialized === "true") return;
     card.dataset.fluidInitialized = "true";
 
@@ -262,22 +262,40 @@ function initFluidProgressMeters() {
     const head = card.querySelector("[data-fluid-head]");
     const lobeA = card.querySelector("[data-fluid-lobe-a]");
     const lobeB = card.querySelector("[data-fluid-lobe-b]");
-    const sheen = card.querySelector("[data-fluid-sheen]");
     const drops = [
       card.querySelector("[data-fluid-drop-a]"),
       card.querySelector("[data-fluid-drop-b]"),
       card.querySelector("[data-fluid-drop-c]")
     ];
 
-    if (!value || !accessible || !gradient || !main || !head || !lobeA || !lobeB || !sheen || drops.some((drop) => !drop)) return;
+    if (!value || !accessible || !gradient || !main || !head || !lobeA || !lobeB || drops.some((drop) => !drop)) return;
 
     const markerPercent = Math.min(94, Math.max(6, target));
     card.style.setProperty("--fluid-progress", `${markerPercent}%`);
+    card.style.setProperty("--fluid-live-progress", "0%");
     accessible.setAttribute("aria-valuenow", String(target));
 
     const trackStart = 2;
     const trackWidth = 996;
     const targetX = trackStart + trackWidth * (target / 100);
+    const randomBetween = (min, max) => min + Math.random() * (max - min);
+    const physics = {
+      startDelay: Math.round(randomBetween(90, 780) + cardIndex * 70),
+      stiffness: randomBetween(24, 38),
+      damping: randomBetween(8.5, 11.5),
+      pulse: randomBetween(1.1, 2.8),
+      pulseRate: randomBetween(7, 13)
+    };
+
+    card.dataset.fluidPhysics = JSON.stringify(physics);
+    card.style.setProperty("--fluid-lobe-a-duration", `${randomBetween(2.3, 4.1).toFixed(2)}s`);
+    card.style.setProperty("--fluid-lobe-b-duration", `${randomBetween(2.5, 4.4).toFixed(2)}s`);
+    card.style.setProperty("--fluid-lobe-a-delay", `${-randomBetween(.1, 2.4).toFixed(2)}s`);
+    card.style.setProperty("--fluid-lobe-b-delay", `${-randomBetween(.2, 2.8).toFixed(2)}s`);
+    card.style.setProperty("--fluid-drop-duration", `${randomBetween(2.7, 4.8).toFixed(2)}s`);
+    card.style.setProperty("--fluid-drop-a-delay", `${randomBetween(.1, 1.4).toFixed(2)}s`);
+    card.style.setProperty("--fluid-drop-b-delay", `${randomBetween(.7, 2.1).toFixed(2)}s`);
+    card.style.setProperty("--fluid-drop-c-delay", `${randomBetween(1.2, 2.9).toFixed(2)}s`);
 
     function setFluidPosition(x) {
       const safeX = Math.min(998, Math.max(trackStart, x));
@@ -303,8 +321,7 @@ function initFluidProgressMeters() {
         drop.setAttribute("cx", String(dropPositions[index][0]));
         drop.setAttribute("cy", String(dropPositions[index][1]));
       });
-
-      sheen.setAttribute("x", String(Math.max(-260, safeX - 190)));
+      card.style.setProperty("--fluid-live-progress", `${Math.min(94, Math.max(0, ((safeX - trackStart) / trackWidth) * 100))}%`);
     }
 
     function finishFluid() {
@@ -326,25 +343,34 @@ function initFluidProgressMeters() {
       value.textContent = "0%";
       setFluidPosition(trackStart);
 
-      const duration = 1800;
-      const startedAt = performance.now();
+      let position = trackStart;
+      let velocity = 0;
+      let previousTime;
+      let elapsed = 0;
 
       function frame(now) {
-        const linear = Math.min((now - startedAt) / duration, 1);
-        const eased = 1 - Math.pow(1 - linear, 3);
-        const x = trackStart + (targetX - trackStart) * eased;
+        if (!previousTime) previousTime = now;
+        const delta = Math.min((now - previousTime) / 1000, .034);
+        previousTime = now;
+        elapsed += delta;
 
-        setFluidPosition(x);
-        value.textContent = `${Math.round(target * eased)}%`;
+        const distance = targetX - position;
+        const pressurePulse = Math.sin(elapsed * physics.pulseRate) * physics.pulse * Math.min(1, Math.abs(distance) / 140);
+        const acceleration = distance * physics.stiffness - velocity * physics.damping + pressurePulse;
+        velocity += acceleration * delta;
+        position += velocity * delta;
 
-        if (linear < 1) {
+        setFluidPosition(position);
+        value.textContent = `${Math.round(target * Math.min(1, Math.max(0, (position - trackStart) / (targetX - trackStart))))}%`;
+
+        if (elapsed < 4.8 && (Math.abs(distance) > .45 || Math.abs(velocity) > .45)) {
           requestAnimationFrame(frame);
         } else {
           finishFluid();
         }
       }
 
-      requestAnimationFrame(frame);
+      window.setTimeout(() => requestAnimationFrame(frame), physics.startDelay);
     }
 
     if (!("IntersectionObserver" in window)) {
