@@ -30,7 +30,7 @@ test("mobile hero essentials fit a Xiaomi-sized opening viewport", async ({ page
       document.querySelector(".hero-lede"),
       document.querySelector(".action-row")
     ];
-    const boxes = essentials.map((element) => element.getBoundingClientRect());
+    const boxes = essentials.filter(Boolean).map((element) => element.getBoundingClientRect());
 
     return {
       allInsideWidth: boxes.every((box) => box.left >= 0 && box.right <= viewportWidth),
@@ -46,6 +46,49 @@ test("mobile hero essentials fit a Xiaomi-sized opening viewport", async ({ page
     displayFontLoaded: true,
     documentFitsWidth: true
   });
+});
+
+test("mobile navigation is touch-friendly, contained, and clear", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/index.html?tab=versions");
+
+  const menu = page.locator("[data-menu]");
+  await expect(menu).toHaveAccessibleName("Open navigation menu");
+  const menuBox = await menu.boundingBox();
+  expect(menuBox.width).toBeGreaterThanOrEqual(44);
+  expect(menuBox.height).toBeGreaterThanOrEqual(44);
+
+  await menu.click();
+  await expect(menu).toHaveAttribute("aria-expanded", "true");
+  await expect(menu).toHaveAccessibleName("Close navigation menu");
+  await expect(page.locator(".menu-toggle b")).toHaveText("Close");
+  await expect(page.locator("main")).toHaveAttribute("inert", "");
+
+  const openMenuState = await page.evaluate(() => {
+    const nav = document.querySelector("#primary-nav").getBoundingClientRect();
+    const buttons = [...document.querySelectorAll("#primary-nav button")];
+    return {
+      navInsideViewport: nav.top >= 0 && nav.bottom <= window.innerHeight,
+      buttonsTouchFriendly: buttons.every((button) => button.getBoundingClientRect().height >= 44),
+      buttonsTabbable: buttons.every((button) => button.tabIndex === 0)
+    };
+  });
+  expect(openMenuState).toEqual({
+    navInsideViewport: true,
+    buttonsTouchFriendly: true,
+    buttonsTabbable: true
+  });
+  await expect(page).toHaveScreenshot("mobile-menu-open.png", { fullPage: false });
+
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeFocused();
+  await expect(menu).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator("main")).not.toHaveAttribute("inert", "");
+
+  await menu.click();
+  await page.getByRole("tab", { name: "Team" }).click();
+  await expect(page.locator("#team")).toBeFocused();
+  await expect(page.locator("html")).toHaveJSProperty("scrollWidth", 390);
 });
 
 test("display typography and hero machine alignment adapt by device", async ({ page }) => {
@@ -81,7 +124,7 @@ test("hidden media and 3D load only when requested", async ({ page }) => {
   await page.goto("/index.html");
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await expect(page.locator('script[src*="model-viewer"]')).toHaveCount(0);
-  await page.getByRole("tab", { name: "Machine Versions" }).click();
+  await page.goto("/index.html?tab=versions");
   await expect(page.locator(".version-timeline img[src]")).toHaveCount(5);
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await page.getByRole("button", { name: "Load interactive 3D" }).click();

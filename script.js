@@ -48,6 +48,9 @@ const header = document.querySelector("[data-header]");
 const meter = document.querySelector(".scroll-meter span");
 const menu = document.querySelector("[data-menu]");
 const nav = document.querySelector("#primary-nav");
+const menuLabel = menu?.querySelector("b");
+const pageMain = document.querySelector("main");
+const pageFooter = document.querySelector("footer");
 const panels = [...document.querySelectorAll("[data-panel]")];
 const navButtons = [...document.querySelectorAll("[data-nav]")];
 const tabs = [...document.querySelectorAll('[role="tab"]')];
@@ -85,15 +88,33 @@ function hydratePanel(panel) {
 
 document.querySelectorAll("img[loading='lazy'], img[data-src]").forEach(registerMediaState);
 
-function closeMenu({ returnFocus = false } = {}) {
-  nav?.classList.remove("is-open");
-  menu?.setAttribute("aria-expanded", "false");
-  document.body.classList.remove("menu-open");
+function setMenuState(open, { focusFirst = false, returnFocus = false } = {}) {
+  nav?.classList.toggle("is-open", open);
+  menu?.setAttribute("aria-expanded", String(open));
+  menu?.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+  if (menuLabel) menuLabel.textContent = open ? "Close" : "Menu";
+  document.body.classList.toggle("menu-open", open);
+  pageMain?.toggleAttribute("inert", open);
+  pageFooter?.toggleAttribute("inert", open);
+  tabs.forEach((tab) => {
+    tab.tabIndex = open || tab.getAttribute("aria-selected") === "true" ? 0 : -1;
+  });
+
+  if (focusFirst && open) {
+    requestAnimationFrame(() => nav?.querySelector("button")?.focus());
+  }
   if (returnFocus) menu?.focus();
 }
 
+function closeMenu(options = {}) {
+  setMenuState(false, options);
+}
+
+setMenuState(false);
+
 function activateTab(tab, options = {}) {
   const target = HUB.tabs[tab] ? tab : "home";
+  const menuWasOpen = nav?.classList.contains("is-open");
 
   panels.forEach((panel) => {
     const active = panel.dataset.panel === target;
@@ -120,7 +141,10 @@ function activateTab(tab, options = {}) {
   }
 
   if (!options.keepScroll) window.scrollTo({ top: 0, behavior: options.instant ? "auto" : "smooth" });
-  requestAnimationFrame(revealVisibleContent);
+  requestAnimationFrame(() => {
+    revealVisibleContent();
+    if (menuWasOpen) panels.find((panel) => panel.dataset.panel === target)?.focus({ preventScroll: true });
+  });
 }
 
 navButtons.forEach((button) => button.addEventListener("click", () => activateTab(button.dataset.nav)));
@@ -141,20 +165,39 @@ tabs.forEach((tab) => {
     if (next === undefined) return;
     event.preventDefault();
     tabs[next].focus();
-    activateTab(tabs[next].dataset.nav);
+    if (!nav?.classList.contains("is-open")) activateTab(tabs[next].dataset.nav);
   });
 });
 
 window.addEventListener("popstate", () => activateTab(currentTabFromUrl(), { fromHistory: true, instant: true }));
 
 menu?.addEventListener("click", () => {
-  const open = nav.classList.toggle("is-open");
-  menu.setAttribute("aria-expanded", String(open));
-  document.body.classList.toggle("menu-open", open);
+  const open = !nav.classList.contains("is-open");
+  setMenuState(open, { focusFirst: open });
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && nav?.classList.contains("is-open")) closeMenu({ returnFocus: true });
+  if (!nav?.classList.contains("is-open")) return;
+  if (event.key === "Escape") {
+    closeMenu({ returnFocus: true });
+    return;
+  }
+  if (event.key !== "Tab") return;
+
+  const focusable = [menu, ...nav.querySelectorAll("button")].filter((item) => item && !item.disabled);
+  const first = focusable[0];
+  const last = focusable.at(-1);
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 900 && nav?.classList.contains("is-open")) closeMenu();
 });
 
 document.querySelector("[data-top]")?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));

@@ -30,7 +30,7 @@
   <meta name="twitter:image:alt" content="InFlux Origin MK1 desktop injection molding machine prototype" />
   <title>Desktop Injection Molding Machine | InFlux Origin</title>
   <link rel="icon" href="assets/logo-mark.webp" />
-  <link rel="stylesheet" href="styles.css?v=2026-06-15-calculated-meters-v2" />
+  <link rel="stylesheet" href="styles.css?v=2026-06-15-mobile-experience-v1" />
   <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -103,7 +103,6 @@
   <header class="site-header" data-header>
     <button class="brand" type="button" data-nav="home" aria-label="Open InFlux home">
       <img src="assets/logo-mark.webp" alt="" />
-      <span><strong>InFlux</strong><small>Origin / Public Hub</small></span>
     </button>
 
     <button class="menu-toggle" type="button" data-menu aria-expanded="false" aria-controls="primary-nav">
@@ -116,7 +115,7 @@
         <button id="tab-home" class="is-active" type="button" data-nav="home" role="tab" aria-controls="home"
           aria-selected="true" tabindex="0">Home</button>
         <button id="tab-versions" type="button" data-nav="versions" role="tab" aria-controls="versions"
-          aria-selected="false" tabindex="-1">Machine Versions</button>
+          aria-selected="false" tabindex="-1">Machine Development</button>
         <button id="tab-projects" type="button" data-nav="projects" role="tab" aria-controls="projects"
           aria-selected="false" tabindex="-1">InFlux Ecosystem</button>
         <button id="tab-team" type="button" data-nav="team" role="tab" aria-controls="team" aria-selected="false"
@@ -138,7 +137,6 @@
       tabindex="0">
       <div class="home-hero">
         <div class="hero-copy reveal">
-          <p class="signal-label"><span></span> Integrated prototype / active calibration</p>
           <h1 id="home-title"><span>Real</span> manufacturing.<br />Desktop scale.</h1>
           <p class="hero-lede">
             InFlux Origin bridges the gap between a 3D printed prototype and industrial manufacturing with
@@ -161,24 +159,10 @@
           </div>
         </div>
 
-        <button class="proof-stamp reveal" type="button" data-nav="proof"
-          aria-label="View proof of the first successful injected part">
-          <img src="assets/first-injected-part-angle-440.webp"
-            srcset="assets/first-injected-part-angle-440.webp 440w, assets/first-injected-part-angle-876.webp 876w"
-            sizes="82px" alt="First successful part injected by InFlux" decoding="async" />
-          <span><b>01 / First successful part</b><small>Proof over polish</small></span>
-        </button>
-      </div>
-
-      <div class="status-strip reveal" aria-label="Current project status">
-        <div><span>State</span><strong>Integrated prototype</strong></div>
-        <div><span>Current focus</span><strong>Repeatability + calibration</strong></div>
-        <div><span>Control path</span><strong>Operator → ESP bridge → Nucleo</strong></div>
-        <div><span>Next direction</span><strong>Safer, cleaner product enclosure</strong></div>
       </div>
 
       <section class="home-statement reveal" aria-labelledby="home-statement-title">
-        <p class="section-index">00 / Why InFlux</p>
+        <p class="section-index">Why InFlux?</p>
         <h2 id="home-statement-title">The expensive middle ground should not be empty.</h2>
         <p>
           Teams can print a model in hours or commit to industrial tooling. InFlux is built for the
@@ -189,7 +173,7 @@
 
       <section class="proof-route reveal" aria-labelledby="proof-route-title">
         <div class="route-heading">
-          <p class="section-index">01 / Evidence route</p>
+          <p class="section-index">Evidence route</p>
           <h2 id="proof-route-title">From a difficult idea to a measured machine.</h2>
         </div>
         <div class="route-steps">
@@ -208,7 +192,7 @@
       </section>
 
       <section class="home-close reveal">
-        <p class="section-index">02 / Public project</p>
+        <p class="section-index">Public resources</p>
         <h2>Built to be inspected, questioned, and improved.</h2>
         <button class="text-link" type="button" data-nav="team">Meet the team <span>↗</span></button>
       </section>
@@ -225,16 +209,16 @@
         <article class="showcase-stage">
           <div class="version-number">01</div>
           <div class="version-copy">
-            <span class="version-state">First principles</span>
+            <span class="version-state">An idea appears</span>
             <h2>Sketches</h2>
             <p>
-              Before parts were ordered, the entire process was reduced to a hand-drawn system:
-              motion, heating, injection, cooling, sensing, and control.
+              My 3D printer is too slow and we can't afford industrial machinery. But what is in between?<br>
+              Thus, we started sketching a machine that can manufacture high quantities for cheap.
             </p>
             <ul>
-              <li>Map the full injection process</li>
-              <li>Identify every required subsystem</li>
-              <li>Turn an idea into an architecture</li>
+              <li>Research the injection process</li>
+              <li>Separate the machine into sub-systems</li>
+              <li>Separate the sub-systems into individual components</li>
             </ul>
           </div>
           <img class="version-diagram" data-src="assets/version-sketch-system.jpg"
@@ -247,13 +231,13 @@
             <span class="version-state">Physical experiments</span>
             <h2>The beginning of InFlux</h2>
             <p>
-              Early mold designs and practical tests established what the machine needed to control.
-              These experiments turned broad assumptions into specific engineering problems.
+              The idea proved possible, so we defined a brand identity. We don't sell a generic injection
+              molding machine. <br> We sell Influx.
             </p>
             <ul>
-              <li>Develop the first mold concepts</li>
-              <li>Test cooling and venting paths</li>
-              <li>Learn from physical limitations</li>
+              <li>Design a brand name and logo.</li>
+              <li>Define our goals.</li>
+              <li>Study the market</li>
             </ul>
           </div>
           <img data-src="assets/version-first-influx-logo.jpg"
@@ -264,16 +248,16 @@
         <article class="showcase-stage">
           <div class="version-number">03</div>
           <div class="version-copy">
-            <span class="version-state">System definition</span>
+            <span class="version-state">Machine Prototyping</span>
             <h2>Plan for MK1</h2>
             <p>
-              The first complete machine plan brought the injection barrel, mold movement,
-              frame, electronics, and safety architecture into one buildable system.
+              Branding and general architecture in place, it was time for engineering.<br>
+              CAD, programming, simulations, test, repeat. There is no going back now.
             </p>
             <ul>
-              <li>Define the complete machine architecture</li>
-              <li>Select and order components</li>
-              <li>Prepare the integrated build</li>
+              <li>Selecting and ordering components.</li>
+              <li>Mechanical and electrical design.</li>
+              <li>Making the first sub-systems work together.</li>
             </ul>
           </div>
           <img data-src="assets/machine-wireframe.jpg" alt="Early InFlux MK1 wireframe plan" loading="lazy"
@@ -283,16 +267,16 @@
         <article class="showcase-stage current-version">
           <div class="version-number">04</div>
           <div class="version-copy">
-            <span class="version-state">Current working prototype</span>
+            <span class="version-state">First working prototype</span>
             <h2>MK1</h2>
             <p>
-              The first complete InFlux machine can heat, move, inject, and produce real parts.
-              It is now being calibrated through repeated operation and measured evidence.
+              Our first complete machine capable of producing real injected parts. Although the automations aren't
+              perfect, it gets the job done, and it certainly does it cheaper than industrial solutions.
             </p>
             <ul>
-              <li>Desktop-scale integrated machine</li>
+              <li>Desktop sized</li>
               <li>Water-cooled resin and metal mold compatibility</li>
-              <li>Connected to the InFlux Operator app</li>
+              <li>Fully compatible with the Influx Operator app</li>
             </ul>
           </div>
           <img data-src="assets/machine-origin-render-640.webp"
@@ -307,13 +291,14 @@
             <span class="version-state">Future product direction</span>
             <h2>Next up</h2>
             <p>
-              The next machine will turn the lessons from MK1 into a more automated,
-              monitored, enclosed, and repeatable product.
+              The next version will focus on a fully automated and monitored process,
+              with water, molten plastic, and mold pressure monitoring. Designed for
+              continuous thrustworthy operation.
             </p>
             <ul>
               <li>Full machine enclosure</li>
               <li>Pressure sensing and temperature balancing</li>
-              <li>Longer printed-mold life and continuous operation</li>
+              <li>Printed molds lifetime improvements</li>
             </ul>
           </div>
           <img data-src="assets/packaging-concept.jpg" alt="InFlux packaging and product development concept"
@@ -363,7 +348,7 @@
             <p class="project-thesis">Everything the operator needs, in one place.</p>
             <h2>InFlux Operator</h2>
             <p>
-              A dedicated interface with internet internet connectivity.
+              A dedicated interface with internet connectivity.
               It includes complete machine monitoring, control and servicing functions.
             </p>
           </div>
@@ -505,7 +490,7 @@
     <section class="tab-panel" id="proof" data-panel="proof" role="tabpanel" aria-labelledby="tab-proof" tabindex="0">
       <header class="proof-hero reveal">
         <div class="proof-hero-copy">
-          <p class="section-index">Proof / Current evidence</p>
+          <p class="section-index">Proof of the prototype</p>
           <h1 id="proof-title">The first part is not perfect.<br />That is why it matters.</h1>
           <p>
             It confirms that the system can heat, move, inject, and produce a physical result. Its
@@ -1133,7 +1118,7 @@
     <p>Desktop injection molding platform / integrated prototype in active calibration.</p>
     <button class="back-top" type="button" data-top>Back to top ↑</button>
   </footer>
-  <script src="script.js?v=2026-06-15-calculated-meters-v2"></script>
+  <script src="script.js?v=2026-06-15-mobile-experience-v1"></script>
 </body>
 
 </html>
