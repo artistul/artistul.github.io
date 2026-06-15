@@ -1595,8 +1595,21 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
     height: 430px;
     margin-top: 14px;
   }
+  .project-ledger .operator-gallery.project-media-frame {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    height: auto;
+    min-height: 0;
+    padding: 22px;
+    overflow: visible;
+  }
+  .project-ledger .operator-gallery.project-media-frame img {
+    width: 100%;
+    max-height: none;
+    transform: none;
+  }
   .project-entry .board-scene .board-main { inset: 8% 4% 12%; width: 92%; height: 80%; }
-  .project-entry .board-scene .board-detail { width: 32%; height: 46%; }
   .scene-label-b { display: none; }
   .scene-caption { right: 11px; bottom: 10px; font-size: 7px; }
   .project-entry .thermal-scene .thermal-main { left: 4%; width: 80%; height: 70%; }

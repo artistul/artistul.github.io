@@ -105,6 +105,7 @@ test("reference-led versions and project stages render", async ({ page }) => {
   await expect(page.locator(".project-entry")).toHaveCount(3);
   await expect(page.getByText("Rapid Mold Program")).toHaveCount(0);
   await expect(page.locator(".operator-gallery img")).toHaveCount(3);
+  await expect(page.locator(".board-scene .board-detail")).toHaveCount(0);
   await expect(page.locator(".project-index a")).toHaveCount(3);
   await expect(page.locator(".project-media-frame")).toHaveCount(3);
   await expect(page.locator(".board-scene")).toBeVisible();
@@ -118,6 +119,26 @@ test("reference-led versions and project stages render", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.goto("/index.html?tab=projects");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await expect.poll(() => page.locator(".operator-gallery img").evaluateAll(
+    (images) => images.length === 3 && images.every((image) => image.naturalWidth > 0)
+  )).toBe(true);
+  const mobileOperatorGallery = await page.evaluate(() => {
+    const gallery = document.querySelector(".operator-gallery");
+    const images = [...gallery.querySelectorAll("img")];
+    return {
+      imageCount: gallery.querySelectorAll("img").length,
+      allVisible: images.every((image) => {
+        const box = image.getBoundingClientRect();
+        return image.naturalWidth > 0 && box.width > 0 && box.height > 0 && getComputedStyle(image).display !== "none";
+      }),
+      columns: getComputedStyle(gallery).gridTemplateColumns.split(" ").length
+    };
+  });
+  expect(mobileOperatorGallery).toEqual({
+    imageCount: 3,
+    allVisible: true,
+    columns: 1
+  });
 });
 
 test("proof fluid meters and updated control copy render", async ({ page }) => {
