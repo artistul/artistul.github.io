@@ -805,10 +805,6 @@ model-viewer { width: 100%; height: 650px; --poster-color: transparent; }
   opacity: 0;
 }
 
-.fluid-sheen {
-  display: none;
-}
-
 .proof-progress.is-fluid-ready .fluid-lobe {
   opacity: 1;
 }

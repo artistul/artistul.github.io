@@ -163,10 +163,10 @@ test("proof fluid meters and updated control copy render", async ({ page }) => {
   )).toBe(true);
   const fluidMotion = await page.locator(".proof-progress[data-progress]").evaluateAll((cards) => ({
     profiles: cards.map((card) => card.dataset.fluidPhysics),
-    sheenHidden: cards.every((card) => getComputedStyle(card.querySelector(".fluid-sheen")).display === "none")
+    sheenCount: cards.reduce((count, card) => count + card.querySelectorAll(".fluid-sheen, [data-fluid-sheen]").length, 0)
   }));
   expect(new Set(fluidMotion.profiles).size).toBe(4);
-  expect(fluidMotion.sheenHidden).toBe(true);
+  expect(fluidMotion.sheenCount).toBe(0);
   await page.locator(".honesty-block").scrollIntoViewIfNeeded();
   await expect.poll(() => page.locator(".proof-progress[data-progress]").evaluateAll((cards) =>
     cards.every((card) => card.classList.contains("is-fluid-ready"))

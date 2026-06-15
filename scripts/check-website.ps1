@@ -48,7 +48,7 @@ Assert-Website (Test-Path (Join-Path $root "CNAME")) "GitHub Pages custom-domain
 Assert-Website ($index -match 'https://influxorigin\.ro/' -and $technical -match 'https://influxorigin\.ro/technical\.html') "custom-domain canonical metadata is missing"
 Assert-Website ($index -match '2026-06-15-fluid-physics-v3' -and $technical -match '2026-06-13-p4') "explicit cache version is missing"
 Assert-Website ($script -match 'dataset\.fluidPhysics' -and $script -match 'stiffness' -and $script -match 'pressurePulse') "independent fluid physics are missing"
-Assert-Website ($styles -match '\.fluid-sheen\s*\{\s*display:\s*none;' -and $styles -notmatch '@keyframes fluid-sheen') "white fluid sheen animation is still enabled"
+Assert-Website ($index -notmatch 'fluid-body-shine|data-fluid-sheen|stop-color="#ffffff"' -and $styles -notmatch 'fluid-sheen') "white fluid sheen layer is still published"
 Assert-Website ($index -match '<span>Three levels</span> of maturity' -and $index -match 'InFlux Ecosystem') "updated section hierarchy labels are missing"
 Assert-Website ("$index`n$script" -notmatch 'STEP.+GLB' -and $index -notmatch 'Orbit and zoom') "redundant 3D micro-label copy is still published"
 Assert-Website (Test-Path (Join-Path $root "robots.txt")) "robots.txt is missing"
