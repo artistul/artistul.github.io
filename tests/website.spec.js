@@ -83,7 +83,8 @@ test("hidden media and 3D load only when requested", async ({ page }) => {
 test("team portraits and evidence landscape render", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=team");
-  await expect(page.locator(".member-portrait")).toHaveCount(3);
+  await expect(page.locator(".member-portrait")).toHaveCount(4);
+  await expect(page.getByRole("heading", { name: "Ciprian Ursu" })).toBeVisible();
   await expect(page).toHaveScreenshot("team-desktop.png", { fullPage: false });
   await page.getByRole("tab", { name: "Proof" }).click();
   await expect(page.locator(".evidence-landscape")).toBeVisible();
@@ -178,6 +179,22 @@ test("proof fluid meters and updated control copy render", async ({ page }) => {
     return outlineTop - arrow.bottom;
   }));
   expect(indicatorGaps.every((gap) => Math.abs(gap - 4) < 0.75)).toBe(true);
+  const goalLabels = await page.locator(".fluid-meter").evaluateAll((meters) => meters.map((meter) => {
+    const goal = meter.querySelector(".fluid-goal");
+    const canvas = meter.querySelector(".fluid-canvas").getBoundingClientRect();
+    const outlineTop = canvas.top + canvas.height * (30 / 86);
+    return {
+      gap: outlineTop - goal.getBoundingClientRect().bottom,
+      color: getComputedStyle(goal).color,
+      text: goal.textContent.trim(),
+      current: meter.querySelector(".fluid-indicator b").textContent.trim(),
+      target: meter.closest(".proof-progress").dataset.current
+    };
+  }));
+  expect(goalLabels.map(({ text }) => text)).toEqual(["500 cycles", "100 parts", "100%", "100%"]);
+  expect(goalLabels.every(({ gap }) => Math.abs(gap - 8) < 0.75)).toBe(true);
+  expect(goalLabels.every(({ color }) => color === "rgb(244, 241, 237)")).toBe(true);
+  expect(goalLabels.every(({ current, target }) => current === target)).toBe(true);
   await expect(page.locator(".honesty-block")).toHaveScreenshot("proof-progress-stage.png");
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -187,6 +204,12 @@ test("proof fluid meters and updated control copy render", async ({ page }) => {
     return canvas.top + canvas.height * (30 / 86) - arrow.bottom;
   }));
   expect(mobileIndicatorGaps.every((gap) => Math.abs(gap - 4) < 0.75)).toBe(true);
+  const mobileGoalGaps = await page.locator(".fluid-meter").evaluateAll((meters) => meters.map((meter) => {
+    const goal = meter.querySelector(".fluid-goal").getBoundingClientRect();
+    const canvas = meter.querySelector(".fluid-canvas").getBoundingClientRect();
+    return canvas.top + canvas.height * (30 / 86) - goal.bottom;
+  }));
+  expect(mobileGoalGaps.every((gap) => Math.abs(gap - 8) < 0.75)).toBe(true);
 });
 
 test("mobile dossier contents collapse and anchors clear the header", async ({ page }) => {

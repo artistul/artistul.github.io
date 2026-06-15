@@ -52,6 +52,7 @@ The first injected part demonstrates system function but is not proof of product
 - Stefan Tonegari: engineering lead covering mechanics, manufacturing, electronics, integration, and product development.
 - Fabian Volintiru: team and business lead covering strategy, economics, sponsorships, organization, and presentation.
 - Pintilei David: simulation and analysis lead covering SimScale, Python models, mathematics, and data analysis.
+- Ciprian Ursu: embedded programming contributor covering Arduino, C++, C, backend development, automations, and system integration.
 
 ## Preferred terminology
 

@@ -255,7 +255,9 @@ function initFluidProgressMeters() {
     card.dataset.fluidInitialized = "true";
 
     const target = Math.min(100, Math.max(0, Number(card.dataset.progress) || 0));
+    const currentTarget = Math.max(0, Number(card.dataset.current) || target);
     const value = card.querySelector(".proof-value");
+    const indicatorValue = card.querySelector(".fluid-indicator b");
     const accessible = card.querySelector(".fluid-progress-accessible");
     const gradient = card.querySelector("[data-fluid-gradient]");
     const main = card.querySelector("[data-fluid-main]");
@@ -268,7 +270,7 @@ function initFluidProgressMeters() {
       card.querySelector("[data-fluid-drop-c]")
     ];
 
-    if (!value || !accessible || !gradient || !main || !head || !lobeA || !lobeB || drops.some((drop) => !drop)) return;
+    if (!value || !indicatorValue || !accessible || !gradient || !main || !head || !lobeA || !lobeB || drops.some((drop) => !drop)) return;
 
     const markerPercent = Math.min(94, Math.max(6, target));
     card.style.setProperty("--fluid-progress", `${markerPercent}%`);
@@ -327,6 +329,7 @@ function initFluidProgressMeters() {
     function finishFluid() {
       setFluidPosition(targetX);
       value.textContent = `${target}%`;
+      indicatorValue.textContent = String(currentTarget);
       card.classList.add("is-fluid-ready");
     }
 
@@ -341,6 +344,7 @@ function initFluidProgressMeters() {
       }
 
       value.textContent = "0%";
+      indicatorValue.textContent = "0";
       setFluidPosition(trackStart);
 
       let position = trackStart;
@@ -361,7 +365,9 @@ function initFluidProgressMeters() {
         position += velocity * delta;
 
         setFluidPosition(position);
-        value.textContent = `${Math.round(target * Math.min(1, Math.max(0, (position - trackStart) / (targetX - trackStart))))}%`;
+        const currentValue = Math.round(target * Math.min(1, Math.max(0, (position - trackStart) / (targetX - trackStart))));
+        value.textContent = `${currentValue}%`;
+        indicatorValue.textContent = String(Math.round(currentTarget * Math.min(1, currentValue / target)));
 
         if (elapsed < 4.8 && (Math.abs(distance) > .45 || Math.abs(velocity) > .45)) {
           requestAnimationFrame(frame);
