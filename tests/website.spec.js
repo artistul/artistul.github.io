@@ -125,20 +125,31 @@ test("reference-led versions and project stages render", async ({ page }) => {
   const mobileOperatorGallery = await page.evaluate(() => {
     const gallery = document.querySelector(".operator-gallery");
     const images = [...gallery.querySelectorAll("img")];
+    const boxes = images.map((image) => image.getBoundingClientRect());
+    const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
     return {
       imageCount: gallery.querySelectorAll("img").length,
       allVisible: images.every((image) => {
         const box = image.getBoundingClientRect();
         return image.naturalWidth > 0 && box.width > 0 && box.height > 0 && getComputedStyle(image).display !== "none";
       }),
-      columns: getComputedStyle(gallery).gridTemplateColumns.split(" ").length
+      sideScreensOverlapLead: overlaps(boxes[0], boxes[1]) && overlaps(boxes[1], boxes[2]),
+      leadScreenIsFront: Number(getComputedStyle(images[1]).zIndex) > Number(getComputedStyle(images[0]).zIndex)
     };
   });
   expect(mobileOperatorGallery).toEqual({
     imageCount: 3,
     allVisible: true,
-    columns: 1
+    sideScreensOverlapLead: true,
+    leadScreenIsFront: true
   });
+  const mobileHeadingLineHeights = await page.locator(".panel-hero h1, .project-copy h2").evaluateAll((headings) =>
+    headings.map((heading) => {
+      const style = getComputedStyle(heading);
+      return Number.parseFloat(style.lineHeight) / Number.parseFloat(style.fontSize);
+    })
+  );
+  expect(mobileHeadingLineHeights.every((ratio) => ratio >= 0.91)).toBe(true);
 });
 
 test("proof fluid meters and updated control copy render", async ({ page }) => {

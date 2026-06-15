@@ -1314,6 +1314,12 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
   }
   .panel-hero { min-height: 48svh; padding-top: calc(var(--header-h) + 46px); padding-bottom: 46px; }
   .panel-hero h1, .proof-hero h1 { font-size: var(--type-display); }
+  .panel-hero h1, .proof-hero h1,
+  .home-statement h2, .route-heading h2, .home-close h2, .viewer-copy h2, .team-principle blockquote, .honesty-block h2,
+  .collaboration-cta h2, .version-timeline .version-copy h2, .project-ledger .project-copy h2,
+  .proof-feature h2, .team-member h2, .link-group h2 {
+    line-height: .92;
+  }
   .home-statement h2, .route-heading h2, .home-close h2, .viewer-copy h2, .team-principle blockquote, .honesty-block h2,
   .collaboration-cta h2 { font-size: var(--type-section); }
   .route-steps button { min-height: 150px; }
@@ -1596,19 +1602,39 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
     margin-top: 14px;
   }
   .project-ledger .operator-gallery.project-media-frame {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 18px;
-    height: auto;
-    min-height: 0;
-    padding: 22px;
-    overflow: visible;
+    display: block;
+    height: 430px;
+    min-height: 430px;
+    padding: 0;
+    overflow: hidden;
   }
   .project-ledger .operator-gallery.project-media-frame img {
-    width: 100%;
+    position: absolute;
+    top: 34px;
+    width: 52%;
+    height: 356px;
     max-height: none;
+    object-fit: contain;
+    background: #080808;
+  }
+  .project-ledger .operator-gallery.project-media-frame img:nth-child(1) {
+    left: 5%;
+    z-index: 2;
+    transform: rotate(-9deg) translateY(18px);
+  }
+  .project-ledger .operator-gallery.project-media-frame img:nth-child(2) {
+    left: 24%;
+    z-index: 4;
     transform: none;
   }
+  .project-ledger .operator-gallery.project-media-frame img:nth-child(3) {
+    right: 5%;
+    z-index: 2;
+    transform: rotate(9deg) translateY(18px);
+  }
+  .project-operator:hover .operator-gallery img:nth-child(1) { transform: rotate(-9deg) translateY(18px); }
+  .project-operator:hover .operator-gallery img:nth-child(2) { transform: none; }
+  .project-operator:hover .operator-gallery img:nth-child(3) { transform: rotate(9deg) translateY(18px); }
   .project-entry .board-scene .board-main { inset: 8% 4% 12%; width: 92%; height: 80%; }
   .scene-label-b { display: none; }
   .scene-caption { right: 11px; bottom: 10px; font-size: 7px; }
