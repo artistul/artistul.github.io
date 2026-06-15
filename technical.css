@@ -133,7 +133,7 @@ main::before {
 .doc-hero-copy h1 {
   max-width: 850px;
   margin: 0;
-  font-family: "InFlux Display", "Arial Narrow", "Roboto Condensed", "sans-serif-condensed", sans-serif;
+  font-family: Impact, "Arial Narrow", sans-serif;
   font-size: var(--doc-display);
   font-weight: 500;
   letter-spacing: -.025em;
@@ -244,7 +244,7 @@ main::before {
 .doc-section h2, .doc-section h3, .doc-section p, .doc-section ul, .doc-section dl { max-width: 860px; }
 .doc-section h2 {
   margin: 0 0 22px;
-  font-family: "InFlux Display", "Arial Narrow", "Roboto Condensed", "sans-serif-condensed", sans-serif;
+  font-family: Impact, "Arial Narrow", sans-serif;
   font-size: clamp(32px, 4.4vw, 50px);
   font-weight: 500;
   letter-spacing: -.015em;
@@ -286,6 +286,9 @@ footer span:first-child { color: var(--text); font-weight: 900; }
 .reveal.is-visible { transform: none; }
 
 @media (max-width: 980px) {
+  .doc-hero-copy h1, .doc-section h2 {
+    font-family: "InFlux Display", "Arial Narrow", "Roboto Condensed", "sans-serif-condensed", sans-serif;
+  }
   .nav-links { display: none; }
   .doc-hero, .doc-shell { grid-template-columns: 1fr; }
   .doc-toc { position: static; max-height: none; overflow: visible; }

@@ -48,6 +48,27 @@ test("mobile hero essentials fit a Xiaomi-sized opening viewport", async ({ page
   });
 });
 
+test("display typography and hero machine alignment adapt by device", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/index.html");
+
+  const desktopState = await page.evaluate(() => {
+    const artifact = document.querySelector(".hero-artifact").getBoundingClientRect();
+    const machine = document.querySelector(".hero-artifact img").getBoundingClientRect();
+    return {
+      fontFamily: getComputedStyle(document.querySelector(".home-hero h1")).fontFamily,
+      centerDelta: Math.round(Math.abs((artifact.left + artifact.width / 2) - (machine.left + machine.width / 2)))
+    };
+  });
+
+  expect(desktopState.fontFamily).toContain("Impact");
+  expect(desktopState.centerDelta).toBeLessThanOrEqual(2);
+
+  await page.setViewportSize({ width: 407, height: 812 });
+  const mobileFont = await page.locator(".home-hero h1").evaluate((element) => getComputedStyle(element).fontFamily);
+  expect(mobileFont).toContain("InFlux Display");
+});
+
 test("hidden media and 3D load only when requested", async ({ page }) => {
   await page.goto("/index.html");
   await expect(page.locator("model-viewer")).toHaveCount(0);

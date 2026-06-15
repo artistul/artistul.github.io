@@ -192,7 +192,7 @@ main, footer { position: relative; z-index: var(--z-content); }
 }
 @keyframes pulse { 50% { opacity: .35; transform: scale(.72); } }
 h1, h2 {
-  font-family: "InFlux Display", "Arial Narrow", "Roboto Condensed", "sans-serif-condensed", sans-serif;
+  font-family: Impact, "Arial Narrow", sans-serif;
   font-weight: 500;
   letter-spacing: -.025em;
   text-transform: uppercase;
@@ -236,22 +236,23 @@ h1, h2 {
 .hero-artifact::before {
   content: "";
   position: absolute;
-  inset: 7% 0 8% 12%;
+  inset: 7% 0 8%;
   border: 1px solid rgba(236,23,44,.6);
   clip-path: polygon(8% 0, 100% 0, 100% 88%, 91% 100%, 0 100%, 0 10%);
 }
 .hero-artifact::after {
   content: "";
   position: absolute;
-  inset: 11% -10% 2% 20%;
+  inset: 11% 0 2%;
   z-index: -1;
   background: repeating-linear-gradient(0deg, transparent 0 11px, rgba(255,255,255,.04) 12px);
 }
 .hero-artifact img {
-  width: 116%;
+  position: relative;
+  z-index: 1;
+  width: 126%;
   max-width: none;
   filter: brightness(1.4) contrast(1.08) drop-shadow(0 45px 40px rgba(0,0,0,.75));
-  transform: translateX(-3%);
 }
 .artifact-coordinates, .artifact-caption {
   position: absolute;
@@ -264,11 +265,11 @@ h1, h2 {
   letter-spacing: .16em;
   text-transform: uppercase;
 }
-.artifact-coordinates { top: 10%; right: 3%; left: 15%; color: var(--muted); }
+.artifact-coordinates { top: 10%; right: 4%; left: 4%; color: var(--muted); }
 .artifact-caption {
   right: 4%;
   bottom: 10%;
-  left: 15%;
+  left: 4%;
   align-items: flex-end;
   border-top: 1px solid var(--line);
   padding-top: 10px;
@@ -965,6 +966,9 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
 
 @media (max-width: 900px) {
   :root { --header-h: 70px; }
+  h1, h2 {
+    font-family: "InFlux Display", "Arial Narrow", "Roboto Condensed", "sans-serif-condensed", sans-serif;
+  }
   .site-header { grid-template-columns: 1fr auto; }
   .menu-toggle {
     display: grid;
@@ -1029,10 +1033,10 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
   .home-hero h1 { font-size: clamp(48px, 13.2vw, 64px); }
   .home-hero .hero-lede { margin-bottom: 0; }
   .home-hero .action-row { margin-top: 24px; }
-  .hero-artifact { min-height: 330px; margin: -28px -25px 0; }
-  .hero-artifact img { width: 128%; }
+  .hero-artifact { min-height: 330px; margin: -12px 0 0; }
+  .hero-artifact img { width: 126%; }
   .artifact-coordinates { display: none; }
-  .artifact-caption { right: 12%; left: 15%; }
+  .artifact-caption { right: 4%; left: 4%; }
   .proof-stamp { margin-top: -20px; }
   .status-strip, .proof-facts { width: calc(100% - 32px); grid-template-columns: 1fr; }
   .status-strip div, .proof-facts article { border-right: 0; border-bottom: 1px solid var(--line); }
