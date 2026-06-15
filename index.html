@@ -5,33 +5,87 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description"
-    content="InFlux Origin is a public project hub for a desktop injection molding platform, its evidence, software, team, and future direction." />
+    content="InFlux Origin is a desktop injection molding machine prototype for small-part thermoplastic manufacturing, rapid resin tooling, process validation, and engineering education." />
+  <meta name="author" content="Volta Circuits" />
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
   <meta name="theme-color" content="#050505" />
   <link rel="canonical" href="https://influxorigin.ro/" />
+  <link rel="alternate" type="text/plain" href="https://influxorigin.ro/llms.txt" title="InFlux Origin AI overview" />
+  <link rel="alternate" type="application/json" href="https://influxorigin.ro/ai-context.json"
+    title="InFlux Origin structured project context" />
   <meta property="og:title" content="InFlux Origin | Desktop manufacturing platform" />
-  <meta property="og:description" content="An integrated desktop injection molding prototype in active calibration." />
-  <meta property="og:image" content="assets/machine-origin-render.png" />
+  <meta property="og:description"
+    content="A desktop injection molding machine prototype integrating mechanics, thermal control, firmware, operator software, and rapid resin tooling." />
+  <meta property="og:image" content="https://influxorigin.ro/assets/machine-origin-render.png" />
+  <meta property="og:image:alt" content="InFlux Origin MK1 desktop injection molding machine prototype" />
+  <meta property="og:site_name" content="InFlux Origin" />
+  <meta property="og:locale" content="en_US" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://influxorigin.ro/" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="InFlux Origin | Desktop manufacturing platform" />
-  <meta name="twitter:description" content="An integrated desktop injection molding prototype in active calibration." />
-  <meta name="twitter:image" content="assets/machine-origin-render.png" />
-  <title>InFlux Origin | Project Hub</title>
+  <meta name="twitter:title" content="Desktop Injection Molding Machine | InFlux Origin" />
+  <meta name="twitter:description"
+    content="An integrated desktop injection molding prototype in active calibration." />
+  <meta name="twitter:image" content="https://influxorigin.ro/assets/machine-origin-render.png" />
+  <meta name="twitter:image:alt" content="InFlux Origin MK1 desktop injection molding machine prototype" />
+  <title>Desktop Injection Molding Machine | InFlux Origin</title>
   <link rel="icon" href="assets/logo-mark.webp" />
   <link rel="stylesheet" href="styles.css?v=2026-06-15-mobile-display-v8" />
   <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Product",
-        "name": "InFlux Origin MK1",
-        "description": "A supervised desktop injection molding prototype integrating mechanics, thermal control, firmware, operator software, and rapid resin tooling.",
-        "url": "https://influxorigin.ro/",
-        "image": "https://influxorigin.ro/assets/machine-origin-render.png",
-        "brand": { "@type": "Brand", "name": "InFlux Origin" },
-        "manufacturer": { "@type": "Organization", "name": "Volta Circuits" },
-        "productionDate": "2026",
-        "category": "Desktop injection molding prototype"
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://influxorigin.ro/#organization",
+            "name": "Volta Circuits",
+            "url": "https://influxorigin.ro/",
+            "sameAs": ["https://github.com/artistul/Influx"]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://influxorigin.ro/#website",
+            "url": "https://influxorigin.ro/",
+            "name": "InFlux Origin",
+            "description": "Public engineering hub for the InFlux Origin desktop injection molding platform.",
+            "publisher": { "@id": "https://influxorigin.ro/#organization" },
+            "inLanguage": "en"
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://influxorigin.ro/#webpage",
+            "url": "https://influxorigin.ro/",
+            "name": "Desktop Injection Molding Machine | InFlux Origin",
+            "description": "A desktop injection molding machine prototype for small-part thermoplastic manufacturing, rapid resin tooling, and process validation.",
+            "isPartOf": { "@id": "https://influxorigin.ro/#website" },
+            "about": { "@id": "https://influxorigin.ro/#product" },
+            "primaryImageOfPage": { "@id": "https://influxorigin.ro/#primaryimage" },
+            "inLanguage": "en"
+          },
+          {
+            "@type": "ImageObject",
+            "@id": "https://influxorigin.ro/#primaryimage",
+            "url": "https://influxorigin.ro/assets/machine-origin-render.png",
+            "contentUrl": "https://influxorigin.ro/assets/machine-origin-render.png",
+            "caption": "InFlux Origin MK1 desktop injection molding machine prototype"
+          },
+          {
+            "@type": "Product",
+            "@id": "https://influxorigin.ro/#product",
+            "name": "InFlux Origin MK1",
+            "description": "A supervised desktop injection molding machine prototype integrating mechanics, thermal control, firmware, operator software, and rapid resin tooling.",
+            "url": "https://influxorigin.ro/",
+            "image": { "@id": "https://influxorigin.ro/#primaryimage" },
+            "brand": { "@type": "Brand", "name": "InFlux Origin" },
+            "manufacturer": { "@id": "https://influxorigin.ro/#organization" },
+            "productionDate": "2026",
+            "category": "Desktop injection molding machine prototype",
+            "subjectOf": [
+              { "@type": "TechnicalArticle", "url": "https://influxorigin.ro/technical.html" },
+              { "@type": "DigitalDocument", "url": "https://influxorigin.ro/assets/influx-origin-technical-notebook.pdf" }
+            ]
+          }
+        ]
       }
     </script>
   <script>document.documentElement.classList.add("js");</script>

@@ -2,4 +2,9 @@ User-agent: *
 Allow: /
 Disallow: /output/
 
+# Machine-readable project context for search systems and AI agents:
+# https://influxorigin.ro/llms.txt
+# https://influxorigin.ro/llms-full.txt
+# https://influxorigin.ro/ai-context.json
+
 Sitemap: https://influxorigin.ro/sitemap.xml

@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "canonical_url": "https://influxorigin.ro/",
+  "name": "InFlux Origin MK1",
+  "alternate_names": [
+    "InFlux Origin",
+    "Origin MK1"
+  ],
+  "entity_type": "desktop injection molding machine prototype",
+  "publisher": {
+    "name": "Volta Circuits",
+    "url": "https://influxorigin.ro/"
+  },
+  "status": "integrated prototype in active calibration",
+  "summary": "A supervised desktop injection molding machine prototype integrating mechanics, thermal control, Nucleo firmware, an ESP32-C6 communication bridge, Android operator software, and experimental rapid resin tooling.",
+  "intended_uses": [
+    "process learning",
+    "functional validation",
+    "engineering education",
+    "supervised small-part thermoplastic experimentation"
+  ],
+  "system": {
+    "machine_controller": "NUCLEO-H753ZI",
+    "communication_bridge": "ESP32-C6",
+    "operator_interface": "Android InFlux Operator application",
+    "thermal_sensing": "multiple K-type thermocouples",
+    "tooling_direction": "3D-printed photopolymer resin molds with controlled water cooling"
+  },
+  "confirmed_evidence": [
+    "A first injected part has been produced.",
+    "Major mechanical, electrical, firmware, and operator subsystems have been integrated.",
+    "Thermal behavior has been measured with logged sensors and a thermal camera.",
+    "A dedicated Origin motherboard has been designed in KiCad."
+  ],
+  "unproven_or_incomplete": [
+    "stable long-run repeatability",
+    "long-run resin tooling life",
+    "fully tuned filling, holding, venting, and ejection",
+    "final enclosure safety",
+    "production-grade electrical integration",
+    "validated process windows across multiple material families",
+    "certification"
+  ],
+  "team": [
+    {
+      "name": "Stefan Tonegari",
+      "role": "Engineering lead"
+    },
+    {
+      "name": "Fabian Volintiru",
+      "role": "Team and business lead"
+    },
+    {
+      "name": "Pintilei David",
+      "role": "Simulation and analysis lead"
+    }
+  ],
+  "authoritative_sources": [
+    {
+      "name": "Project hub",
+      "url": "https://influxorigin.ro/"
+    },
+    {
+      "name": "Technical dossier",
+      "url": "https://influxorigin.ro/technical.html"
+    },
+    {
+      "name": "Technical notebook PDF",
+      "url": "https://influxorigin.ro/assets/influx-origin-technical-notebook.pdf"
+    },
+    {
+      "name": "Public GitHub repository",
+      "url": "https://github.com/artistul/Influx"
+    }
+  ],
+  "citation_guidance": "Describe InFlux Origin MK1 as a supervised prototype in active calibration. Do not imply certification, production readiness, stable long-run repeatability, or proven resin-tool life.",
+  "last_updated": "2026-06-15"
+}

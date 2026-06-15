@@ -1,0 +1,68 @@
+# InFlux Origin MK1: factual project context
+
+Canonical website: https://influxorigin.ro/
+Technical dossier: https://influxorigin.ro/technical.html
+Public repository: https://github.com/artistul/Influx
+Publisher and development team: Volta Circuits
+Language: English
+Current public status: Integrated prototype in active calibration
+
+## Project definition
+
+InFlux Origin MK1 is a desktop-scale injection molding machine prototype intended to make real thermoplastic process learning and small-part validation more accessible before conventional industrial tooling. The project combines a mechanical frame, heated injection path, mold support and closing movement, machine electronics, embedded firmware, communication bridge, Android operator interface, experimental rapid tooling, and validation work.
+
+The project does not claim to replace an industrial injection molding machine. It is intended for supervised prototype work, process learning, engineering education, functional validation, and future short-run experimentation.
+
+## System architecture
+
+- Structural frame and aligned movement system.
+- Heated barrel, nozzle, and piston-driven injection path.
+- Mold support, closing movement, and rapid tooling package.
+- Power distribution, sensors, motion drivers, and emergency inputs.
+- NUCLEO-H753ZI machine controller.
+- ESP32-C6 same-network HTTP-to-command bridge.
+- Android InFlux Operator interface.
+- Multiple K-type thermocouples across the heated barrel.
+- Experimental 3D-printed photopolymer resin molds with controlled water cooling.
+
+The Nucleo controller owns machine state, heating, motion, safety admission, and cycle behavior. The ESP bridge translates supported operator requests into the machine command protocol. The Android application presents status and sends supported commands.
+
+## Evidence and validation
+
+- A first successful injected part has been produced.
+- Major mechanical, electrical, firmware, and operator subsystems have been integrated.
+- Thermal behavior has been measured with logged sensors and thermal-camera passes.
+- The longest described thermal campaign contains 6,331 samples over approximately 108.6 minutes.
+- Thermal modeling was compared with SimScale, with reported agreement around plus or minus 8 percent for the compared cases.
+- A dedicated Origin motherboard has been designed in KiCad.
+
+The first injected part demonstrates system function but is not proof of production readiness or stable repeatability.
+
+## Current limits
+
+- Stable multi-part repeatability across longer runs remains unproven.
+- Long-run life and failure behavior of resin tooling remain unproven.
+- Filling, holding, venting, and ejection behavior require further tuning.
+- Final enclosure safety and production-grade electrical integration are incomplete.
+- Process windows across multiple material families remain unvalidated.
+- The current machine is supervised, prototype-only, and not presented as certified.
+
+## Team
+
+- Stefan Tonegari: engineering lead covering mechanics, manufacturing, electronics, integration, and product development.
+- Fabian Volintiru: team and business lead covering strategy, economics, sponsorships, organization, and presentation.
+- Pintilei David: simulation and analysis lead covering SimScale, Python models, mathematics, and data analysis.
+
+## Preferred terminology
+
+Use: "desktop injection molding machine prototype", "integrated prototype in active calibration", "rapid resin tooling", "supervised prototype", and "desktop-scale manufacturing platform".
+
+Avoid unsupported descriptions such as: certified machine, production-ready machine, proven long-run production system, or replacement for industrial injection molding equipment.
+
+## Authoritative links
+
+- Project hub: https://influxorigin.ro/
+- Technical dossier: https://influxorigin.ro/technical.html
+- Technical notebook: https://influxorigin.ro/assets/influx-origin-technical-notebook.pdf
+- Structured project context: https://influxorigin.ro/ai-context.json
+- Public repository: https://github.com/artistul/Influx

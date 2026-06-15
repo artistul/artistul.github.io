@@ -1,6 +1,6 @@
 const HUB = {
   tabs: {
-    home: { title: "InFlux Origin | Project Hub" },
+    home: { title: "Desktop Injection Molding Machine | InFlux Origin" },
     versions: { title: "Machine Versions | InFlux Origin" },
     projects: { title: "InFlux Ecosystem | InFlux Origin" },
     team: { title: "Team | InFlux Origin" },

@@ -6,6 +6,11 @@ $technical = [IO.File]::ReadAllText((Join-Path $root "technical.html"))
 $styles = [IO.File]::ReadAllText((Join-Path $root "styles.css"))
 $technicalStyles = [IO.File]::ReadAllText((Join-Path $root "technical.css"))
 $script = [IO.File]::ReadAllText((Join-Path $root "script.js"))
+$robots = [IO.File]::ReadAllText((Join-Path $root "robots.txt"))
+$sitemap = [IO.File]::ReadAllText((Join-Path $root "sitemap.xml"))
+$llms = [IO.File]::ReadAllText((Join-Path $root "llms.txt"))
+$llmsFull = [IO.File]::ReadAllText((Join-Path $root "llms-full.txt"))
+$aiContext = [IO.File]::ReadAllText((Join-Path $root "ai-context.json"))
 
 $failures = [System.Collections.Generic.List[string]]::new()
 
@@ -46,11 +51,27 @@ Assert-Website ($index -match '<span>Three levels</span> of maturity' -and $inde
 Assert-Website ("$index`n$script" -notmatch 'STEP.+GLB' -and $index -notmatch 'Orbit and zoom') "redundant 3D micro-label copy is still published"
 Assert-Website (Test-Path (Join-Path $root "robots.txt")) "robots.txt is missing"
 Assert-Website (Test-Path (Join-Path $root "sitemap.xml")) "sitemap.xml is missing"
+Assert-Website (Test-Path (Join-Path $root "llms.txt")) "llms.txt is missing"
+Assert-Website (Test-Path (Join-Path $root "llms-full.txt")) "llms-full.txt is missing"
+Assert-Website (Test-Path (Join-Path $root "ai-context.json")) "AI context JSON is missing"
+Assert-Website ($index -match 'rel="alternate" type="text/plain".+llms\.txt') "AI overview discovery link is missing"
+Assert-Website ($index -match 'rel="alternate" type="application/json".+ai-context\.json') "structured AI context discovery link is missing"
+Assert-Website ($robots -match 'llms\.txt' -and $robots -match 'ai-context\.json') "robots.txt does not advertise machine-readable context"
+Assert-Website ($llms -match 'Citation guidance' -and $llmsFull -match 'Current limits') "AI context guardrails are incomplete"
+Assert-Website ($aiContext -match '"citation_guidance"' -and $aiContext -match '"unproven_or_incomplete"') "structured AI context guardrails are incomplete"
+Assert-Website ($sitemap -notmatch '/machine/|/components/|/team/|/evidence/|/downloads/|/resources/') "redirect helper URLs must not be listed in the sitemap"
+Assert-Website ($sitemap -match 'https://influxorigin\.ro/technical\.html') "technical dossier is missing from sitemap"
 Assert-Website (Test-Path (Join-Path $root "assets\checksums.txt")) "artifact checksums are missing"
 Assert-Website ("$index`n$technical`n$script" -notmatch '[\u00C2\u00E2]') "mojibake characters detected"
 
 foreach ($route in @("machine", "components", "team", "evidence", "downloads", "resources")) {
-  Assert-Website (Test-Path (Join-Path $root "$route\index.html")) "route alias is missing: $route"
+  $routePath = Join-Path $root "$route\index.html"
+  Assert-Website (Test-Path $routePath) "route alias is missing: $route"
+  if (Test-Path $routePath) {
+    $routeHtml = [IO.File]::ReadAllText($routePath)
+    Assert-Website ($routeHtml -match 'noindex,follow') "redirect helper must be noindex: $route"
+    Assert-Website ($routeHtml -notmatch 'artistul\.github\.io') "stale GitHub Pages canonical remains: $route"
+  }
 }
 
 $assetReferences = [regex]::Matches("$index`n$technical", '(?:src|href|data-src)="([^"#?]+)"') |
