@@ -171,7 +171,22 @@ test("proof fluid meters and updated control copy render", async ({ page }) => {
   await expect.poll(() => page.locator(".proof-progress[data-progress]").evaluateAll((cards) =>
     cards.every((card) => card.classList.contains("is-fluid-ready"))
   ), { timeout: 8000 }).toBe(true);
+  const indicatorGaps = await page.locator(".fluid-meter").evaluateAll((meters) => meters.map((meter) => {
+    const arrow = meter.querySelector(".fluid-indicator i").getBoundingClientRect();
+    const canvas = meter.querySelector(".fluid-canvas").getBoundingClientRect();
+    const outlineTop = canvas.top + canvas.height * (30 / 86);
+    return outlineTop - arrow.bottom;
+  }));
+  expect(indicatorGaps.every((gap) => Math.abs(gap - 4) < 0.75)).toBe(true);
   await expect(page.locator(".honesty-block")).toHaveScreenshot("proof-progress-stage.png");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileIndicatorGaps = await page.locator(".fluid-meter").evaluateAll((meters) => meters.map((meter) => {
+    const arrow = meter.querySelector(".fluid-indicator i").getBoundingClientRect();
+    const canvas = meter.querySelector(".fluid-canvas").getBoundingClientRect();
+    return canvas.top + canvas.height * (30 / 86) - arrow.bottom;
+  }));
+  expect(mobileIndicatorGaps.every((gap) => Math.abs(gap - 4) < 0.75)).toBe(true);
 });
 
 test("mobile dossier contents collapse and anchors clear the header", async ({ page }) => {

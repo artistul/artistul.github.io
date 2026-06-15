@@ -705,6 +705,7 @@ model-viewer { width: 100%; height: 650px; --poster-color: transparent; }
 }
 
 .fluid-meter {
+  --fluid-canvas-height: clamp(42px, 4.25vw, 64px);
   position: relative;
   min-width: 0;
   padding-top: 34px;
@@ -713,7 +714,6 @@ model-viewer { width: 100%; height: 650px; --poster-color: transparent; }
 .fluid-indicator,
 .fluid-goal {
   position: absolute;
-  top: 0;
   z-index: 4;
   font-family: Consolas, monospace;
   font-size: 10px;
@@ -726,6 +726,8 @@ model-viewer { width: 100%; height: 650px; --poster-color: transparent; }
 }
 
 .fluid-indicator {
+  top: auto;
+  bottom: calc((var(--fluid-canvas-height) * 56 / 86) + 4px);
   left: 0;
   display: grid;
   justify-items: center;
@@ -755,6 +757,7 @@ model-viewer { width: 100%; height: 650px; --poster-color: transparent; }
 }
 
 .fluid-goal {
+  top: 0;
   right: 0;
   max-width: 52%;
   overflow: hidden;
@@ -766,7 +769,7 @@ model-viewer { width: 100%; height: 650px; --poster-color: transparent; }
 .fluid-canvas {
   display: block;
   width: 100%;
-  height: clamp(42px, 4.25vw, 64px);
+  height: var(--fluid-canvas-height);
   overflow: visible;
   filter: drop-shadow(0 0 10px rgba(236, 23, 44, .15));
 }
@@ -1120,14 +1123,13 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
 
 
 @media (max-width: 620px) {
-  .fluid-meter { padding-top: 50px; }
+  .fluid-meter { --fluid-canvas-height: 52px; padding-top: 50px; }
   .fluid-goal {
     top: 0;
     max-width: 100%;
     font-size: 9px;
   }
   .fluid-indicator {
-    top: 22px;
     font-size: 9px;
   }
   .fluid-indicator i {
@@ -1136,7 +1138,6 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
     border-right-width: 6px;
     border-top-width: 8px;
   }
-  .fluid-canvas { height: 52px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
