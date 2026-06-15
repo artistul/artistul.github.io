@@ -3,6 +3,7 @@ const { test, expect } = require("@playwright/test");
 const viewports = [
   { name: "small-mobile", width: 320, height: 568 },
   { name: "mobile", width: 390, height: 844 },
+  { name: "xiaomi-13t-pro", width: 407, height: 812 },
   { name: "tablet", width: 768, height: 1024 },
   { name: "desktop", width: 1440, height: 900 }
 ];
@@ -15,6 +16,34 @@ for (const viewport of viewports) {
     await expect(page).toHaveScreenshot(`home-${viewport.name}.png`, { fullPage: false });
   });
 }
+
+test("mobile hero essentials fit a Xiaomi-sized opening viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 407, height: 812 });
+  await page.goto("/index.html");
+
+  const heroFit = await page.evaluate(() => {
+    const viewportWidth = document.documentElement.clientWidth;
+    const essentials = [
+      document.querySelector(".signal-label"),
+      document.querySelector(".home-hero h1"),
+      document.querySelector(".hero-lede"),
+      document.querySelector(".action-row")
+    ];
+    const boxes = essentials.map((element) => element.getBoundingClientRect());
+
+    return {
+      allInsideWidth: boxes.every((box) => box.left >= 0 && box.right <= viewportWidth),
+      actionsInsideOpeningViewport: boxes.at(-1).bottom <= window.innerHeight,
+      documentFitsWidth: document.documentElement.scrollWidth === viewportWidth
+    };
+  });
+
+  expect(heroFit).toEqual({
+    allInsideWidth: true,
+    actionsInsideOpeningViewport: true,
+    documentFitsWidth: true
+  });
+});
 
 test("hidden media and 3D load only when requested", async ({ page }) => {
   await page.goto("/index.html");
