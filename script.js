@@ -250,14 +250,26 @@ activateTab(currentTabFromUrl(), { fromHistory: true, instant: true, keepScroll:
 function initFluidProgressMeters() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  document.querySelectorAll(".proof-progress[data-progress]").forEach((card, cardIndex) => {
+  document.querySelectorAll(".proof-progress[data-current][data-final]").forEach((card, cardIndex) => {
     if (card.dataset.fluidInitialized === "true") return;
     card.dataset.fluidInitialized = "true";
 
-    const target = Math.min(100, Math.max(0, Number(card.dataset.progress) || 0));
-    const currentTarget = Math.max(0, Number(card.dataset.current) || target);
+    const currentTarget = Math.max(0, Number(card.dataset.current) || 0);
+    const finalTarget = Math.max(0, Number(card.dataset.final) || 0);
+    const startTarget = Math.max(0, Number(card.dataset.start) || 0);
+    const isFlipped = card.hasAttribute("data-flipped");
+    const target = isFlipped
+      ? startTarget > finalTarget
+        ? Math.min(100, Math.max(0, ((startTarget - currentTarget) / (startTarget - finalTarget)) * 100))
+        : 0
+      : finalTarget > 0
+        ? Math.min(100, (currentTarget / finalTarget) * 100)
+        : 0;
+    const unit = card.dataset.unit?.trim() || "";
     const value = card.querySelector(".proof-value");
     const indicatorValue = card.querySelector(".fluid-indicator b");
+    const goalValue = card.querySelector(".fluid-goal");
+    const meter = card.querySelector("[data-fluid-meter]");
     const accessible = card.querySelector(".fluid-progress-accessible");
     const gradient = card.querySelector("[data-fluid-gradient]");
     const main = card.querySelector("[data-fluid-main]");
@@ -270,12 +282,57 @@ function initFluidProgressMeters() {
       card.querySelector("[data-fluid-drop-c]")
     ];
 
-    if (!value || !indicatorValue || !accessible || !gradient || !main || !head || !lobeA || !lobeB || drops.some((drop) => !drop)) return;
+    if (!value || !indicatorValue || !goalValue || !meter || !accessible || !gradient || !main || !head || !lobeA || !lobeB || drops.some((drop) => !drop)) return;
+
+    const formatNumber = (number, maximumFractionDigits = 1) =>
+      new Intl.NumberFormat("en-US", { maximumFractionDigits }).format(number);
+    const formatMeasurement = (number) => {
+      const displayedUnit = number === 1 && unit.endsWith("s") ? unit.slice(0, -1) : unit;
+      if (unit === "%") return `${formatNumber(number)}%`;
+      if (/^[€$£¥]$/.test(unit)) return `${unit}${formatNumber(number)}`;
+      return `${formatNumber(number)}${displayedUnit ? ` ${displayedUnit}` : ""}`;
+    };
+    const formatPercentage = (number) => `${formatNumber(number)}%`;
+
+    value.textContent = formatPercentage(target);
+    indicatorValue.textContent = formatNumber(currentTarget);
+    goalValue.textContent = formatMeasurement(finalTarget);
+    accessible.setAttribute("aria-valuemax", "100");
+    accessible.setAttribute("aria-valuenow", String(target));
+    accessible.setAttribute("aria-valuetext", isFlipped
+      ? `${formatMeasurement(currentTarget)} reduced from ${formatMeasurement(startTarget)} toward ${formatMeasurement(finalTarget)} (${formatPercentage(target)})`
+      : `${formatMeasurement(currentTarget)} of ${formatMeasurement(finalTarget)} (${formatPercentage(target)})`);
+
+    const milestones = (card.dataset.milestones || "")
+      .split(",")
+      .map((milestone) => Number(milestone.trim()))
+      .filter((milestone) => Number.isFinite(milestone) && (
+        isFlipped
+          ? milestone > finalTarget && milestone < startTarget
+          : milestone > 0 && milestone < finalTarget
+      ))
+      .sort((a, b) => isFlipped ? b - a : a - b);
+    const milestoneLayer = document.createElement("div");
+    milestoneLayer.className = "fluid-milestones";
+    milestoneLayer.setAttribute("aria-label", "Milestones");
+    milestones.forEach((milestone) => {
+      const marker = document.createElement("span");
+      marker.className = "fluid-milestone";
+      const milestonePosition = isFlipped
+        ? ((startTarget - milestone) / (startTarget - finalTarget)) * 100
+        : (milestone / finalTarget) * 100;
+      const isPassed = isFlipped ? currentTarget <= milestone : currentTarget >= milestone;
+      marker.style.setProperty("--milestone-position", `${milestonePosition}%`);
+      marker.classList.toggle("is-passed", isPassed);
+      marker.title = `${formatMeasurement(milestone)} milestone${isPassed ? " passed" : ""}`;
+      marker.innerHTML = `<i aria-hidden="true"></i><b>${formatMeasurement(milestone)}</b>`;
+      milestoneLayer.append(marker);
+    });
+    meter.append(milestoneLayer);
 
     const markerPercent = Math.min(94, Math.max(6, target));
     card.style.setProperty("--fluid-progress", `${markerPercent}%`);
     card.style.setProperty("--fluid-live-progress", "0%");
-    accessible.setAttribute("aria-valuenow", String(target));
 
     const trackStart = 2;
     const trackWidth = 996;
@@ -328,8 +385,8 @@ function initFluidProgressMeters() {
 
     function finishFluid() {
       setFluidPosition(targetX);
-      value.textContent = `${target}%`;
-      indicatorValue.textContent = String(currentTarget);
+      value.textContent = formatPercentage(target);
+      indicatorValue.textContent = formatNumber(currentTarget);
       card.classList.add("is-fluid-ready");
     }
 
@@ -366,8 +423,8 @@ function initFluidProgressMeters() {
 
         setFluidPosition(position);
         const currentValue = Math.round(target * Math.min(1, Math.max(0, (position - trackStart) / (targetX - trackStart))));
-        value.textContent = `${currentValue}%`;
-        indicatorValue.textContent = String(Math.round(currentTarget * Math.min(1, currentValue / target)));
+        value.textContent = formatPercentage(currentValue);
+        indicatorValue.textContent = formatNumber(currentTarget * Math.min(1, target > 0 ? currentValue / target : 0));
 
         if (elapsed < 4.8 && (Math.abs(distance) > .45 || Math.abs(velocity) > .45)) {
           requestAnimationFrame(frame);

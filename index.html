@@ -30,7 +30,7 @@
   <meta name="twitter:image:alt" content="InFlux Origin MK1 desktop injection molding machine prototype" />
   <title>Desktop Injection Molding Machine | InFlux Origin</title>
   <link rel="icon" href="assets/logo-mark.webp" />
-  <link rel="stylesheet" href="styles.css?v=2026-06-15-proof-labels-v9" />
+  <link rel="stylesheet" href="styles.css?v=2026-06-15-calculated-meters-v2" />
   <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -217,43 +217,82 @@
     <section class="tab-panel" id="versions" data-panel="versions" role="tabpanel" aria-labelledby="tab-versions"
       tabindex="0">
       <header class="panel-hero reveal">
-        <h1 id="versions-title">One platform.<br /><span>Three levels</span> of maturity.</h1>
-        <p>Each version exists to remove a different kind of uncertainty.</p>
+        <h1 id="versions-title">From first lines<br />to a <span>working machine.</span></h1>
+        <p>InFlux developed through sketches, experiments, planning, and a complete MK1 prototype.</p>
       </header>
 
       <div class="version-timeline reveal">
         <article class="showcase-stage">
-          <div class="version-number">V0</div>
+          <div class="version-number">01</div>
           <div class="version-copy">
-            <span class="version-state">Proving the concept</span>
-            <h2>The First Prototype</h2>
+            <span class="version-state">First principles</span>
+            <h2>Sketches</h2>
             <p>
-              The project began with CAD models, motion tests, sensor calibration,
-              early firmware, and a complete plan for the first machine.
+              Before parts were ordered, the entire process was reduced to a hand-drawn system:
+              motion, heating, injection, cooling, sensing, and control.
             </p>
             <ul>
-              <li>Selecting and ordering the components</li>
-              <li>Bringing the first systems together</li>
-              <li>Setting the machine architecture</li>
+              <li>Map the full injection process</li>
+              <li>Identify every required subsystem</li>
+              <li>Turn an idea into an architecture</li>
             </ul>
           </div>
-          <img data-src="assets/machine-wireframe.jpg" alt="Early InFlux wireframe studies" loading="lazy"
+          <img class="version-diagram" data-src="assets/version-sketch-system.jpg"
+            alt="Original hand-drawn InFlux injection molding system sketch" loading="lazy" decoding="async" />
+        </article>
+
+        <article class="showcase-stage">
+          <div class="version-number">02</div>
+          <div class="version-copy">
+            <span class="version-state">Physical experiments</span>
+            <h2>The beginning of InFlux</h2>
+            <p>
+              Early mold designs and practical tests established what the machine needed to control.
+              These experiments turned broad assumptions into specific engineering problems.
+            </p>
+            <ul>
+              <li>Develop the first mold concepts</li>
+              <li>Test cooling and venting paths</li>
+              <li>Learn from physical limitations</li>
+            </ul>
+          </div>
+          <img data-src="assets/version-first-influx-logo.jpg"
+            alt="The first hand-drawn InFlux Origin MK1 logo on the cardboard prototype" loading="lazy"
+            decoding="async" />
+        </article>
+
+        <article class="showcase-stage">
+          <div class="version-number">03</div>
+          <div class="version-copy">
+            <span class="version-state">System definition</span>
+            <h2>Plan for MK1</h2>
+            <p>
+              The first complete machine plan brought the injection barrel, mold movement,
+              frame, electronics, and safety architecture into one buildable system.
+            </p>
+            <ul>
+              <li>Define the complete machine architecture</li>
+              <li>Select and order components</li>
+              <li>Prepare the integrated build</li>
+            </ul>
+          </div>
+          <img data-src="assets/machine-wireframe.jpg" alt="Early InFlux MK1 wireframe plan" loading="lazy"
             decoding="async" />
         </article>
 
         <article class="showcase-stage current-version">
-          <div class="version-number">MK1</div>
+          <div class="version-number">04</div>
           <div class="version-copy">
             <span class="version-state">Current working prototype</span>
-            <h2>Origin MK1</h2>
+            <h2>MK1</h2>
             <p>
-              Our first complete machine capable of producing real injected parts. Although the automations aren't
-              perfect, it gets the job done, and it certainly does it cheaper than industrial solutions.
+              The first complete InFlux machine can heat, move, inject, and produce real parts.
+              It is now being calibrated through repeated operation and measured evidence.
             </p>
             <ul>
-              <li>Desktop sized</li>
+              <li>Desktop-scale integrated machine</li>
               <li>Water-cooled resin and metal mold compatibility</li>
-              <li>Fully compatible with the Influx Operator app</li>
+              <li>Connected to the InFlux Operator app</li>
             </ul>
           </div>
           <img data-src="assets/machine-origin-render-640.webp"
@@ -263,19 +302,18 @@
         </article>
 
         <article class="showcase-stage">
-          <div class="version-number">NEXT UP</div>
+          <div class="version-number">05</div>
           <div class="version-copy">
             <span class="version-state">Future product direction</span>
-            <h2>Origin Mk 2</h2>
+            <h2>Next up</h2>
             <p>
-              The next version will focus on a fully automated and monitored process,
-              with water, molten plastic, and mold pressure monitoring. Designed for
-              continuous thrustworthy operation.
+              The next machine will turn the lessons from MK1 into a more automated,
+              monitored, enclosed, and repeatable product.
             </p>
             <ul>
               <li>Full machine enclosure</li>
               <li>Pressure sensing and temperature balancing</li>
-              <li>Printed molds lifetime improvements</li>
+              <li>Longer printed-mold life and continuous operation</li>
             </ul>
           </div>
           <img data-src="assets/packaging-concept.jpg" alt="InFlux packaging and product development concept"
@@ -521,24 +559,36 @@
         </div>
       </section>
 
+      <section class="proof-feature proof-feature-parts reveal">
+        <img class="evidence-portrait" data-src="assets/proof-56-parts.jpg"
+          alt="Box containing 56 parts injected by InFlux Origin MK1" loading="lazy" decoding="async" />
+        <div>
+          <p class="section-index">Evidence 04 / Repeatability</p>
+          <h2>56 parts. One mold. A measurable starting point.</h2>
+          <p>The box records the current mold-life result as physical output, not a projected percentage. Each part
+            adds evidence about repeatability, fill behavior, cooling, and mold durability.</p>
+          <p class="evidence-note">Current result: 56 injected parts from the active validation mold.</p>
+        </div>
+      </section>
+
       <section class="honesty-block reveal">
         <p class="section-index">Prototype status</p>
-        <h2>What is not proven yet.</h2>
+        <h2>What is not proven.<br> . . .yet</h2>
 
         <div class="proof-progress-list">
-          <article class="proof-progress" data-progress="42" data-current="56">
+          <article class="proof-progress" data-current="56" data-final="250" data-unit="cycles" data-milestones="25,50,100,200">
             <div>
               <h3>Mold life</h3>
-              <span class="proof-value">42%</span>
+              <span class="proof-value"></span>
             </div>
-            <p>Long-run resin mold durability across repeated cycles.</p>
+            <p>Resin mold durability across continuous, repeated cycles.</p>
 
             <div class="fluid-meter" data-fluid-meter>
               <span class="fluid-indicator" aria-hidden="true">
-                <b>56</b>
+                <b></b>
                 <i></i>
               </span>
-              <span class="fluid-goal" aria-hidden="true">500 cycles</span>
+              <span class="fluid-goal" aria-hidden="true"></span>
 
               <svg
                 class="fluid-canvas"
@@ -641,25 +691,25 @@
                 role="progressbar"
                 aria-label="Mold life validation"
                 aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow="42"
+                aria-valuemax="500"
+                aria-valuenow="56"
               ></div>
             </div>
           </article>
 
-          <article class="proof-progress" data-progress="58" data-current="58">
+          <article class="proof-progress" data-current="3" data-final="24" data-unit="hours" data-milestones="1,3,6,12">
             <div>
-              <h3>Multi-part repeatability</h3>
-              <span class="proof-value">58%</span>
+              <h3>Continuous running</h3>
+              <span class="proof-value"></span>
             </div>
             <p>Stable output quality across longer, controlled runs.</p>
 
             <div class="fluid-meter" data-fluid-meter>
               <span class="fluid-indicator" aria-hidden="true">
-                <b>58</b>
+                <b></b>
                 <i></i>
               </span>
-              <span class="fluid-goal" aria-hidden="true">100 parts</span>
+              <span class="fluid-goal" aria-hidden="true"></span>
 
               <svg
                 class="fluid-canvas"
@@ -760,7 +810,7 @@
               <div
                 class="fluid-progress-accessible"
                 role="progressbar"
-                aria-label="Multi-part repeatability validation"
+                aria-label="Continuous running validation"
                 aria-valuemin="0"
                 aria-valuemax="100"
                 aria-valuenow="58"
@@ -768,19 +818,19 @@
             </div>
           </article>
 
-          <article class="proof-progress" data-progress="35" data-current="35">
+          <article class="proof-progress" data-start="5000" data-current="4000" data-final="2500" data-unit="€" data-milestones="4500, 4000, 3500, 3000" data-flipped>
             <div>
-              <h3>Production readiness</h3>
-              <span class="proof-value">35%</span>
+              <h3>Price reduction</h3>
+              <span class="proof-value"></span>
             </div>
-            <p>Guarding, certification, and unattended-use validation.</p>
+            <p>Reducing the profitable selling cost as much as possible.</p>
 
             <div class="fluid-meter" data-fluid-meter>
               <span class="fluid-indicator" aria-hidden="true">
-                <b>35</b>
+                <b></b>
                 <i></i>
               </span>
-              <span class="fluid-goal" aria-hidden="true">100%</span>
+              <span class="fluid-goal" aria-hidden="true"></span>
 
               <svg
                 class="fluid-canvas"
@@ -889,19 +939,19 @@
             </div>
           </article>
 
-          <article class="proof-progress" data-progress="64" data-current="64">
+          <article class="proof-progress" data-start="45" data-current="32" data-final="25" data-unit="°C" data-milestones="40,35,30" data-flipped>
             <div>
-              <h3>Process calibration</h3>
-              <span class="proof-value">64%</span>
+              <h3>Max water temperature</h3>
+              <span class="proof-value"></span>
             </div>
-            <p>Venting, thermal insulation, fill behavior, and control tuning.</p>
+            <p>Maximum temperature the mold cooling water reaches during normal operation.</p>
 
             <div class="fluid-meter" data-fluid-meter>
               <span class="fluid-indicator" aria-hidden="true">
-                <b>64</b>
+                <b></b>
                 <i></i>
               </span>
-              <span class="fluid-goal" aria-hidden="true">100%</span>
+              <span class="fluid-goal" aria-hidden="true"></span>
 
               <svg
                 class="fluid-canvas"
@@ -1083,7 +1133,7 @@
     <p>Desktop injection molding platform / integrated prototype in active calibration.</p>
     <button class="back-top" type="button" data-top>Back to top ↑</button>
   </footer>
-  <script src="script.js?v=2026-06-15-fluid-labels-v4"></script>
+  <script src="script.js?v=2026-06-15-calculated-meters-v2"></script>
 </body>
 
 </html>

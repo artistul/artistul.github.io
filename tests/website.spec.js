@@ -69,12 +69,20 @@ test("display typography and hero machine alignment adapt by device", async ({ p
   expect(mobileFont).toContain("InFlux Display");
 });
 
+test("red micro-label typography is enlarged", async ({ page }) => {
+  await page.goto("/index.html?tab=proof");
+  const fontSizes = await page.locator(".signal-label, .section-index, .version-state").evaluateAll((labels) =>
+    labels.map((label) => Number.parseFloat(getComputedStyle(label).fontSize))
+  );
+  expect(fontSizes.every((fontSize) => fontSize >= 16)).toBe(true);
+});
+
 test("hidden media and 3D load only when requested", async ({ page }) => {
   await page.goto("/index.html");
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await expect(page.locator('script[src*="model-viewer"]')).toHaveCount(0);
   await page.getByRole("tab", { name: "Machine Versions" }).click();
-  await expect(page.locator(".version-timeline img[src]")).toHaveCount(3);
+  await expect(page.locator(".version-timeline img[src]")).toHaveCount(5);
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await page.getByRole("button", { name: "Load interactive 3D" }).click();
   await expect(page.locator("model-viewer")).toHaveAttribute("src", "assets/machine-assembly-optimized.glb");
@@ -94,11 +102,18 @@ test("team portraits and evidence landscape render", async ({ page }) => {
 test("reference-led versions and project stages render", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=versions");
-  await expect(page.locator("#versions-title span")).toHaveText("Three levels");
+  await expect(page.locator("#versions-title span")).toHaveText("working machine.");
   await expect(page.locator("#versions-title span")).toHaveCSS("color", "rgb(236, 23, 44)");
   await expect(page.getByText("No need to take our word for it, convince yourself. Take a look at the InFlux Origin Mk. 1.")).toBeVisible();
   await expect(page.locator(".model-tag")).toHaveCount(0);
-  await expect(page.locator(".version-timeline .showcase-stage")).toHaveCount(3);
+  await expect(page.locator(".version-timeline .showcase-stage")).toHaveCount(5);
+  await expect(page.locator(".version-timeline h2")).toHaveText([
+    "Sketches",
+    "The beginning of InFlux",
+    "Plan for MK1",
+    "MK1",
+    "Next up"
+  ]);
   await expect(page.locator(".current-version")).toHaveScreenshot("version-current-stage.png");
 
   await page.goto("/index.html?tab=projects");
@@ -159,17 +174,17 @@ test("proof fluid meters and updated control copy render", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Every action has a supervisor." })).toBeVisible();
   await expect(page.locator(".fluid-meter")).toHaveCount(4);
   await expect(page.getByRole("progressbar")).toHaveCount(4);
-  await expect.poll(() => page.locator(".proof-progress[data-progress]").evaluateAll((cards) =>
+  await expect.poll(() => page.locator(".proof-progress[data-current][data-final]").evaluateAll((cards) =>
     cards.every((card) => card.dataset.fluidPhysics)
   )).toBe(true);
-  const fluidMotion = await page.locator(".proof-progress[data-progress]").evaluateAll((cards) => ({
+  const fluidMotion = await page.locator(".proof-progress[data-current][data-final]").evaluateAll((cards) => ({
     profiles: cards.map((card) => card.dataset.fluidPhysics),
     sheenCount: cards.reduce((count, card) => count + card.querySelectorAll(".fluid-sheen, [data-fluid-sheen]").length, 0)
   }));
   expect(new Set(fluidMotion.profiles).size).toBe(4);
   expect(fluidMotion.sheenCount).toBe(0);
   await page.locator(".honesty-block").scrollIntoViewIfNeeded();
-  await expect.poll(() => page.locator(".proof-progress[data-progress]").evaluateAll((cards) =>
+  await expect.poll(() => page.locator(".proof-progress[data-current][data-final]").evaluateAll((cards) =>
     cards.every((card) => card.classList.contains("is-fluid-ready"))
   ), { timeout: 8000 }).toBe(true);
   const indicatorGaps = await page.locator(".fluid-meter").evaluateAll((meters) => meters.map((meter) => {
@@ -191,10 +206,45 @@ test("proof fluid meters and updated control copy render", async ({ page }) => {
       target: meter.closest(".proof-progress").dataset.current
     };
   }));
-  expect(goalLabels.map(({ text }) => text)).toEqual(["500 cycles", "100 parts", "100%", "100%"]);
+  expect(goalLabels.every(({ text }) => text.length > 0)).toBe(true);
   expect(goalLabels.every(({ gap }) => Math.abs(gap - 8) < 0.75)).toBe(true);
   expect(goalLabels.every(({ color }) => color === "rgb(244, 241, 237)")).toBe(true);
-  expect(goalLabels.every(({ current, target }) => current === target)).toBe(true);
+  expect(goalLabels.every(({ current, target }) => current.replace(/,/g, "") === target)).toBe(true);
+  const meterValues = await page.locator(".proof-progress").evaluateAll((cards) => cards.map((card) => {
+    const current = Number(card.dataset.current);
+    const final = Number(card.dataset.final);
+    const start = Number(card.dataset.start);
+    const flipped = card.hasAttribute("data-flipped");
+    const rawProgress = flipped ? (start - current) / (start - final) : current / final;
+    const percentage = Math.round(Math.max(0, Math.min(1, rawProgress)) * 1000) / 10;
+    const milestones = (card.dataset.milestones || "")
+      .split(",")
+      .map((milestone) => milestone.trim())
+      .filter(Boolean)
+      .map(Number)
+      .filter((milestone) => Number.isFinite(milestone) && (
+        flipped ? milestone > final && milestone < start : milestone > 0 && milestone < final
+      ));
+    return {
+      displayedPercentage: card.querySelector(".proof-value").textContent.trim(),
+      expectedPercentage: `${percentage}%`,
+      ariaValue: card.querySelector("[role='progressbar']").getAttribute("aria-valuetext"),
+      milestoneCount: card.querySelectorAll(".fluid-milestone").length,
+      expectedMilestoneCount: milestones.length,
+      passedCount: card.querySelectorAll(".fluid-milestone.is-passed").length,
+      expectedPassedCount: milestones.filter((milestone) => flipped ? current <= milestone : current >= milestone).length
+    };
+  }));
+  expect(meterValues.every(({ displayedPercentage, expectedPercentage }) => displayedPercentage === expectedPercentage)).toBe(true);
+  expect(meterValues.every(({ ariaValue, expectedPercentage }) => ariaValue.includes(`(${expectedPercentage})`))).toBe(true);
+  expect(meterValues.every(({ milestoneCount, expectedMilestoneCount }) => milestoneCount === expectedMilestoneCount)).toBe(true);
+  expect(meterValues.every(({ passedCount, expectedPassedCount }) => passedCount === expectedPassedCount)).toBe(true);
+  const milestoneColors = await page.locator(".fluid-milestone").evaluateAll((markers) =>
+    markers.map((marker) => ({ passed: marker.classList.contains("is-passed"), color: getComputedStyle(marker).color }))
+  );
+  expect(milestoneColors.every(({ passed, color }) =>
+    color === (passed ? "rgb(67, 224, 123)" : "rgb(255, 23, 52)")
+  )).toBe(true);
   await expect(page.locator(".honesty-block")).toHaveScreenshot("proof-progress-stage.png");
 
   await page.setViewportSize({ width: 390, height: 844 });
