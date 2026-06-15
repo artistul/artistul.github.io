@@ -12,8 +12,8 @@ const HUB = {
     {
       name: "InFlux Operator APK",
       category: "Prototype operator artifact",
-      description: "Supervised prototype operator build. Not a general-purpose machine controller.",
-      meta: "Android APK / 19.79 MB / bundled June 2026",
+      description: "Latest version of the Influx Origin control app.",
+      meta: "Android APK / 19.79 MB / June 2026",
       href: "assets/influx-operator-latest.apk",
       download: true
     },
@@ -29,7 +29,7 @@ const HUB = {
       name: "Extended Technical Dossier",
       category: "Public documentation / web",
       description: "Long-form documentation covering mechanics, control, validation, limits, and next steps.",
-      meta: "Web dossier / current public edition",
+      meta: "Web technical notebook",
       href: "technical.html",
       download: false
     },
@@ -281,7 +281,7 @@ function renderDownloads() {
   list.innerHTML = HUB.downloads.map((file, index) => `
     <a class="download-entry" href="${file.href}" ${file.download ? "download" : ""}>
       <span class="file-index">${String(index + 1).padStart(2, "0")}</span>
-      <div><p class="section-index">${file.category}</p><h2>${file.name}</h2><small>${file.meta}</small></div>
+      <div><h2>${file.name}</h2><small>${file.meta}</small></div>
       <p>${file.description}</p>
       <span>↓</span>
     </a>`).join("");
