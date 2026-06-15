@@ -22,11 +22,7 @@ if ($branch -ne "main") {
   throw "Expected branch 'main', but the current branch is '$branch'."
 }
 
-Write-Host "`nRunning browser tests..." -ForegroundColor Cyan
-Invoke-Checked npm.cmd test
-
-Write-Host "`nRunning static website checks..." -ForegroundColor Cyan
-Invoke-Checked powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$repo\scripts\check-website.ps1"
+Invoke-Checked powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$repo\scripts\test-website-for-publish.ps1"
 
 Invoke-Checked git add --all
 git diff --cached --quiet
