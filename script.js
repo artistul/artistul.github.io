@@ -18,6 +18,14 @@ const HUB = {
       download: true
     },
     {
+      name: "InFlux Operator Legacy ONCS APK",
+      category: "Legacy operator artifact",
+      description: "Pre-redesign app build used for the ONCS presentation path. Kept for archival compatibility.",
+      meta: "Android APK / 21.43 MB / May 2026",
+      href: "assets/influx-operator-legacy-oncs.apk",
+      download: true
+    },
+    {
       name: "Technical Notebook",
       category: "Public documentation / PDF",
       description: "Ten-page public notebook covering the project, system, testing, and direction.",

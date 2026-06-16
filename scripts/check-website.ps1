@@ -42,7 +42,7 @@ Assert-Website ($technical -match 'Confirmed platform summary') "confirmed speci
 Assert-Website ($technical -match 'April 16, 2026') "validation evidence date is missing"
 Assert-Website ($index -match 'team-stefan\.webp' -and $index -match 'team-david\.webp') "published team portraits are missing"
 Assert-Website ($index -match 'motherboard-kicad-landscape\.webp') "Evidence 3 landscape asset is missing"
-Assert-Website ($index -match 'Every action has a supervisor' -and $index -match 'running an STM32') "Evidence 3 copy is stale"
+Assert-Website ($index -match 'settings, sensors and outputs are controlled by the motherboard' -and $index -match 'running an STM32') "Evidence 3 copy is stale"
 Assert-Website ($index -notmatch 'Rapid Mold Program') "removed Rapid Mold Program is still published"
 Assert-Website ($index -match 'operator-dashboard\.webp' -and $index -match 'operator-run\.webp' -and $index -match 'operator-movement\.webp') "Operator app screen set is incomplete"
 Assert-Website ($index -match 'class="fluid-meter"' -and $index -match 'role="progressbar"' -and $styles -match '@keyframes fluid-lobe') "animated fluid proof meters are missing"
@@ -123,7 +123,7 @@ foreach ($asset in $largePageAssets) {
 }
 
 $checksumText = [IO.File]::ReadAllText((Join-Path $root "assets\checksums.txt"))
-foreach ($artifact in @("influx-operator-latest.apk", "influx-origin-technical-notebook.pdf", "influx-origin-logo.svg")) {
+foreach ($artifact in @("influx-operator-latest.apk", "influx-operator-legacy-oncs.apk", "influx-origin-technical-notebook.pdf", "influx-origin-logo.svg")) {
   $hash = (Get-FileHash (Join-Path $root "assets\$artifact") -Algorithm SHA256).Hash
   Assert-Website ($checksumText -match $hash) "checksum is stale or missing: $artifact"
 }

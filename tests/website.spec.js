@@ -120,6 +120,30 @@ test("red micro-label typography is enlarged", async ({ page }) => {
   expect(fontSizes.every((fontSize) => fontSize >= 16)).toBe(true);
 });
 
+test("downloads include current and legacy ONCS operator APKs", async ({ page }) => {
+  await page.goto("/index.html?tab=downloads");
+  const downloadLinks = await page.locator(".download-entry").evaluateAll((entries) =>
+    entries.map((entry) => ({
+      label: entry.querySelector("h2")?.textContent.trim(),
+      href: entry.getAttribute("href"),
+      hasDownload: entry.hasAttribute("download")
+    }))
+  );
+
+  expect(downloadLinks).toEqual(expect.arrayContaining([
+    expect.objectContaining({
+      label: "InFlux Operator APK",
+      href: "assets/influx-operator-latest.apk",
+      hasDownload: true
+    }),
+    expect.objectContaining({
+      label: "InFlux Operator Legacy ONCS APK",
+      href: "assets/influx-operator-legacy-oncs.apk",
+      hasDownload: true
+    })
+  ]));
+});
+
 test("hidden media and 3D load only when requested", async ({ page }) => {
   await page.goto("/index.html");
   await expect(page.locator("model-viewer")).toHaveCount(0);
@@ -214,7 +238,7 @@ test("reference-led versions and project stages render", async ({ page }) => {
 test("proof fluid meters and updated control copy render", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=proof");
-  await expect(page.getByRole("heading", { name: "Every action has a supervisor." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Not perfect. But it proves the concept." })).toBeVisible();
   await expect(page.locator(".fluid-meter")).toHaveCount(4);
   await expect(page.getByRole("progressbar")).toHaveCount(4);
   await expect.poll(() => page.locator(".proof-progress[data-current][data-final]").evaluateAll((cards) =>
