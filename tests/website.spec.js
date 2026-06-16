@@ -137,7 +137,7 @@ test("downloads include current and ONCS auto-connect operator APKs", async ({ p
       hasDownload: true
     }),
     expect.objectContaining({
-      label: "InFlux Operator",
+      label: "InFlux Operator Legacy",
       href: "assets/influx-operator-auto-connect.apk",
       hasDownload: true
     })

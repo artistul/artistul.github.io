@@ -18,7 +18,7 @@ const HUB = {
       download: true
     },
     {
-      name: "InFlux Operator",
+      name: "InFlux Operator Legacy",
       category: "ONCS operator artifact",
       description: "Auto Connect app build used for the ONCS presentation path.",
       meta: "Android APK / 19.79 MB / May 2026",
