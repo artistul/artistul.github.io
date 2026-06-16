@@ -120,7 +120,7 @@ test("red micro-label typography is enlarged", async ({ page }) => {
   expect(fontSizes.every((fontSize) => fontSize >= 16)).toBe(true);
 });
 
-test("downloads include current and legacy ONCS operator APKs", async ({ page }) => {
+test("downloads include current and ONCS auto-connect operator APKs", async ({ page }) => {
   await page.goto("/index.html?tab=downloads");
   const downloadLinks = await page.locator(".download-entry").evaluateAll((entries) =>
     entries.map((entry) => ({
@@ -137,8 +137,8 @@ test("downloads include current and legacy ONCS operator APKs", async ({ page })
       hasDownload: true
     }),
     expect.objectContaining({
-      label: "InFlux Operator Legacy ONCS APK",
-      href: "assets/influx-operator-legacy-oncs.apk",
+      label: "InFlux Operator",
+      href: "assets/influx-operator-auto-connect.apk",
       hasDownload: true
     })
   ]));

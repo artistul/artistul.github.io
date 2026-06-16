@@ -52,7 +52,7 @@ Assert-Website ($index -match 'application/ld\+json' -and $technical -match 'app
 Assert-Website ($index -match 'rel="canonical"' -and $technical -match 'rel="canonical"') "canonical metadata is missing"
 Assert-Website (Test-Path (Join-Path $root "CNAME")) "GitHub Pages custom-domain file is missing"
 Assert-Website ($index -match 'https://influxorigin\.ro/' -and $technical -match 'https://influxorigin\.ro/technical\.html') "custom-domain canonical metadata is missing"
-Assert-Website ($index -match '2026-06-16-legacy-oncs-download-v1' -and $technical -match '2026-06-13-p4') "explicit cache version is missing"
+Assert-Website ($index -match '2026-06-16-auto-connect-download-v1' -and $technical -match '2026-06-13-p4') "explicit cache version is missing"
 Assert-Website ($script -match 'dataset\.fluidPhysics' -and $script -match 'stiffness' -and $script -match 'pressurePulse') "independent fluid physics are missing"
 Assert-Website ($index -notmatch 'fluid-body-shine|data-fluid-sheen|stop-color="#ffffff"' -and $styles -notmatch 'fluid-sheen') "white fluid sheen layer is still published"
 Assert-Website ($index -match 'Ciprian Ursu' -and $technical -match 'Ciprian Ursu') "Ciprian Ursu team patch is missing"
@@ -123,7 +123,7 @@ foreach ($asset in $largePageAssets) {
 }
 
 $checksumText = [IO.File]::ReadAllText((Join-Path $root "assets\checksums.txt"))
-foreach ($artifact in @("influx-operator-latest.apk", "influx-operator-legacy-oncs.apk", "influx-origin-technical-notebook.pdf", "influx-origin-logo.svg")) {
+foreach ($artifact in @("influx-operator-latest.apk", "influx-operator-auto-connect.apk", "influx-origin-technical-notebook.pdf", "influx-origin-logo.svg")) {
   $hash = (Get-FileHash (Join-Path $root "assets\$artifact") -Algorithm SHA256).Hash
   Assert-Website ($checksumText -match $hash) "checksum is stale or missing: $artifact"
 }
