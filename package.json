@@ -2,6 +2,7 @@
   "name": "influx-showcase-website",
   "private": true,
   "scripts": {
+    "prepare:site": "node scripts/prepare-website-assets.mjs",
     "test": "playwright test",
     "test:update": "playwright test --update-snapshots"
   },

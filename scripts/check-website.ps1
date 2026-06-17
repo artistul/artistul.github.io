@@ -52,7 +52,15 @@ Assert-Website ($index -match 'application/ld\+json' -and $technical -match 'app
 Assert-Website ($index -match 'rel="canonical"' -and $technical -match 'rel="canonical"') "canonical metadata is missing"
 Assert-Website (Test-Path (Join-Path $root "CNAME")) "GitHub Pages custom-domain file is missing"
 Assert-Website ($index -match 'https://influxorigin\.ro/' -and $technical -match 'https://influxorigin\.ro/technical\.html') "custom-domain canonical metadata is missing"
-Assert-Website ($index -match '2026-06-16-auto-connect-download-v1' -and $technical -match '2026-06-13-p4') "explicit cache version is missing"
+Assert-Website ($index -match '2026-06-17-seo-pagespeed-v1' -and $technical -match '2026-06-17-seo-pagespeed-v1') "explicit cache version is missing"
+Assert-Website ($index -match 'styles\.min\.css' -and $technical -match 'technical\.min\.css') "minified stylesheet links are missing"
+Assert-Website ((Test-Path (Join-Path $root "styles.min.css")) -and (Test-Path (Join-Path $root "technical.min.css"))) "minified stylesheet files are missing"
+Assert-Website ($index -match 'machine-full-640\.webp' -and $index -match 'machine-full-960\.webp') "responsive hero image variants are missing"
+Assert-Website ($index -match 'influx-logo-white-96\.webp' -and $technical -match 'influx-logo-white-96\.webp') "optimized header logo is missing"
+Assert-Website ($index -match 'rel="preload" href="styles\.min\.css' -and $technical -match 'rel="preload" href="technical\.min\.css') "stylesheet preload optimization is missing"
+Assert-Website ($index -match 'script\.js\?v=2026-06-17-seo-pagespeed-v1" defer' -and $technical -match 'technical\.js\?v=2026-06-17-seo-pagespeed-v1" defer') "deferred JavaScript loading is missing"
+Assert-Website ($styles -match '--red-bg' -and $styles -match 'background: var\(--red-bg\)' -and $technicalStyles -match '--red-bg') "contrast-safe red button fill is missing"
+Assert-Website ($sitemap -match '<lastmod>2026-06-17</lastmod>' -and $aiContext -match '"last_updated": "2026-06-17"') "search context dates are stale"
 Assert-Website ($script -match 'dataset\.fluidPhysics' -and $script -match 'stiffness' -and $script -match 'pressurePulse') "independent fluid physics are missing"
 Assert-Website ($index -notmatch 'fluid-body-shine|data-fluid-sheen|stop-color="#ffffff"' -and $styles -notmatch 'fluid-sheen') "white fluid sheen layer is still published"
 Assert-Website ($index -match 'Ciprian Ursu' -and $technical -match 'Ciprian Ursu') "Ciprian Ursu team patch is missing"
@@ -106,10 +114,10 @@ foreach ($reference in $srcsetReferences) {
 }
 
 $initialAssets = @(
-  "styles.css",
+  "styles.min.css",
   "script.js",
-  "assets/logo-mark.webp",
-  "assets/machine-full.webp",
+  "assets/influx-logo-white-96.webp",
+  "assets/machine-full-960.webp",
   "assets/first-injected-part-angle-440.webp",
   "assets/influx-origin-logo.svg"
 )

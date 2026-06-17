@@ -22,6 +22,7 @@
   <meta property="og:locale" content="en_US" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://influxorigin.ro/" />
+  <meta property="og:updated_time" content="2026-06-17" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Desktop Injection Molding Machine | InFlux Origin" />
   <meta name="twitter:description" content="An integrated desktop injection molding prototype in active calibration." />
@@ -29,7 +30,9 @@
   <meta name="twitter:image:alt" content="InFlux Origin MK1 desktop injection molding machine prototype" />
   <title>Desktop Injection Molding Machine | InFlux Origin</title>
   <link rel="icon" href="assets/influx-logo-white.png" />
-  <link rel="stylesheet" href="styles.css?v=2026-06-15-collaboration-fit-v2" />
+  <link rel="preload" href="styles.min.css?v=2026-06-17-seo-pagespeed-v1" as="style"
+    onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="styles.min.css?v=2026-06-17-seo-pagespeed-v1" /></noscript>
   <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -56,9 +59,11 @@
             "url": "https://influxorigin.ro/",
             "name": "Desktop Injection Molding Machine | InFlux Origin",
             "description": "A desktop injection molding machine prototype for small-part thermoplastic manufacturing, rapid resin tooling, and process validation.",
+            "dateModified": "2026-06-17",
             "isPartOf": { "@id": "https://influxorigin.ro/#website" },
             "about": { "@id": "https://influxorigin.ro/#product" },
             "primaryImageOfPage": { "@id": "https://influxorigin.ro/#primaryimage" },
+            "mainEntity": { "@id": "https://influxorigin.ro/#product" },
             "inLanguage": "en"
           },
           {
@@ -69,6 +74,20 @@
             "caption": "InFlux Origin MK1 desktop injection molding machine prototype"
           },
           {
+            "@type": "SiteNavigationElement",
+            "@id": "https://influxorigin.ro/#navigation",
+            "name": ["Home", "Machine Development", "InFlux Ecosystem", "Team", "Proof", "Downloads", "Links"],
+            "url": [
+              "https://influxorigin.ro/",
+              "https://influxorigin.ro/?tab=versions",
+              "https://influxorigin.ro/?tab=projects",
+              "https://influxorigin.ro/?tab=team",
+              "https://influxorigin.ro/?tab=proof",
+              "https://influxorigin.ro/?tab=downloads",
+              "https://influxorigin.ro/?tab=links"
+            ]
+          },
+          {
             "@type": "Product",
             "@id": "https://influxorigin.ro/#product",
             "name": "InFlux Origin MK1",
@@ -77,6 +96,7 @@
             "image": { "@id": "https://influxorigin.ro/#primaryimage" },
             "brand": { "@type": "Brand", "name": "InFlux Origin" },
             "manufacturer": { "@id": "https://influxorigin.ro/#organization" },
+            "dateModified": "2026-06-17",
             "productionDate": "2026",
             "category": "Desktop injection molding machine prototype",
             "subjectOf": [
@@ -155,7 +175,7 @@
 
   <header class="site-header" data-header>
     <button class="brand" type="button" data-nav="home" aria-label="Open InFlux home">
-      <img src="assets/influx-logo-white.png" alt="" />
+      <img src="assets/influx-logo-white-96.webp" width="54" height="54" alt="" />
     </button>
 
     <button class="menu-toggle" type="button" data-menu aria-expanded="false" aria-controls="primary-nav">
@@ -205,8 +225,10 @@
           <div class="artifact-coordinates">
             <span></span><span>47.538917 N, 25.401444 E</span>
           </div>
-          <img src="assets/machine-full.webp" alt="CAD render of the InFlux Origin MK1 machine" fetchpriority="high"
-            decoding="async" />
+          <img src="assets/machine-full-960.webp"
+            srcset="assets/machine-full-640.webp 640w, assets/machine-full-960.webp 960w, assets/machine-full.webp 1800w"
+            sizes="(max-width: 900px) 92vw, 52vw" width="1800" height="1350"
+            alt="CAD render of the InFlux Origin MK1 machine" fetchpriority="high" decoding="async" />
           <div class="artifact-caption">
             <strong>Origin MK1</strong>
           </div>
@@ -1071,7 +1093,7 @@
     <p></p>
     <button class="back-top" type="button" data-top>Back to top ↑</button>
   </footer>
-  <script src="script.js?v=2026-06-16-auto-connect-download-v1"></script>
+  <script src="script.js?v=2026-06-17-seo-pagespeed-v1" defer></script>
 </body>
 
 </html>
