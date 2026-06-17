@@ -27,19 +27,15 @@ test("search metadata and structured context are published", async ({ page, requ
   const sitemapResponse = await request.get("/sitemap.xml");
   const sitemap = await sitemapResponse.text();
   expect(sitemap).toContain("https://influxorigin.ro/technical.html");
-  for (const route of ["machine", "components", "team", "evidence", "downloads", "resources", "sponsor"]) {
-    expect(sitemap).toContain(`https://influxorigin.ro/${route}/`);
-  }
+  expect(sitemap).not.toContain("https://influxorigin.ro/machine/");
 });
 
-test("section routes are indexable real pages", async ({ request }) => {
+test("redirect helper routes do not compete for indexing", async ({ request }) => {
   for (const route of ["machine", "components", "team", "evidence", "downloads", "resources"]) {
     const response = await request.get(`/${route}/`);
     const html = await response.text();
-    expect(html).toContain('name="robots" content="index,follow');
-    expect(html).toContain(`<link rel="canonical" href="https://influxorigin.ro/${route}/"`);
-    expect(html).not.toContain('http-equiv="refresh"');
-    expect(html).not.toContain("location.replace");
+    expect(html).toContain('name="robots" content="noindex,follow"');
+    expect(html).toContain('<link rel="canonical" href="https://influxorigin.ro/"');
     expect(html).not.toContain("artistul.github.io");
   }
 });
