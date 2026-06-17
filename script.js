@@ -6,6 +6,7 @@ const HUB = {
     team: { title: "Team | InFlux Origin" },
     proof: { title: "Proof | InFlux Origin" },
     downloads: { title: "Download Hub | InFlux Origin" },
+    sponsor: { title: "Sponsor InFlux | InFlux Origin" },
     links: { title: "External Links | InFlux Origin" }
   },
   downloads: [
@@ -192,7 +193,7 @@ document.addEventListener("keydown", (event) => {
   }
   if (event.key !== "Tab") return;
 
-  const focusable = [menu, ...nav.querySelectorAll("button")].filter((item) => item && !item.disabled);
+  const focusable = [menu, ...nav.querySelectorAll("button, a")].filter((item) => item && !item.disabled);
   const first = focusable[0];
   const last = focusable.at(-1);
   if (event.shiftKey && document.activeElement === first) {

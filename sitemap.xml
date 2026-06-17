@@ -21,4 +21,74 @@
       <image:caption>InFlux Origin MK1 desktop injection molding machine prototype</image:caption>
     </image:image>
   </url>
+  <url>
+    <loc>https://influxorigin.ro/machine/</loc>
+    <lastmod>2026-06-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://influxorigin.ro/assets/machine-origin-render.png</image:loc>
+      <image:caption>InFlux Origin MK1 desktop injection molding machine prototype</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://influxorigin.ro/components/</loc>
+    <lastmod>2026-06-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://influxorigin.ro/assets/motherboard-kicad-landscape.webp</image:loc>
+      <image:caption>InFlux Origin electronics and control ecosystem</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://influxorigin.ro/evidence/</loc>
+    <lastmod>2026-06-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://influxorigin.ro/assets/first-injected-part-angle-876.webp</image:loc>
+      <image:caption>First injected InFlux Origin prototype part</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://influxorigin.ro/team/</loc>
+    <lastmod>2026-06-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+    <image:image>
+      <image:loc>https://influxorigin.ro/assets/team-stefan.webp</image:loc>
+      <image:caption>Volta Circuits team member working on InFlux Origin</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://influxorigin.ro/downloads/</loc>
+    <lastmod>2026-06-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+    <image:image>
+      <image:loc>https://influxorigin.ro/assets/machine-origin-render.png</image:loc>
+      <image:caption>InFlux Origin public downloads and artifacts</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://influxorigin.ro/resources/</loc>
+    <lastmod>2026-06-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+    <image:image>
+      <image:loc>https://influxorigin.ro/assets/machine-origin-render.png</image:loc>
+      <image:caption>InFlux Origin resources and references</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://influxorigin.ro/sponsor/</loc>
+    <lastmod>2026-06-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://influxorigin.ro/assets/machine-origin-render.png</image:loc>
+      <image:caption>InFlux Origin MK1 desktop injection molding machine prototype</image:caption>
+    </image:image>
+  </url>
 </urlset>

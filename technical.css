@@ -272,6 +272,88 @@ main::before {
 .doc-team li { display: grid; gap: 4px; padding-left: 16px; border-left: 3px solid var(--red); }
 .doc-team strong { color: var(--text); }
 
+.sponsor-hero .doc-hero-copy h1 { max-width: 980px; }
+.sponsor-shell { margin-bottom: 96px; }
+.sponsor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  max-width: 920px;
+  margin-top: 22px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.08);
+}
+.sponsor-grid article {
+  min-height: 230px;
+  padding: 24px;
+  background: rgba(20,20,20,.9);
+}
+.sponsor-grid span,
+.sponsor-contact-panel span {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.sponsor-grid h3 { margin-top: 0; }
+.sponsor-grid p { margin-bottom: 0; }
+.sponsor-proof-actions { margin-top: 26px; }
+.sponsor-contact-panel {
+  max-width: 860px;
+  margin: 24px 0;
+  padding: 22px;
+  border: 1px solid rgba(225,25,44,.38);
+  background: rgba(225,25,44,.08);
+}
+.sponsor-contact-panel p { margin-bottom: 0; color: var(--text); }
+.not-found-simple {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: calc(var(--header-h) + 20px) 20px 48px;
+}
+.not-found-message {
+  width: min(1180px, 100%);
+}
+.not-found-code {
+  margin: 0 0 8px;
+  color: var(--red);
+  font-family: Impact, "Arial Narrow", sans-serif;
+  font-size: clamp(140px, 30vw, 390px);
+  font-weight: 500;
+  letter-spacing: -.04em;
+  line-height: .74;
+  text-transform: uppercase;
+}
+.not-found-message h1 {
+  margin: 0 0 24px;
+  font-family: Impact, "Arial Narrow", sans-serif;
+  font-size: clamp(58px, 10vw, 150px);
+  font-weight: 500;
+  letter-spacing: -.02em;
+  line-height: .88;
+  text-transform: uppercase;
+}
+.not-found-message p:not(.eyebrow) {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: clamp(22px, 2.6vw, 34px);
+  line-height: 1.5;
+}
+.not-found-message .doc-actions {
+  margin-top: 36px;
+}
+.not-found-message .primary-button,
+.not-found-message .secondary-button {
+  min-height: 62px;
+  padding-inline: 28px;
+  font-size: 15px;
+}
+
 footer {
   display: flex;
   justify-content: space-between;
@@ -291,6 +373,7 @@ footer span:first-child { color: var(--text); font-weight: 900; }
   }
   .nav-links { display: none; }
   .doc-hero, .doc-shell { grid-template-columns: 1fr; }
+  .sponsor-grid { grid-template-columns: 1fr; }
   .doc-toc { position: static; max-height: none; overflow: visible; }
   .doc-toc-toggle { pointer-events: auto; cursor: pointer; }
   .doc-toc-toggle strong { display: block; }

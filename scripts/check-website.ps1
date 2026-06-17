@@ -12,6 +12,7 @@ $technical = [IO.File]::ReadAllText((Join-Path $root "technical.html"))
 $styles = [IO.File]::ReadAllText((Join-Path $root "styles.css"))
 $technicalStyles = [IO.File]::ReadAllText((Join-Path $root "technical.css"))
 $script = [IO.File]::ReadAllText((Join-Path $root "script.js"))
+$notFound = [IO.File]::ReadAllText((Join-Path $root "404.html"))
 $robots = [IO.File]::ReadAllText((Join-Path $root "robots.txt"))
 $sitemap = [IO.File]::ReadAllText((Join-Path $root "sitemap.xml"))
 $llms = [IO.File]::ReadAllText((Join-Path $root "llms.txt"))
@@ -65,6 +66,9 @@ Assert-Website ($index -match 'assets/proof-56-parts\.jpg' -and (Test-Path (Join
 Assert-Website ("$index`n$script" -notmatch 'STEP.+GLB' -and $index -notmatch 'Orbit and zoom') "redundant 3D micro-label copy is still published"
 Assert-Website (Test-Path (Join-Path $root "robots.txt")) "robots.txt is missing"
 Assert-Website (Test-Path (Join-Path $root "sitemap.xml")) "sitemap.xml is missing"
+Assert-Website (Test-Path (Join-Path $root "404.html")) "custom 404 page is missing"
+Assert-Website ($notFound -match 'Page Not Found \| InFlux Origin' -and $notFound -match 'noindex,follow') "custom 404 metadata is incomplete"
+Assert-Website ($notFound -match 'href="index\.html"' -and $notFound -match 'href="evidence/"' -and $notFound -match 'href="sponsor/index\.html"') "custom 404 recovery links are incomplete"
 Assert-Website (Test-Path (Join-Path $root "llms.txt")) "llms.txt is missing"
 Assert-Website (Test-Path (Join-Path $root "llms-full.txt")) "llms-full.txt is missing"
 Assert-Website (Test-Path (Join-Path $root "ai-context.json")) "AI context JSON is missing"
@@ -73,18 +77,21 @@ Assert-Website ($index -match 'rel="alternate" type="application/json".+ai-conte
 Assert-Website ($robots -match 'llms\.txt' -and $robots -match 'ai-context\.json') "robots.txt does not advertise machine-readable context"
 Assert-Website ($llms -match 'Citation guidance' -and $llmsFull -match 'Current limits') "AI context guardrails are incomplete"
 Assert-Website ($aiContext -match '"citation_guidance"' -and $aiContext -match '"unproven_or_incomplete"') "structured AI context guardrails are incomplete"
-Assert-Website ($sitemap -notmatch '/machine/|/components/|/team/|/evidence/|/downloads/|/resources/') "redirect helper URLs must not be listed in the sitemap"
 Assert-Website ($sitemap -match 'https://influxorigin\.ro/technical\.html') "technical dossier is missing from sitemap"
+foreach ($route in @("machine", "components", "team", "evidence", "downloads", "resources", "sponsor")) {
+  Assert-Website ($sitemap -match "https://influxorigin\.ro/$route/") "indexable route is missing from sitemap: $route"
+}
 Assert-Website (Test-Path (Join-Path $root "assets\checksums.txt")) "artifact checksums are missing"
 Assert-Website ("$index`n$technical`n$script" -notmatch '[\u00C2\u00E2]') "mojibake characters detected"
 
-foreach ($route in @("machine", "components", "team", "evidence", "downloads", "resources")) {
+foreach ($route in @("machine", "components", "team", "evidence", "downloads", "resources", "sponsor")) {
   $routePath = Join-Path $root "$route\index.html"
-  Assert-Website (Test-Path $routePath) "route alias is missing: $route"
+  Assert-Website (Test-Path $routePath) "indexable route is missing: $route"
   if (Test-Path $routePath) {
     $routeHtml = [IO.File]::ReadAllText($routePath)
-    Assert-Website ($routeHtml -match 'noindex,follow') "redirect helper must be noindex: $route"
-    Assert-Website ($routeHtml -notmatch 'artistul\.github\.io') "stale GitHub Pages canonical remains: $route"
+    Assert-Website ($routeHtml -match 'index,follow') "route must be indexable: $route"
+    Assert-Website ($routeHtml -match "https://influxorigin\.ro/$route/") "route canonical must be self-referential: $route"
+    Assert-Website ($routeHtml -notmatch 'http-equiv="refresh"|location\.replace|noindex|artistul\.github\.io') "route still behaves like a redirect helper: $route"
   }
 }
 
