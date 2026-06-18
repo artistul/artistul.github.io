@@ -14,7 +14,6 @@
   --muted: #b8b4af;
   --dim: #66625f;
   --red: #ec172c;
-  --red-bg: #b90017;
   --line: rgba(244, 241, 237, 0.16);
   --max: 1480px;
   --header-h: 82px;
@@ -129,7 +128,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   padding: 10px 9px;
   background: transparent;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -150,7 +149,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .primary-nav button:hover, .primary-nav button.is-active { color: var(--white); }
 .primary-nav button.is-active::after { transform: scaleX(1); }
 .utility-tabs button { color: var(--white); }
-.utility-tabs button:first-child { background: var(--red-bg); }
+.utility-tabs button:first-child { background: var(--red); }
 .utility-tabs button:first-child::after { display: none; }
 .menu-toggle { display: none; }
 
@@ -210,14 +209,14 @@ h1, h2 {
   padding: 0 20px;
   border: 1px solid var(--line);
   background: transparent;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   letter-spacing: .12em;
   text-transform: uppercase;
   transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 .action:hover { transform: translateY(-2px); border-color: var(--red); }
-.action-primary { border-color: var(--red); background: var(--red-bg); color: var(--white); }
+.action-primary { border-color: var(--red); background: var(--red); }
 .action-primary:hover { background: var(--white); color: var(--black); }
 
 .hero-artifact {

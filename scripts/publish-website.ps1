@@ -41,9 +41,6 @@ function Invoke-PublishValidation {
 
 Write-Host "Publishing the InFlux website..." -ForegroundColor Cyan
 
-Write-Host "`nPreparing optimized website assets..." -ForegroundColor Cyan
-Invoke-Checked npm.cmd run prepare:site
-
 $branch = (git branch --show-current).Trim()
 if ($branch -ne "main") {
   throw "Expected branch 'main', but the current branch is '$branch'."

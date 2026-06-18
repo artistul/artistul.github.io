@@ -3,4 +3,3 @@ assets/caiet-tehnic-v1.docx
 node_modules/
 playwright-report/
 test-results/
-.playwright-cli/

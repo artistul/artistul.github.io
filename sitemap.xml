@@ -3,25 +3,17 @@
   xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://influxorigin.ro/</loc>
-    <lastmod>2026-06-17</lastmod>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://influxorigin.ro/assets/machine-origin-render.png</image:loc>
       <image:caption>InFlux Origin MK1 desktop injection molding machine prototype</image:caption>
     </image:image>
-    <image:image>
-      <image:loc>https://influxorigin.ro/assets/machine-full.webp</image:loc>
-      <image:caption>CAD render of the InFlux Origin MK1 desktop machine frame</image:caption>
-    </image:image>
-    <image:image>
-      <image:loc>https://influxorigin.ro/assets/proof-56-parts.jpg</image:loc>
-      <image:caption>Box containing 56 injected InFlux Origin proof parts</image:caption>
-    </image:image>
   </url>
   <url>
     <loc>https://influxorigin.ro/technical.html</loc>
-    <lastmod>2026-06-17</lastmod>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <image:image>

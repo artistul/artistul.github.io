@@ -13,7 +13,6 @@
   --text: #fff;
   --muted: #bdbdbd;
   --red: #e1192c;
-  --red-bg: #b90017;
   --max: 1180px;
   --header-h: 74px;
   --doc-display: clamp(54px, 9vw, 118px);
@@ -97,7 +96,7 @@ a:focus-visible, button:focus-visible {
   min-height: 40px;
   padding: 0 14px;
   border-radius: 999px;
-  background: var(--red-bg);
+  background: var(--red);
   font-size: 13px;
   font-weight: 800;
 }
@@ -158,7 +157,7 @@ main::before {
   font-weight: 850;
   transition: transform 180ms ease, border-color 180ms ease;
 }
-.primary-button { background: var(--red-bg); }
+.primary-button { background: var(--red); }
 .secondary-button { border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.035); }
 .primary-button:hover, .secondary-button:hover { transform: translateY(-2px); }
 .doc-summary {

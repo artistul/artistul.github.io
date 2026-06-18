@@ -6,7 +6,6 @@ Public repository: https://github.com/artistul/Influx
 Publisher and development team: Volta Circuits
 Language: English
 Current public status: Integrated prototype in active calibration
-Last updated: 2026-06-17
 
 ## Project definition
 
