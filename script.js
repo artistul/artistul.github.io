@@ -110,14 +110,17 @@ function registerMediaState(asset) {
 }
 
 function hydratePanel(panel) {
-  panel.querySelectorAll("[data-src]").forEach((asset) => {
+  panel.querySelectorAll("img[data-src], img[data-srcset]").forEach((asset) => {
     registerMediaState(asset);
-    asset.src = asset.dataset.src;
-    asset.removeAttribute("data-src");
-  });
-  panel.querySelectorAll("[data-srcset]").forEach((asset) => {
-    asset.srcset = asset.dataset.srcset;
-    asset.removeAttribute("data-srcset");
+    if (asset.loading === "lazy") asset.loading = "eager";
+    if (asset.dataset.srcset) {
+      asset.srcset = asset.dataset.srcset;
+      asset.removeAttribute("data-srcset");
+    }
+    if (asset.dataset.src) {
+      asset.src = asset.dataset.src;
+      asset.removeAttribute("data-src");
+    }
   });
 }
 

@@ -378,6 +378,17 @@ test("proof fluid meters and updated control copy render", async ({ page }) => {
   expect(mobileGoalGaps.every((gap) => Math.abs(gap - 8) < 0.75)).toBe(true);
 });
 
+test("proof media loads after navigating from an indexable route", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/sponsorship/");
+  await page.getByRole("tab", { name: "Proof" }).click();
+  await expect(page).toHaveURL(/\/\?tab=proof$/);
+  await expect(page.locator("#proof")).toHaveClass(/is-active/);
+  await expect.poll(() => page.locator("#proof img").evaluateAll((images) =>
+    images.every((image) => image.currentSrc && image.naturalWidth > 0)
+  )).toBe(true);
+});
+
 test("mobile dossier contents collapse and anchors clear the header", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/technical.html");
