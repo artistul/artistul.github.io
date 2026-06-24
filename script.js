@@ -4,6 +4,8 @@ const HUB = {
     versions: { title: "Machine Versions | InFlux Origin" },
     projects: { title: "InFlux Ecosystem | InFlux Origin" },
     team: { title: "Team | InFlux Origin" },
+    sponsorship: { title: "Sponsors | InFlux Origin" },
+    contact: { title: "Contact Us | InFlux Origin" },
     proof: { title: "Proof | InFlux Origin" },
     downloads: { title: "Download Hub | InFlux Origin" },
     links: { title: "External Links | InFlux Origin" }

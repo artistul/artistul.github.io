@@ -67,12 +67,12 @@ Assert-Website ($index -match 'rel="alternate" type="application/json".+ai-conte
 Assert-Website ($robots -match 'llms\.txt' -and $robots -match 'ai-context\.json') "robots.txt does not advertise machine-readable context"
 Assert-Website ($llms -match 'Citation guidance' -and $llmsFull -match 'Current limits') "AI context guardrails are incomplete"
 Assert-Website ($aiContext -match '"citation_guidance"' -and $aiContext -match '"unproven_or_incomplete"') "structured AI context guardrails are incomplete"
-Assert-Website ($sitemap -notmatch '/machine/|/components/|/team/|/evidence/|/downloads/|/resources/') "redirect helper URLs must not be listed in the sitemap"
+Assert-Website ($sitemap -notmatch '/machine/|/components/|/team/|/sponsorship/|/contact/|/evidence/|/downloads/|/resources/') "redirect helper URLs must not be listed in the sitemap"
 Assert-Website ($sitemap -match 'https://influxorigin\.ro/technical\.html') "technical dossier is missing from sitemap"
 Assert-Website (Test-Path (Join-Path $root "assets\checksums.txt")) "artifact checksums are missing"
 Assert-Website ("$index`n$technical`n$script" -notmatch '[\u00C2\u00E2]') "mojibake characters detected"
 
-foreach ($route in @("machine", "components", "team", "evidence", "downloads", "resources")) {
+foreach ($route in @("machine", "components", "team", "sponsorship", "contact", "evidence", "downloads", "resources")) {
   $routePath = Join-Path $root "$route\index.html"
   Assert-Website (Test-Path $routePath) "route alias is missing: $route"
   if (Test-Path $routePath) {

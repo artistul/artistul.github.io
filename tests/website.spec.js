@@ -166,6 +166,55 @@ test("team portraits and evidence landscape render", async ({ page }) => {
   await expect(page).toHaveScreenshot("proof-desktop.png", { fullPage: false });
 });
 
+test("contact tab exposes the direct email paths", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/index.html?tab=contact");
+
+  await expect(page).toHaveTitle("Contact Us | InFlux Origin");
+  await expect(page.getByRole("tab", { name: "Contact Us" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("heading", { name: "Contact US" })).toBeVisible();
+  await expect(page.getByText("We're here to connect.")).toBeVisible();
+  await expect(page.locator(".contact-option")).toHaveCount(2);
+  await expect(page.getByRole("heading", { name: "Sponsorship" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "General Inquiry" })).toBeVisible();
+  await expect(page.locator(".contact-option .action")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /tonegari\.stefan@gmail\.com/ })).toHaveAttribute("href", /mailto:tonegari\.stefan@gmail\.com/);
+  await expect(page.getByRole("link", { name: /david\.pintilei9@gmail\.com/ })).toHaveAttribute("href", /mailto:david\.pintilei9@gmail\.com/);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/index.html?tab=contact");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test("sponsors tab shows current sponsor tiers and visibility render", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/index.html?tab=sponsorship");
+
+  await expect(page).toHaveTitle("Sponsors | InFlux Origin");
+  await expect(page.getByRole("tab", { name: "Sponsors" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("#sponsorship .contact-option")).toHaveCount(0);
+  await expect(page.locator("#sponsorship .panel-hero")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Thank you to our sponsors!" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Interested in becoming a sponsor? Contact us! ↗" })).toHaveAttribute("href", "?tab=contact");
+  await expect(page.locator(".sponsor-logo-wall img")).toHaveCount(6);
+  await expect(page.locator(".sponsor-logo-wall img").first()).toHaveAttribute("src", "assets/sponsor-01-taggo.png");
+  const sponsorHeights = await page.locator(".sponsor-logo-wall img").evaluateAll((logos) =>
+    logos.map((logo) => Math.round(logo.getBoundingClientRect().height))
+  );
+  expect(sponsorHeights[0]).toBeGreaterThan(sponsorHeights[1]);
+  expect(sponsorHeights[1]).toBeGreaterThan(sponsorHeights[3]);
+  expect(sponsorHeights[1]).toBe(sponsorHeights[2]);
+  await expect(page.getByRole("heading", { name: "Your brand can travel with the team." })).toBeVisible();
+  await expect(page.locator(".uniform-render img")).toHaveAttribute("src", "assets/sponsorship-uniform-render.jpeg");
+  await page.getByRole("link", { name: "Interested in becoming a sponsor? Contact us! ↗" }).click();
+  await expect(page.getByRole("tab", { name: "Contact Us" })).toHaveAttribute("aria-selected", "true");
+  await expect(page).toHaveTitle("Contact Us | InFlux Origin");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/index.html?tab=sponsorship");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
 test("reference-led versions and project stages render", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=versions");

@@ -6,7 +6,7 @@ The project is an integrated prototype in active calibration. It has produced a 
 
 ## Primary sources
 
-- [Project hub](https://influxorigin.ro/): Product overview, machine versions, ecosystem, team, evidence, downloads, and references.
+- [Project hub](https://influxorigin.ro/): Product overview, machine versions, ecosystem, team, sponsors, contact path, evidence, downloads, and references.
 - [Technical dossier](https://influxorigin.ro/technical.html): Long-form system architecture, mechanics, thermal system, controls, software, safety position, validation evidence, current limits, and roadmap.
 - [Technical notebook PDF](https://influxorigin.ro/assets/influx-origin-technical-notebook.pdf): Public project notebook.
 - [Public GitHub repository](https://github.com/artistul/Influx): Public source repository.

@@ -31,7 +31,7 @@ test("search metadata and structured context are published", async ({ page, requ
 });
 
 test("redirect helper routes do not compete for indexing", async ({ request }) => {
-  for (const route of ["machine", "components", "team", "evidence", "downloads", "resources"]) {
+  for (const route of ["machine", "components", "team", "sponsorship", "contact", "evidence", "downloads", "resources"]) {
     const response = await request.get(`/${route}/`);
     const html = await response.text();
     expect(html).toContain('name="robots" content="noindex,follow"');

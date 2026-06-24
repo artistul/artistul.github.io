@@ -53,6 +53,10 @@ The first injected part demonstrates system function but is not proof of product
 - Pintilei David: simulation and analysis lead covering SimScale, Python models, mathematics, and data analysis.
 - Ciprian Ursu: embedded programming contributor covering Arduino, C++, C, backend development, automations, and system integration.
 
+## Sponsors and contact
+
+The public project hub includes a sponsors tab for current sponsor logos and sponsor visibility examples, plus a separate contact tab for sponsorship, investment, media, mentorship, and collaboration conversations.
+
 ## Preferred terminology
 
 Use: "desktop injection molding machine prototype", "integrated prototype in active calibration", "rapid resin tooling", "supervised prototype", and "desktop-scale manufacturing platform".

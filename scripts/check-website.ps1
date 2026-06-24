@@ -52,7 +52,7 @@ Assert-Website ($index -match 'application/ld\+json' -and $technical -match 'app
 Assert-Website ($index -match 'rel="canonical"' -and $technical -match 'rel="canonical"') "canonical metadata is missing"
 Assert-Website (Test-Path (Join-Path $root "CNAME")) "GitHub Pages custom-domain file is missing"
 Assert-Website ($index -match 'https://influxorigin\.ro/' -and $technical -match 'https://influxorigin\.ro/technical\.html') "custom-domain canonical metadata is missing"
-Assert-Website ($index -match '2026-06-16-auto-connect-download-v1' -and $technical -match '2026-06-13-p4') "explicit cache version is missing"
+Assert-Website ($index -match '2026-06-24-sponsors-contact-v2' -and $technical -match '2026-06-13-p4') "explicit cache version is missing"
 Assert-Website ($script -match 'dataset\.fluidPhysics' -and $script -match 'stiffness' -and $script -match 'pressurePulse') "independent fluid physics are missing"
 Assert-Website ($index -notmatch 'fluid-body-shine|data-fluid-sheen|stop-color="#ffffff"' -and $styles -notmatch 'fluid-sheen') "white fluid sheen layer is still published"
 Assert-Website ($index -match 'Ciprian Ursu' -and $technical -match 'Ciprian Ursu') "Ciprian Ursu team patch is missing"
@@ -61,6 +61,8 @@ Assert-Website ($index -match 'data-unit="cycles"' -and $script -match 'currentT
 Assert-Website ($index -match 'data-milestones="25,50,100,200"' -and $script -match 'fluid-milestone' -and $styles -match '\.fluid-milestone\.is-passed') "calculated proof milestones are missing"
 Assert-Website ($index -match 'data-start="5000"' -and $index -match 'data-flipped' -and $script -match 'startTarget - currentTarget') "flipped reduction meter behavior is missing"
 Assert-Website ($index -match '<h2>Sketches</h2>' -and $index -match '<h2>The beginning of InFlux</h2>' -and $index -match '<h2>Plan for MK1</h2>' -and $index -match '<h2>MK1</h2>' -and $index -match '<h2>Next up</h2>' -and $index -match 'InFlux Ecosystem') "updated section hierarchy labels are missing"
+Assert-Website ($index -match 'data-nav="sponsorship"' -and $index -match 'data-nav="contact"' -and $index -match 'tonegari\.stefan@gmail\.com' -and $index -match 'david\.pintilei9@gmail\.com' -and $index -match 'sponsorship-uniform-render\.jpeg') "sponsors/contact content is incomplete"
+Assert-Website ($index -match 'Thank you to our' -and $index -match 'Interested in becoming a sponsor\? Contact us!' -and $index -match 'data-nav-link="contact"' -and $index -match 'sponsor-01-taggo\.png' -and $index -match 'sponsor-02-termohabitat-fotovoltaice\.svg' -and $index -match 'sponsor-03-centrul-medical-biotest\.png' -and $index -match 'sponsor-06-banca-transilvania\.png') "sponsor logo wall is incomplete"
 Assert-Website ($index -match 'assets/proof-56-parts\.jpg' -and (Test-Path (Join-Path $root "assets\proof-56-parts.jpg"))) "56-part proof evidence is missing"
 Assert-Website ("$index`n$script" -notmatch 'STEP.+GLB' -and $index -notmatch 'Orbit and zoom') "redundant 3D micro-label copy is still published"
 Assert-Website (Test-Path (Join-Path $root "robots.txt")) "robots.txt is missing"
@@ -73,12 +75,12 @@ Assert-Website ($index -match 'rel="alternate" type="application/json".+ai-conte
 Assert-Website ($robots -match 'llms\.txt' -and $robots -match 'ai-context\.json') "robots.txt does not advertise machine-readable context"
 Assert-Website ($llms -match 'Citation guidance' -and $llmsFull -match 'Current limits') "AI context guardrails are incomplete"
 Assert-Website ($aiContext -match '"citation_guidance"' -and $aiContext -match '"unproven_or_incomplete"') "structured AI context guardrails are incomplete"
-Assert-Website ($sitemap -notmatch '/machine/|/components/|/team/|/evidence/|/downloads/|/resources/') "redirect helper URLs must not be listed in the sitemap"
+Assert-Website ($sitemap -notmatch '/machine/|/components/|/team/|/sponsorship/|/contact/|/evidence/|/downloads/|/resources/') "redirect helper URLs must not be listed in the sitemap"
 Assert-Website ($sitemap -match 'https://influxorigin\.ro/technical\.html') "technical dossier is missing from sitemap"
 Assert-Website (Test-Path (Join-Path $root "assets\checksums.txt")) "artifact checksums are missing"
 Assert-Website ("$index`n$technical`n$script" -notmatch '[\u00C2\u00E2]') "mojibake characters detected"
 
-foreach ($route in @("machine", "components", "team", "evidence", "downloads", "resources")) {
+foreach ($route in @("machine", "components", "team", "sponsorship", "contact", "evidence", "downloads", "resources")) {
   $routePath = Join-Path $root "$route\index.html"
   Assert-Website (Test-Path $routePath) "route alias is missing: $route"
   if (Test-Path $routePath) {
