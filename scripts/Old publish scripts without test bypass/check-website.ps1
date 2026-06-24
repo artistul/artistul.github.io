@@ -8,6 +8,8 @@ $technicalStyles = [IO.File]::ReadAllText((Join-Path $root "technical.css"))
 $script = [IO.File]::ReadAllText((Join-Path $root "script.js"))
 $robots = [IO.File]::ReadAllText((Join-Path $root "robots.txt"))
 $sitemap = [IO.File]::ReadAllText((Join-Path $root "sitemap.xml"))
+$sponsorshipRoute = [IO.File]::ReadAllText((Join-Path $root "sponsorship\index.html"))
+$contactRoute = [IO.File]::ReadAllText((Join-Path $root "contact\index.html"))
 $llms = [IO.File]::ReadAllText((Join-Path $root "llms.txt"))
 $llmsFull = [IO.File]::ReadAllText((Join-Path $root "llms-full.txt"))
 $aiContext = [IO.File]::ReadAllText((Join-Path $root "ai-context.json"))
@@ -43,6 +45,7 @@ Assert-Website ($index -match 'class="fluid-meter"' -and $index -match 'role="pr
 Assert-Website ($script -match 'registerMediaState' -and $styles -match '\.media-loading') "shared media loading state is missing"
 Assert-Website ($technical -match 'data-toc-toggle' -and $technicalStyles -match 'doc-toc\.is-open') "mobile dossier contents disclosure is missing"
 Assert-Website ($index -match 'application/ld\+json' -and $technical -match 'application/ld\+json') "structured data is missing"
+Assert-Website ("$index`n$technical`n$sponsorshipRoute`n$contactRoute" -notmatch '"@type": "Product"|#product') "Product rich-result schema must not be published without offers, reviews, or aggregateRating"
 Assert-Website ($index -match 'rel="canonical"' -and $technical -match 'rel="canonical"') "canonical metadata is missing"
 Assert-Website (Test-Path (Join-Path $root "CNAME")) "GitHub Pages custom-domain file is missing"
 Assert-Website ($index -match 'https://influxorigin\.ro/' -and $technical -match 'https://influxorigin\.ro/technical\.html') "custom-domain canonical metadata is missing"
@@ -67,18 +70,29 @@ Assert-Website ($index -match 'rel="alternate" type="application/json".+ai-conte
 Assert-Website ($robots -match 'llms\.txt' -and $robots -match 'ai-context\.json') "robots.txt does not advertise machine-readable context"
 Assert-Website ($llms -match 'Citation guidance' -and $llmsFull -match 'Current limits') "AI context guardrails are incomplete"
 Assert-Website ($aiContext -match '"citation_guidance"' -and $aiContext -match '"unproven_or_incomplete"') "structured AI context guardrails are incomplete"
-Assert-Website ($sitemap -notmatch '/machine/|/components/|/team/|/sponsorship/|/contact/|/evidence/|/downloads/|/resources/') "redirect helper URLs must not be listed in the sitemap"
+Assert-Website ($sitemap -notmatch '/machine/|/components/|/team/|/evidence/|/downloads/|/resources/') "redirect helper URLs must not be listed in the sitemap"
 Assert-Website ($sitemap -match 'https://influxorigin\.ro/technical\.html') "technical dossier is missing from sitemap"
+Assert-Website ($sitemap -match 'https://influxorigin\.ro/sponsorship/' -and $sitemap -match 'https://influxorigin\.ro/contact/') "indexable sponsor/contact routes are missing from sitemap"
 Assert-Website (Test-Path (Join-Path $root "assets\checksums.txt")) "artifact checksums are missing"
 Assert-Website ("$index`n$technical`n$script" -notmatch '[\u00C2\u00E2]') "mojibake characters detected"
 
-foreach ($route in @("machine", "components", "team", "sponsorship", "contact", "evidence", "downloads", "resources")) {
+foreach ($route in @("machine", "components", "team", "evidence", "downloads", "resources")) {
   $routePath = Join-Path $root "$route\index.html"
   Assert-Website (Test-Path $routePath) "route alias is missing: $route"
   if (Test-Path $routePath) {
     $routeHtml = [IO.File]::ReadAllText($routePath)
     Assert-Website ($routeHtml -match 'noindex,follow') "redirect helper must be noindex: $route"
     Assert-Website ($routeHtml -notmatch 'artistul\.github\.io') "stale GitHub Pages canonical remains: $route"
+  }
+}
+
+foreach ($route in @("sponsorship", "contact")) {
+  $routePath = Join-Path $root "$route\index.html"
+  Assert-Website (Test-Path $routePath) "indexable route is missing: $route"
+  if (Test-Path $routePath) {
+    $routeHtml = [IO.File]::ReadAllText($routePath)
+    Assert-Website ($routeHtml -match 'index,follow' -and $routeHtml -match "https://influxorigin\.ro/$route/") "indexable route metadata is missing: $route"
+    Assert-Website ($routeHtml -notmatch 'http-equiv="refresh"|location\.replace|artistul\.github\.io') "indexable route still behaves like a redirect helper: $route"
   }
 }
 

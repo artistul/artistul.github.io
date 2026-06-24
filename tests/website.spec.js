@@ -195,7 +195,7 @@ test("sponsors tab shows current sponsor tiers and visibility render", async ({ 
   await expect(page.locator("#sponsorship .contact-option")).toHaveCount(0);
   await expect(page.locator("#sponsorship .panel-hero")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Thank you to our sponsors!" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Interested in becoming a sponsor? Contact us! ↗" })).toHaveAttribute("href", "?tab=contact");
+  await expect(page.getByRole("link", { name: "Interested in becoming a sponsor? Contact us! ↗" })).toHaveAttribute("href", "contact/");
   await expect(page.locator(".sponsor-logo-wall img")).toHaveCount(6);
   await expect(page.locator(".sponsor-logo-wall img").first()).toHaveAttribute("src", "assets/sponsor-01-taggo.png");
   const sponsorHeights = await page.locator(".sponsor-logo-wall img").evaluateAll((logos) =>

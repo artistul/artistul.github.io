@@ -54,6 +54,13 @@ const HUB = {
   ]
 };
 
+const ROUTE_TABS = {
+  "/sponsorship/": "sponsorship",
+  "/sponsorship/index.html": "sponsorship",
+  "/contact/": "contact",
+  "/contact/index.html": "contact"
+};
+
 const header = document.querySelector("[data-header]");
 const meter = document.querySelector(".scroll-meter span");
 const menu = document.querySelector("[data-menu]");
@@ -69,7 +76,25 @@ let scrollFrame;
 
 function currentTabFromUrl() {
   const candidate = new URLSearchParams(window.location.search).get("tab");
-  return HUB.tabs[candidate] ? candidate : "home";
+  if (HUB.tabs[candidate]) return candidate;
+  const pathname = window.location.pathname;
+  const directoryPath = pathname.endsWith("/") ? pathname : `${pathname}/`;
+  return ROUTE_TABS[pathname] || ROUTE_TABS[directoryPath] || "home";
+}
+
+function urlForTab(tab) {
+  const url = new URL(window.location.href);
+  if (tab === "sponsorship" || tab === "contact") {
+    url.pathname = `/${tab === "sponsorship" ? "sponsorship" : "contact"}/`;
+    url.search = "";
+    url.hash = "";
+    return url;
+  }
+  url.pathname = "/";
+  url.hash = "";
+  if (tab === "home") url.search = "";
+  else url.search = `?tab=${encodeURIComponent(tab)}`;
+  return url;
 }
 
 function registerMediaState(asset) {
@@ -144,10 +169,7 @@ function activateTab(tab, options = {}) {
   closeMenu();
 
   if (!options.fromHistory) {
-    const url = new URL(window.location.href);
-    if (target === "home") url.searchParams.delete("tab");
-    else url.searchParams.set("tab", target);
-    window.history.pushState({ tab: target }, "", url);
+    window.history.pushState({ tab: target }, "", urlForTab(target));
   }
 
   if (!options.keepScroll) window.scrollTo({ top: 0, behavior: options.instant ? "auto" : "smooth" });

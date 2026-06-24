@@ -10,9 +10,9 @@ test("search metadata and structured context are published", async ({ page, requ
   await expect(page.locator('link[rel="alternate"][type="application/json"]')).toHaveAttribute("href", "https://influxorigin.ro/ai-context.json");
 
   const graph = await page.locator('script[type="application/ld+json"]').evaluate((node) => JSON.parse(node.textContent));
-  expect(graph["@graph"].map((entity) => entity["@type"])).toEqual(
-    expect.arrayContaining(["Organization", "WebSite", "WebPage", "Product"])
-  );
+  const entityTypes = graph["@graph"].map((entity) => entity["@type"]);
+  expect(entityTypes).toEqual(expect.arrayContaining(["Organization", "WebSite", "WebPage", "Thing"]));
+  expect(entityTypes).not.toContain("Product");
 
   const llmsResponse = await request.get("/llms.txt");
   expect(llmsResponse.ok()).toBe(true);
@@ -27,15 +27,31 @@ test("search metadata and structured context are published", async ({ page, requ
   const sitemapResponse = await request.get("/sitemap.xml");
   const sitemap = await sitemapResponse.text();
   expect(sitemap).toContain("https://influxorigin.ro/technical.html");
+  expect(sitemap).toContain("https://influxorigin.ro/sponsorship/");
+  expect(sitemap).toContain("https://influxorigin.ro/contact/");
   expect(sitemap).not.toContain("https://influxorigin.ro/machine/");
 });
 
 test("redirect helper routes do not compete for indexing", async ({ request }) => {
-  for (const route of ["machine", "components", "team", "sponsorship", "contact", "evidence", "downloads", "resources"]) {
+  for (const route of ["machine", "components", "team", "evidence", "downloads", "resources"]) {
     const response = await request.get(`/${route}/`);
     const html = await response.text();
     expect(html).toContain('name="robots" content="noindex,follow"');
     expect(html).toContain('<link rel="canonical" href="https://influxorigin.ro/"');
     expect(html).not.toContain("artistul.github.io");
   }
+});
+
+test("sponsor and contact routes are indexable clean URLs", async ({ page }) => {
+  await page.goto("/sponsorship/");
+  await expect(page).toHaveTitle("Sponsors | InFlux Origin");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://influxorigin.ro/sponsorship/");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /index,follow/);
+  await expect(page.locator("#sponsorship")).toHaveClass(/is-active/);
+
+  await page.goto("/contact/");
+  await expect(page).toHaveTitle("Contact Us | InFlux Origin");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://influxorigin.ro/contact/");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /index,follow/);
+  await expect(page.locator("#contact")).toHaveClass(/is-active/);
 });
