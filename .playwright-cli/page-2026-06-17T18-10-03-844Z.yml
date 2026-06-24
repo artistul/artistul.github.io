@@ -1,0 +1,77 @@
+- generic [ref=e1]:
+  - banner [ref=e3]:
+    - button "Open InFlux home" [ref=e4] [cursor=pointer]
+    - tablist "Project views" [ref=e5]:
+      - generic [ref=e6]:
+        - tab "Home" [ref=e7] [cursor=pointer]
+        - tab "Machine Development" [ref=e8] [cursor=pointer]
+        - tab "InFlux Ecosystem" [ref=e9] [cursor=pointer]
+        - tab "Team" [ref=e10] [cursor=pointer]
+        - tab "Proof" [ref=e11] [cursor=pointer]
+      - generic [ref=e12]:
+        - tab "Downloads" [active] [selected] [ref=e13] [cursor=pointer]
+        - tab "Links" [ref=e14] [cursor=pointer]
+  - main [ref=e15]:
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+    - tabpanel "Downloads" [ref=e353]:
+      - generic [ref=e354]:
+        - paragraph [ref=e355]: Download Hub
+        - heading "Public files. Clearly labeled." [level=1] [ref=e356]:
+          - text: Public files.
+          - text: Clearly labeled.
+        - paragraph [ref=e357]: Welcome to the download hub! Check out the app, technical notebook or the branding materials.
+      - generic [ref=e358]:
+        - link "01 InFlux Operator APK Android APK / 19.79 MB / June 2026 Latest version of the Influx Origin control app. ↓" [ref=e359] [cursor=pointer]:
+          - /url: assets/influx-operator-latest.apk
+          - generic [ref=e360]: "01"
+          - generic [ref=e361]:
+            - heading "InFlux Operator APK" [level=2] [ref=e362]
+            - generic [ref=e363]: Android APK / 19.79 MB / June 2026
+          - paragraph [ref=e364]: Latest version of the Influx Origin control app.
+          - generic [ref=e365]: ↓
+        - link "02 InFlux Operator Legacy Android APK / 19.79 MB / May 2026 Auto Connect app build used for the ONCS presentation path. ↓" [ref=e366] [cursor=pointer]:
+          - /url: assets/influx-operator-auto-connect.apk
+          - generic [ref=e367]: "02"
+          - generic [ref=e368]:
+            - heading "InFlux Operator Legacy" [level=2] [ref=e369]
+            - generic [ref=e370]: Android APK / 19.79 MB / May 2026
+          - paragraph [ref=e371]: Auto Connect app build used for the ONCS presentation path.
+          - generic [ref=e372]: ↓
+        - link "03 Technical Notebook PDF / 645 KB / June 2026 Ten-page public notebook covering the project, system, testing, and direction. ↓" [ref=e373] [cursor=pointer]:
+          - /url: assets/influx-origin-technical-notebook.pdf
+          - generic [ref=e374]: "03"
+          - generic [ref=e375]:
+            - heading "Technical Notebook" [level=2] [ref=e376]
+            - generic [ref=e377]: PDF / 645 KB / June 2026
+          - paragraph [ref=e378]: Ten-page public notebook covering the project, system, testing, and direction.
+          - generic [ref=e379]: ↓
+        - link "04 Extended Technical Dossier Web technical notebook Long-form documentation covering mechanics, control, validation, limits, and next steps. ↓" [ref=e380] [cursor=pointer]:
+          - /url: technical.html
+          - generic [ref=e381]: "04"
+          - generic [ref=e382]:
+            - heading "Extended Technical Dossier" [level=2] [ref=e383]
+            - generic [ref=e384]: Web technical notebook
+          - paragraph [ref=e385]: Long-form documentation covering mechanics, control, validation, limits, and next steps.
+          - generic [ref=e386]: ↓
+        - link "05 InFlux Origin Logo SVG / 8 KB Scalable monochrome logo for project references and approved public coverage. ↓" [ref=e387] [cursor=pointer]:
+          - /url: assets/influx-origin-logo.svg
+          - generic [ref=e388]: "05"
+          - generic [ref=e389]:
+            - heading "InFlux Origin Logo" [level=2] [ref=e390]
+            - generic [ref=e391]: SVG / 8 KB
+          - paragraph [ref=e392]: Scalable monochrome logo for project references and approved public coverage.
+          - generic [ref=e393]: ↓
+      - paragraph [ref=e394]:
+        - strong [ref=e395]: "Prototype notice:"
+        - text: The public Influx Operator APK is still in development. Do not use it as a general-purpose machine controller. Constant machine supervision is required.
+      - paragraph [ref=e396]:
+        - strong [ref=e397]: "Integrity:"
+        - text: SHA-256 checksums are published in
+        - link "checksums.txt" [ref=e398] [cursor=pointer]:
+          - /url: assets/checksums.txt
+        - text: . If the checksums don't check out, your file is NOT from Influx! Be careful of modified installations!
+  - contentinfo [ref=e56]:
+    - button "InFlux Origin" [ref=e57] [cursor=pointer]:
+      - img "InFlux Origin" [ref=e58]
+    - paragraph
+    - button "Back to top ↑" [ref=e59] [cursor=pointer]

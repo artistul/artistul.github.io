@@ -1,0 +1,99 @@
+- generic [ref=e1]:
+  - banner [ref=e3]:
+    - button "Open InFlux home" [ref=e4] [cursor=pointer]
+    - tablist "Project views" [ref=e5]:
+      - generic [ref=e6]:
+        - tab "Home" [ref=e7] [cursor=pointer]
+        - tab "Machine Development" [active] [selected] [ref=e8] [cursor=pointer]
+        - tab "InFlux Ecosystem" [ref=e9] [cursor=pointer]
+        - tab "Team" [ref=e10] [cursor=pointer]
+        - tab "Proof" [ref=e11] [cursor=pointer]
+      - generic [ref=e12]:
+        - tab "Downloads" [ref=e13] [cursor=pointer]
+        - tab "Links" [ref=e14] [cursor=pointer]
+  - main [ref=e15]:
+    - tabpanel "Machine Development" [ref=e60]:
+      - generic [ref=e61]:
+        - heading "From an idea to a working machine." [level=1] [ref=e62]:
+          - text: From an idea
+          - text: to a working machine.
+        - paragraph [ref=e63]: We didn't build it all in one day. We took it step by step, making sure to improve along the way.
+      - generic [ref=e64]:
+        - article [ref=e65]:
+          - generic [ref=e66]: "01"
+          - generic [ref=e67]:
+            - text: An idea appears
+            - heading "Sketches" [level=2] [ref=e68]
+            - paragraph [ref=e69]:
+              - text: My 3D printer is too slow and we can't afford industrial machinery. But what is in between?
+              - text: Thus, we started sketching a machine that can manufacture high quantities for cheap.
+            - list [ref=e70]:
+              - listitem [ref=e71]: 01 Research the injection process
+              - listitem [ref=e72]: 02 Separate the machine into sub-systems
+              - listitem [ref=e73]: 03 Separate the sub-systems into individual components
+          - img "Original hand-drawn InFlux injection molding system sketch" [ref=e74]
+        - article [ref=e75]:
+          - generic [ref=e76]: "02"
+          - generic [ref=e77]:
+            - text: Physical experiments
+            - heading "The beginning of InFlux" [level=2] [ref=e78]
+            - paragraph [ref=e79]:
+              - text: The idea proved possible, so we defined a brand identity. We don't sell a generic injection molding machine.
+              - text: We sell Influx.
+            - list [ref=e80]:
+              - listitem [ref=e81]: 01 Design a brand name and logo.
+              - listitem [ref=e82]: 02 Define our goals.
+              - listitem [ref=e83]: 03 Study the market
+          - img "The first hand-drawn InFlux Origin MK1 logo on the cardboard prototype" [ref=e84]
+        - article [ref=e85]:
+          - generic [ref=e86]: "03"
+          - generic [ref=e87]:
+            - text: Machine Prototyping
+            - heading "Plan for MK1" [level=2] [ref=e88]
+            - paragraph [ref=e89]:
+              - text: Branding and general architecture in place, it was time for engineering.
+              - text: CAD, programming, simulations, test, repeat. There is no going back now.
+            - list [ref=e90]:
+              - listitem [ref=e91]: 01 Selecting and ordering components.
+              - listitem [ref=e92]: 02 Mechanical and electrical design.
+              - listitem [ref=e93]: 03 Making the first sub-systems work together.
+          - img "Early InFlux MK1 wireframe plan" [ref=e94]
+        - article [ref=e95]:
+          - generic [ref=e96]: "04"
+          - generic [ref=e97]:
+            - text: First working prototype
+            - heading "MK1" [level=2] [ref=e98]
+            - paragraph [ref=e99]: Our first complete machine capable of producing real injected parts. Although the automations aren't perfect, it gets the job done, and it certainly does it cheaper than industrial solutions.
+            - list [ref=e100]:
+              - listitem [ref=e101]: 01 Desktop sized
+              - listitem [ref=e102]: 02 Water-cooled resin and metal mold compatibility
+              - listitem [ref=e103]: 03 Fully compatible with the Influx Operator app
+          - img "InFlux Origin MK1 integrated machine render" [ref=e104]
+        - article [ref=e105]:
+          - generic [ref=e106]: "05"
+          - generic [ref=e107]:
+            - text: Future product direction
+            - heading "Next up" [level=2] [ref=e108]
+            - paragraph [ref=e109]: The next version will focus on a fully automated and monitored process, with water, molten plastic, and mold pressure monitoring. Designed for continuous thrustworthy operation.
+            - list [ref=e110]:
+              - listitem [ref=e111]: 01 Full machine enclosure
+              - listitem [ref=e112]: 02 Pressure sensing and temperature balancing
+              - listitem [ref=e113]: 03 Printed molds lifetime improvements
+          - img "InFlux packaging and product development concept" [ref=e114]
+      - region "Inspect the machine, not just the pitch." [ref=e115]:
+        - generic [ref=e116]:
+          - paragraph [ref=e117]: Interactive assembly
+          - heading "Inspect the machine, not just the pitch." [level=2] [ref=e118]
+          - paragraph [ref=e119]: No need to take our word for it, convince yourself. Take a look at the InFlux Origin Mk. 1.
+        - generic [ref=e120]:
+          - img "Preview of the InFlux Origin MK1 assembly" [ref=e121]
+          - generic [ref=e122]:
+            - paragraph [ref=e123]:
+              - strong [ref=e124]: Interactive assembly
+              - generic [ref=e125]: Loads a 0.31 MB optimized model and the viewer runtime.
+            - button "Load interactive 3D" [ref=e126] [cursor=pointer]
+  - contentinfo [ref=e56]:
+    - button "InFlux Origin" [ref=e57] [cursor=pointer]:
+      - img "InFlux Origin" [ref=e58]
+    - paragraph
+    - button "Back to top ↑" [ref=e59] [cursor=pointer]

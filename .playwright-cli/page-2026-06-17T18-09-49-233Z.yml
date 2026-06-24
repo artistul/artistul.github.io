@@ -1,0 +1,78 @@
+- generic [ref=e1]:
+  - banner [ref=e3]:
+    - button "Open InFlux home" [ref=e4] [cursor=pointer]
+    - tablist "Project views" [ref=e5]:
+      - generic [ref=e6]:
+        - tab "Home" [ref=e7] [cursor=pointer]
+        - tab "Machine Development" [ref=e8] [cursor=pointer]
+        - tab "InFlux Ecosystem" [ref=e9] [cursor=pointer]
+        - tab "Team" [active] [selected] [ref=e10] [cursor=pointer]
+        - tab "Proof" [ref=e11] [cursor=pointer]
+      - generic [ref=e12]:
+        - tab "Downloads" [ref=e13] [cursor=pointer]
+        - tab "Links" [ref=e14] [cursor=pointer]
+  - main [ref=e15]:
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+    - tabpanel "Team" [ref=e180]:
+      - generic [ref=e181]:
+        - paragraph [ref=e182]: Team Volta Circuits
+        - heading "Three disciplines. One physical result." [level=1] [ref=e183]:
+          - text: Three disciplines.
+          - text: One physical result.
+        - paragraph [ref=e184]: InFlux is built at the intersection of engineering, analysis and business. Nothing is left out.
+      - generic [ref=e185]:
+        - article [ref=e186]:
+          - generic [ref=e187]: "01"
+          - img "Stefan Tonegari at a Volta Circuits event" [ref=e188]
+          - generic [ref=e189]:
+            - paragraph [ref=e190]: Engineering lead
+            - heading "Stefan Tonegari" [level=2] [ref=e191]
+          - paragraph [ref=e192]: Mechanical engineering, manufacturing, CAD design, electrical integration, microcontrollers, and product development.
+          - strong [ref=e193]: Build the machine.
+        - article [ref=e194]:
+          - generic [ref=e195]: "02"
+          - img "Pintilei David at a Volta Circuits event" [ref=e196]
+          - generic [ref=e197]:
+            - paragraph [ref=e198]: Simulation + analysis lead
+            - heading "Pintilei David" [level=2] [ref=e199]
+          - paragraph [ref=e200]: Math, SimScale, Unreal Engine simulations, Python models, machine learning, and data analysis.
+          - strong [ref=e201]: Prove the decisions.
+        - article [ref=e202]:
+          - generic [ref=e203]: "03"
+          - generic "Fabian Volintiru portrait not yet published" [ref=e204]:
+            - generic [ref=e205]: FV
+          - generic [ref=e206]:
+            - paragraph [ref=e207]: Business lead
+            - heading "Fabian Volintiru" [level=2] [ref=e208]
+          - paragraph [ref=e209]: Marketing, sponsorships, economics, logistics, and pitching.
+          - strong [ref=e210]: Sell the idea.
+        - article [ref=e211]:
+          - generic [ref=e212]: "04"
+          - generic "Ciprian Ursu portrait not yet published" [ref=e213]:
+            - generic [ref=e214]: CU
+          - generic [ref=e215]:
+            - paragraph [ref=e216]: Embedded programming
+            - heading "Ciprian Ursu" [level=2] [ref=e217]
+          - paragraph [ref=e218]: Arduino, C++, C, backend development, automations, and system integration.
+          - strong [ref=e219]: Make it think.
+      - generic [ref=e220]:
+        - paragraph [ref=e221]: Working principle
+        - blockquote [ref=e222]: Plan. Build. Measure. Explain. As simple as that.
+      - region "Review the work. Challenge the assumptions." [ref=e223]:
+        - paragraph [ref=e224]: Public collaboration path
+        - heading "Review the work. Challenge the assumptions." [level=2] [ref=e225]:
+          - text: Review the work.
+          - text: Challenge the assumptions.
+        - paragraph [ref=e226]: Start with the public dossier, inspect the current artifacts, or follow the active repository.
+        - generic [ref=e227]:
+          - link "Read technical dossier" [ref=e228] [cursor=pointer]:
+            - /url: technical.html
+          - link "Open public artifacts" [ref=e229] [cursor=pointer]:
+            - /url: "?tab=downloads"
+          - link "View repository" [ref=e230] [cursor=pointer]:
+            - /url: https://github.com/artistul/Influx
+  - contentinfo [ref=e56]:
+    - button "InFlux Origin" [ref=e57] [cursor=pointer]:
+      - img "InFlux Origin" [ref=e58]
+    - paragraph
+    - button "Back to top ↑" [ref=e59] [cursor=pointer]

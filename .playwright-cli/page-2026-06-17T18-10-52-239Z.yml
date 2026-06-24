@@ -1,0 +1,65 @@
+- generic [ref=e1]:
+  - banner [ref=e3]:
+    - button "Open InFlux home" [ref=e4] [cursor=pointer]
+    - button "Close navigation menu" [expanded] [ref=e451] [cursor=pointer]:
+      - generic [ref=e448]: Close
+    - tablist "Project views" [ref=e5]:
+      - generic [ref=e6]:
+        - tab "Home" [active] [selected] [ref=e7] [cursor=pointer]
+        - tab "Machine Development" [ref=e8] [cursor=pointer]
+        - tab "InFlux Ecosystem" [ref=e9] [cursor=pointer]
+        - tab "Team" [ref=e10] [cursor=pointer]
+        - tab "Proof" [ref=e11] [cursor=pointer]
+      - generic [ref=e12]:
+        - tab "Downloads" [ref=e13] [cursor=pointer]
+        - tab "Links" [ref=e14] [cursor=pointer]
+  - main:
+    - tabpanel "Home":
+      - generic:
+        - generic:
+          - heading "Real manufacturing. Desktop scale." [level=1]:
+            - text: Real manufacturing.
+            - text: Desktop scale.
+          - paragraph: InFlux Origin bridges the gap between a 3D printed prototype and industrial manufacturing with real thermoplastic shots, resin 3D printed molds, and an easy-to-use operator app!
+          - generic:
+            - button "See the evidence"
+            - button "Explore the machine"
+        - generic:
+          - img "CAD render of the InFlux Origin MK1 machine"
+          - generic:
+            - strong: Origin MK1
+      - region "The middle ground should not be empty.":
+        - paragraph: Why InFlux?
+        - heading "The middle ground should not be empty." [level=2]
+        - paragraph:
+          - text: You can print a model in hours or dump tens of thousands of euros into industrial manufacturing. Why not something in between? Faster than 3D printing. Semi-industrial quantities.
+          - text: Influx is the answer.
+      - region "From an ambitious idea to a working machine.":
+        - generic:
+          - paragraph: Evidence route
+          - heading "From an ambitious idea to a working machine." [level=2]
+        - generic:
+          - button "01 Thermal tested 6,331 samples in the longest captured campaign.":
+            - generic: "01"
+            - strong: Thermal tested
+            - generic: 6,331 samples in the longest captured campaign.
+          - button "02 Control stack built Firmware, Wi-Fi bridge, operator app, and servicing functions.":
+            - generic: "02"
+            - strong: Control stack built
+            - generic: Firmware, Wi-Fi bridge, operator app, and servicing functions.
+          - button "03 Part injected We don't try to convince. We prove.":
+            - generic: "03"
+            - strong: Part injected
+            - generic: We don't try to convince. We prove.
+      - generic:
+        - paragraph: Public resources
+        - heading "Built to be inspected, questioned, and improved." [level=2]
+        - button "Meet the team ↗":
+          - text: Meet the team
+          - generic: ↗
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+  - contentinfo:
+    - button "InFlux Origin":
+      - img "InFlux Origin"
+    - paragraph
+    - button "Back to top ↑"

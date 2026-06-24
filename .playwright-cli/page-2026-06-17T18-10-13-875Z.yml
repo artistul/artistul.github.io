@@ -1,0 +1,74 @@
+- generic [ref=e1]:
+  - banner [ref=e3]:
+    - button "Open InFlux home" [ref=e4] [cursor=pointer]
+    - tablist "Project views" [ref=e5]:
+      - generic [ref=e6]:
+        - tab "Home" [ref=e7] [cursor=pointer]
+        - tab "Machine Development" [ref=e8] [cursor=pointer]
+        - tab "InFlux Ecosystem" [ref=e9] [cursor=pointer]
+        - tab "Team" [ref=e10] [cursor=pointer]
+        - tab "Proof" [ref=e11] [cursor=pointer]
+      - generic [ref=e12]:
+        - tab "Downloads" [ref=e13] [cursor=pointer]
+        - tab "Links" [active] [selected] [ref=e14] [cursor=pointer]
+  - main [ref=e15]:
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+    - tabpanel "Links" [ref=e399]:
+      - generic [ref=e400]:
+        - paragraph [ref=e401]: External Links + References
+        - heading "Follow the work. Check the sources." [level=1] [ref=e402]:
+          - text: Follow the work.
+          - text: Check the sources.
+        - paragraph [ref=e403]: Public project destinations and technical references that informed the platform.
+      - generic [ref=e404]:
+        - generic [ref=e405]:
+          - generic [ref=e406]:
+            - generic [ref=e407]: "01"
+            - heading "Project destinations" [level=2] [ref=e408]
+          - link "Technical documentation Read the extended project dossier ↗" [ref=e409] [cursor=pointer]:
+            - /url: technical.html
+            - generic [ref=e410]: Technical documentation
+            - generic [ref=e411]: Read the extended project dossier
+            - generic [ref=e412]: ↗
+          - button "Download hub APK, notebook, and public brand files ↗" [ref=e413] [cursor=pointer]:
+            - generic [ref=e414]: Download hub
+            - generic [ref=e415]: APK, notebook, and public brand files
+            - generic [ref=e416]: ↗
+          - button "Evidence overview Results, measurements, and current limits ↗" [ref=e417] [cursor=pointer]:
+            - generic [ref=e418]: Evidence overview
+            - generic [ref=e419]: Results, measurements, and current limits
+            - generic [ref=e420]: ↗
+          - link "Public repository Inspect the active software and firmware record ↗" [ref=e421] [cursor=pointer]:
+            - /url: https://github.com/artistul/Influx
+            - generic [ref=e422]: Public repository
+            - generic [ref=e423]: Inspect the active software and firmware record
+            - generic [ref=e424]: ↗
+        - generic [ref=e425]:
+          - generic [ref=e426]:
+            - generic [ref=e427]: "02"
+            - heading "Technical references" [level=2] [ref=e428]
+          - link "Formlabs Low-volume injection molding with 3D printed molds ↗" [ref=e429] [cursor=pointer]:
+            - /url: https://formlabs.com/white-papers/low-volume-rapid-injection-molding-with-3d-printed-molds/
+            - generic [ref=e430]: Formlabs
+            - generic [ref=e431]: Low-volume injection molding with 3D printed molds
+            - generic [ref=e432]: ↗
+          - link "Protolabs Plastic injection molding design guidelines ↗" [ref=e433] [cursor=pointer]:
+            - /url: https://www.protolabs.com/services/injection-molding/plastic-injection-molding/design-guidelines/
+            - generic [ref=e434]: Protolabs
+            - generic [ref=e435]: Plastic injection molding design guidelines
+            - generic [ref=e436]: ↗
+          - link "STMicroelectronics NUCLEO-H753ZI product documentation ↗" [ref=e437] [cursor=pointer]:
+            - /url: https://www.st.com/en/evaluation-tools/nucleo-h753zi.html
+            - generic [ref=e438]: STMicroelectronics
+            - generic [ref=e439]: NUCLEO-H753ZI product documentation
+            - generic [ref=e440]: ↗
+          - link "OMEGA Engineering Thermocouple fundamentals ↗" [ref=e441] [cursor=pointer]:
+            - /url: https://www.omega.com/en-us/resources/thermocouple-hub
+            - generic [ref=e442]: OMEGA Engineering
+            - generic [ref=e443]: Thermocouple fundamentals
+            - generic [ref=e444]: ↗
+  - contentinfo [ref=e56]:
+    - button "InFlux Origin" [ref=e57] [cursor=pointer]:
+      - img "InFlux Origin" [ref=e58]
+    - paragraph
+    - button "Back to top ↑" [ref=e59] [cursor=pointer]

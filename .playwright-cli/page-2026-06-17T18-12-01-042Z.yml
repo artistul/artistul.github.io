@@ -1,0 +1,54 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e3]:
+    - button "Open InFlux home" [ref=e4] [cursor=pointer]
+    - button "Open navigation menu" [ref=e5] [cursor=pointer]:
+      - generic [ref=e8]: Menu
+  - main [ref=e9]:
+    - tabpanel "Home" [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - heading "Real manufacturing. Desktop scale." [level=1] [ref=e13]:
+            - text: Real manufacturing.
+            - text: Desktop scale.
+          - paragraph [ref=e14]: InFlux Origin bridges the gap between a 3D printed prototype and industrial manufacturing with real thermoplastic shots, resin 3D printed molds, and an easy-to-use operator app!
+          - generic [ref=e15]:
+            - button "See the evidence" [ref=e16] [cursor=pointer]
+            - button "Explore the machine" [ref=e17] [cursor=pointer]
+        - generic [ref=e18]:
+          - img "CAD render of the InFlux Origin MK1 machine" [ref=e19]
+          - strong [ref=e21]: Origin MK1
+      - region "The middle ground should not be empty." [ref=e22]:
+        - paragraph [ref=e23]: Why InFlux?
+        - heading "The middle ground should not be empty." [level=2] [ref=e24]
+        - paragraph [ref=e25]:
+          - text: You can print a model in hours or dump tens of thousands of euros into industrial manufacturing. Why not something in between? Faster than 3D printing. Semi-industrial quantities.
+          - text: Influx is the answer.
+      - region "From an ambitious idea to a working machine." [ref=e26]:
+        - generic [ref=e27]:
+          - paragraph [ref=e28]: Evidence route
+          - heading "From an ambitious idea to a working machine." [level=2] [ref=e29]
+        - generic [ref=e30]:
+          - button "01 Thermal tested 6,331 samples in the longest captured campaign." [ref=e31] [cursor=pointer]:
+            - generic [ref=e32]: "01"
+            - strong [ref=e33]: Thermal tested
+            - generic [ref=e34]: 6,331 samples in the longest captured campaign.
+          - button "02 Control stack built Firmware, Wi-Fi bridge, operator app, and servicing functions." [ref=e35] [cursor=pointer]:
+            - generic [ref=e36]: "02"
+            - strong [ref=e37]: Control stack built
+            - generic [ref=e38]: Firmware, Wi-Fi bridge, operator app, and servicing functions.
+          - button "03 Part injected We don't try to convince. We prove." [ref=e39] [cursor=pointer]:
+            - generic [ref=e40]: "03"
+            - strong [ref=e41]: Part injected
+            - generic [ref=e42]: We don't try to convince. We prove.
+      - generic [ref=e43]:
+        - paragraph [ref=e44]: Public resources
+        - heading "Built to be inspected, questioned, and improved." [level=2] [ref=e45]
+        - button "Meet the team ↗" [ref=e46] [cursor=pointer]:
+          - text: Meet the team
+          - generic [ref=e47]: ↗
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+  - contentinfo [ref=e48]:
+    - button "InFlux Origin" [ref=e49] [cursor=pointer]:
+      - img "InFlux Origin" [ref=e50]
+    - paragraph
+    - button "Back to top ↑" [ref=e51] [cursor=pointer]

@@ -1,0 +1,127 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e3]:
+    - button "Open InFlux home" [ref=e4] [cursor=pointer]
+    - button "Open navigation menu" [ref=e452] [cursor=pointer]:
+      - generic [ref=e448]: Menu
+  - main [ref=e15]:
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+    - tabpanel "Proof" [ref=e231]:
+      - generic [ref=e232]:
+        - generic [ref=e233]:
+          - paragraph [ref=e234]: Proof of the prototype
+          - heading "Not perfect. But it proves the concept." [level=1] [ref=e235]:
+            - text: Not perfect.
+            - text: But it proves the concept.
+          - paragraph [ref=e236]: A bad-looking first part doesn't prove the machine is poorly made. It proves the machine can control heat, melt plastic, control injection amount, flow cooling water, clamp molds and eject parts.
+        - figure [ref=e237]:
+          - generic [ref=e238]:
+            - img [ref=e239]
+            - img [ref=e240]
+            - img "First successfully injected InFlux part" [ref=e241]
+      - generic [ref=e242]:
+        - article [ref=e243]:
+          - generic [ref=e244]: 6,331
+          - paragraph [ref=e245]: samples in the longest captured thermal campaign, recorded April 16, 2026
+        - article [ref=e246]:
+          - generic [ref=e247]: 108.6 min
+          - paragraph [ref=e248]: measured heat-up, stabilization, and cooldown period
+        - article [ref=e249]:
+          - generic [ref=e250]: ±8%
+          - paragraph [ref=e251]: reported thermal model agreement with SimScale simulations
+        - article [ref=e252]:
+          - generic [ref=e253]: 1 stack
+          - paragraph [ref=e254]: operator app, machine, and safety all in one system
+      - generic [ref=e255]:
+        - img "InFlux thermal testing in the laboratory" [ref=e256]
+        - generic [ref=e257]:
+          - paragraph [ref=e258]: Thermal tests
+          - heading "Measurements defined the variables." [level=2] [ref=e259]
+          - paragraph [ref=e260]: Thermal camera images and logged sensor data exposed heat loss, hot spots, and control behavior before those weaknesses became hidden inside an enclosure.
+      - generic [ref=e261]:
+        - img "Landscape view of the InFlux dedicated motherboard design" [ref=e262]
+        - generic [ref=e263]:
+          - paragraph [ref=e264]: Centralised control
+          - heading "Every action answers to the same hub." [level=2] [ref=e265]
+          - paragraph [ref=e266]: The connectivity board communicates with the user, so the motherboard can focus on safety and precise control. All settings, sensors and outputs are controlled by the motherboard, running an STM32.
+      - generic [ref=e267]:
+        - img "Box containing 56 parts injected by InFlux Origin MK1" [ref=e268]
+        - generic [ref=e269]:
+          - paragraph [ref=e270]: Repeatability
+          - heading "56 parts. One mold." [level=2] [ref=e271]:
+            - text: 56 parts.
+            - text: One mold.
+          - paragraph [ref=e272]: A single 3D printed resin mold was able to produce 56 individual parts before failure. Analysis revealed failure points and proposed quality-of-life improvements. The next version WILL be better.
+      - generic [ref=e273]:
+        - paragraph [ref=e274]: Prototype status
+        - heading "What is not proven. . . .yet" [level=2] [ref=e275]:
+          - text: What is not proven.
+          - text: . . .yet
+        - generic [ref=e276]:
+          - article [ref=e277]:
+            - generic [ref=e278]:
+              - heading "Mold life" [level=3] [ref=e279]
+              - generic [ref=e280]: 22.4%
+            - paragraph [ref=e281]: Resin mold durability across continuous, repeated cycles.
+            - generic [ref=e282]:
+              - generic:
+                - generic: "56"
+              - generic: 250 cycles
+              - img [ref=e283]
+              - progressbar "Mold life validation" [ref=e295]
+              - generic "Milestones":
+                - generic "25 cycles milestone passed"
+                - generic "50 cycles milestone passed"
+                - generic "100 cycles milestone"
+                - generic "200 cycles milestone"
+          - article [ref=e296]:
+            - generic [ref=e297]:
+              - heading "Continuous running" [level=3] [ref=e298]
+              - generic [ref=e299]: 12.5%
+            - paragraph [ref=e300]: Stable output quality across longer, controlled runs.
+            - generic [ref=e301]:
+              - generic:
+                - generic: "3"
+              - generic: 24 hours
+              - img [ref=e302]
+              - progressbar "Continuous running validation" [ref=e314]
+              - generic "Milestones":
+                - generic "1 hour milestone passed"
+                - generic "3 hours milestone passed"
+                - generic "6 hours milestone"
+                - generic "12 hours milestone"
+          - article [ref=e315]:
+            - generic [ref=e316]:
+              - heading "Price reduction" [level=3] [ref=e317]
+              - generic [ref=e318]: 40%
+            - paragraph [ref=e319]: Reducing the profitable selling cost as much as possible.
+            - generic [ref=e320]:
+              - generic:
+                - generic: 4,000
+              - generic: €2,500
+              - img [ref=e321]
+              - progressbar "Production readiness validation" [ref=e333]
+              - generic "Milestones":
+                - generic "€4,500 milestone passed"
+                - generic "€4,000 milestone passed"
+                - generic "€3,500 milestone"
+                - generic "€3,000 milestone"
+          - article [ref=e334]:
+            - generic [ref=e335]:
+              - heading "Max water temperature" [level=3] [ref=e336]
+              - generic [ref=e337]: 65%
+            - paragraph [ref=e338]: Maximum temperature the mold cooling water reaches during normal operation.
+            - generic [ref=e339]:
+              - generic:
+                - generic: "32"
+              - generic: 25 °C
+              - img [ref=e340]
+              - progressbar "Process calibration validation" [ref=e352]
+              - generic "Milestones":
+                - generic "40 °C milestone passed"
+                - generic "35 °C milestone passed"
+                - generic "30 °C milestone"
+  - contentinfo [ref=e56]:
+    - button "InFlux Origin" [ref=e57] [cursor=pointer]:
+      - img "InFlux Origin" [ref=e58]
+    - paragraph
+    - button "Back to top ↑" [ref=e59] [cursor=pointer]
