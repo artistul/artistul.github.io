@@ -259,7 +259,10 @@ h1, h2 {
   transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 .action:hover { transform: translateY(-2px); border-color: var(--red); }
-.action-primary { border-color: var(--red); background: var(--red); }
+.action-primary {
+  border-color: var(--red);
+  background: rgba(255,255,255,.035);
+}
 .action-primary:hover { background: var(--white); color: var(--black); }
 
 .hero-artifact {

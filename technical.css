@@ -157,7 +157,7 @@ main::before {
   font-weight: 850;
   transition: transform 180ms ease, border-color 180ms ease;
 }
-.primary-button { background: var(--red); }
+.primary-button { border: 1px solid var(--red); background: rgba(255,255,255,.035); }
 .secondary-button { border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.035); }
 .primary-button:hover, .secondary-button:hover { transform: translateY(-2px); }
 .doc-summary {

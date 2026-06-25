@@ -117,6 +117,31 @@ test("mobile navigation is touch-friendly, contained, and clear", async ({ page 
   await expect(page.locator("html")).toHaveJSProperty("scrollWidth", 390);
 });
 
+test("solid red clickable controls are reserved for contact", async ({ page }) => {
+  for (const path of ["/index.html", "/technical.html"]) {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(path);
+    const redTargets = await page.evaluate(() => {
+      const redFills = new Set(["rgb(236, 23, 44)", "rgb(225, 25, 44)"]);
+      return [...document.querySelectorAll("a, button")].flatMap((element) => {
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        if (!redFills.has(style.backgroundColor) || rect.width === 0 || rect.height === 0) return [];
+        return [{
+          text: element.textContent.trim(),
+          href: element instanceof HTMLAnchorElement ? element.getAttribute("href") : "",
+          nav: element.getAttribute("data-nav") || ""
+        }];
+      });
+    });
+
+    expect(redTargets.length).toBeGreaterThan(0);
+    expect(redTargets.every((target) =>
+      /contact us/i.test(target.text) || target.href?.startsWith("contact") || target.nav === "contact"
+    )).toBe(true);
+  }
+});
+
 test("display typography and hero machine alignment adapt by device", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html");
