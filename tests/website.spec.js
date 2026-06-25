@@ -62,14 +62,14 @@ test("mobile navigation is touch-friendly, contained, and clear", async ({ page 
     return {
       background: style.backgroundColor,
       color: style.color,
-      hasEnvelopeBox: envelope.borderTopWidth !== "0px" && envelope.width !== "auto",
+      hasEnvelopeIcon: envelope.backgroundImage.includes("svg") && envelope.width !== "auto",
       hasArrow: arrow.borderTopWidth !== "0px" && arrow.borderRightWidth !== "0px"
     };
   });
   expect(contactCta).toEqual({
     background: "rgb(236, 23, 44)",
     color: "rgb(244, 241, 237)",
-    hasEnvelopeBox: true,
+    hasEnvelopeIcon: true,
     hasArrow: true
   });
   const storyTabs = await page.locator(".story-tabs button").evaluateAll((buttons) =>
