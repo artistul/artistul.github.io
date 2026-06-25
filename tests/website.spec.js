@@ -55,6 +55,23 @@ test("mobile navigation is touch-friendly, contained, and clear", async ({ page 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/index.html?tab=versions");
   await expect(page.locator(".utility-tabs button")).toHaveText(["Contact Us", "Sponsors"]);
+  const contactCta = await page.locator("#tab-contact").evaluate((button) => {
+    const style = getComputedStyle(button);
+    const envelope = getComputedStyle(button, "::before");
+    const arrow = getComputedStyle(button, "::after");
+    return {
+      background: style.backgroundColor,
+      color: style.color,
+      hasEnvelopeBox: envelope.borderTopWidth !== "0px" && envelope.width !== "auto",
+      hasArrow: arrow.borderTopWidth !== "0px" && arrow.borderRightWidth !== "0px"
+    };
+  });
+  expect(contactCta).toEqual({
+    background: "rgb(236, 23, 44)",
+    color: "rgb(244, 241, 237)",
+    hasEnvelopeBox: true,
+    hasArrow: true
+  });
   const storyTabs = await page.locator(".story-tabs button").evaluateAll((buttons) =>
     buttons.map((button) => button.textContent.trim())
   );
