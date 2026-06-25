@@ -73,6 +73,7 @@ const navButtons = [...document.querySelectorAll("[data-nav]")];
 const tabs = [...document.querySelectorAll('[role="tab"]')];
 let modelViewerPromise;
 let scrollFrame;
+let activeMediaObserver;
 
 function currentTabFromUrl() {
   const candidate = new URLSearchParams(window.location.search).get("tab");
@@ -99,27 +100,82 @@ function urlForTab(tab) {
 
 function registerMediaState(asset) {
   if (!(asset instanceof HTMLImageElement)) return;
+  if (asset.dataset.mediaStateRegistered === "true") return;
+  asset.dataset.mediaStateRegistered = "true";
+  const usePlaceholder = asset.getAttribute("fetchpriority") !== "high";
   const settle = () => {
     asset.classList.remove("media-loading");
-    asset.classList.add("media-loaded");
+    if (usePlaceholder) asset.classList.add("media-loaded");
   };
-  asset.classList.add("media-loading");
+  if (usePlaceholder) asset.classList.add("media-loading");
   asset.addEventListener("load", settle, { once: true });
   asset.addEventListener("error", settle, { once: true });
   if (asset.complete && asset.currentSrc) settle();
 }
 
+function loadMediaAsset(asset, { eager = false } = {}) {
+  if (!(asset instanceof HTMLImageElement)) return;
+  registerMediaState(asset);
+
+  if (eager && asset.loading === "lazy") asset.loading = "eager";
+
+  if (asset.dataset.srcset) {
+    asset.srcset = asset.dataset.srcset;
+    asset.removeAttribute("data-srcset");
+  }
+
+  if (asset.dataset.src) {
+    asset.src = asset.dataset.src;
+    asset.removeAttribute("data-src");
+    return;
+  }
+
+  if (eager && asset.getAttribute("src") && !asset.currentSrc) {
+    const source = asset.getAttribute("src");
+    asset.removeAttribute("src");
+    asset.src = source;
+  }
+}
+
+function getActiveMediaObserver() {
+  if (!("IntersectionObserver" in window)) return null;
+  if (!activeMediaObserver) {
+    activeMediaObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        loadMediaAsset(entry.target, { eager: true });
+        activeMediaObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: "900px 0px" });
+  }
+  return activeMediaObserver;
+}
+
+function shouldLoadMediaNow(asset, index) {
+  if (index < 2) return true;
+  const rect = asset.getBoundingClientRect();
+  return rect.top < window.innerHeight + 360 && rect.bottom > -160;
+}
+
 function hydratePanel(panel) {
-  panel.querySelectorAll("img[data-src], img[data-srcset]").forEach((asset) => {
+  const observer = getActiveMediaObserver();
+  panel.querySelectorAll("img").forEach((asset, index) => {
+    if (!asset.dataset.src && !asset.dataset.srcset && asset.currentSrc) return;
     registerMediaState(asset);
-    if (asset.loading === "lazy") asset.loading = "eager";
+    if (shouldLoadMediaNow(asset, index) || !observer) {
+      loadMediaAsset(asset, { eager: true });
+      return;
+    }
     if (asset.dataset.srcset) {
-      asset.srcset = asset.dataset.srcset;
-      asset.removeAttribute("data-srcset");
+      observer.observe(asset);
+      return;
     }
     if (asset.dataset.src) {
-      asset.src = asset.dataset.src;
-      asset.removeAttribute("data-src");
+      observer.observe(asset);
+      return;
+    }
+    if (asset.getAttribute("src") && !asset.currentSrc) {
+      observer.observe(asset);
     }
   });
 }

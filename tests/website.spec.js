@@ -12,6 +12,9 @@ for (const viewport of viewports) {
   test(`home responsive regression / ${viewport.name}`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto("/index.html");
+    await expect.poll(() => page.locator(".hero-artifact img").evaluate((image) =>
+      Boolean(image.currentSrc && image.naturalWidth > 0)
+    )).toBe(true);
     await expect(page.locator("html")).toHaveJSProperty("scrollWidth", viewport.width);
     await expect(page).toHaveScreenshot(`home-${viewport.name}.png`, { fullPage: false });
   });
@@ -149,7 +152,15 @@ test("hidden media and 3D load only when requested", async ({ page }) => {
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await expect(page.locator('script[src*="model-viewer"]')).toHaveCount(0);
   await page.goto("/index.html?tab=versions");
-  await expect(page.locator(".version-timeline img[src]")).toHaveCount(5);
+  await expect.poll(() => page.locator(".version-timeline img").evaluateAll((images) =>
+    images.filter((image) => image.currentSrc && image.naturalWidth > 0).length
+  )).toBeGreaterThanOrEqual(2);
+  const versionImageCount = await page.locator(".version-timeline img").count();
+  for (let index = 0; index < versionImageCount; index += 1) {
+    const image = page.locator(".version-timeline img").nth(index);
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((node) => Boolean(node.currentSrc && node.naturalWidth > 0))).toBe(true);
+  }
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await page.getByRole("button", { name: "Load interactive 3D" }).click();
   await expect(page.locator("model-viewer")).toHaveAttribute("src", "assets/machine-assembly-optimized.glb");
@@ -198,6 +209,9 @@ test("sponsors tab shows current sponsor tiers and visibility render", async ({ 
   await expect(page.getByRole("link", { name: "Interested in becoming a sponsor? Contact us! ↗" })).toHaveAttribute("href", "contact/");
   await expect(page.locator(".sponsor-logo-wall img")).toHaveCount(6);
   await expect(page.locator(".sponsor-logo-wall img").first()).toHaveAttribute("src", "assets/sponsor-01-taggo.png");
+  await expect.poll(() => page.locator("#sponsorship img").evaluateAll((images) =>
+    images.every((image) => image.currentSrc && image.naturalWidth > 0)
+  )).toBe(true);
   const sponsorHeights = await page.locator(".sponsor-logo-wall img").evaluateAll((logos) =>
     logos.map((logo) => Math.round(logo.getBoundingClientRect().height))
   );
@@ -384,7 +398,25 @@ test("proof media loads after navigating from an indexable route", async ({ page
   await page.getByRole("tab", { name: "Proof" }).click();
   await expect(page).toHaveURL(/\/\?tab=proof$/);
   await expect(page.locator("#proof")).toHaveClass(/is-active/);
-  await expect.poll(() => page.locator("#proof img").evaluateAll((images) =>
+  await expect.poll(() => page.locator(".proof-hero img").evaluateAll((images) =>
+    images.every((image) => image.currentSrc && image.naturalWidth > 0)
+  )).toBe(true);
+
+  const featureCount = await page.locator("#proof .proof-feature").count();
+  for (let index = 0; index < featureCount; index += 1) {
+    const feature = page.locator("#proof .proof-feature").nth(index);
+    await feature.scrollIntoViewIfNeeded();
+    await expect.poll(() => feature.locator("img").evaluate((image) =>
+      Boolean(image.currentSrc && image.naturalWidth > 0)
+    )).toBe(true);
+  }
+});
+
+test("visible sponsor media loads from the clean route", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/sponsorship/");
+  await expect(page.locator("#sponsorship")).toHaveClass(/is-active/);
+  await expect.poll(() => page.locator("#sponsorship img").evaluateAll((images) =>
     images.every((image) => image.currentSrc && image.naturalWidth > 0)
   )).toBe(true);
 });
