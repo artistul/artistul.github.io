@@ -170,26 +170,22 @@ ul { margin: 0; padding: 0; list-style: none; }
 #tab-contact::after {
   content: "";
   position: absolute;
-  top: 0;
-  right: 14px;
-  bottom: 0;
+  top: 50%;
+  right: 13px;
+  bottom: auto;
   left: auto;
-  width: 9px;
-  height: 9px;
-  margin-block: auto;
-  border-top: 3px solid currentColor;
-  border-right: 3px solid currentColor;
-  background: transparent;
-  transform: rotate(45deg);
+  width: 14px;
+  height: 18px;
+  background: center / contain no-repeat url("data:image/svg+xml,%3Csvg%20viewBox%3D%270%200%2014%2018%27%20fill%3D%27none%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3Cpath%20d%3D%27M3%202L10%209L3%2016%27%20stroke%3D%27white%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27square%27%20stroke-linejoin%3D%27miter%27%2F%3E%3C%2Fsvg%3E");
+  transform: translateY(-50%);
   transition: transform 180ms ease;
 }
 #tab-contact:hover,
 #tab-contact.is-active {
   color: var(--white);
 }
-#tab-contact:hover::after,
-#tab-contact.is-active::after {
-  transform: translateX(3px) rotate(45deg);
+#tab-contact:hover::after {
+  transform: translate(3px, -50%);
 }
 .menu-toggle { display: none; }
 
@@ -1019,7 +1015,7 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
   .primary-nav button { padding-inline: 6px; font-size: 9px; }
   #tab-contact { gap: 7px; padding: 9px 28px 9px 12px; letter-spacing: .12em; }
   #tab-contact::before { width: 17px; height: 13px; }
-  #tab-contact::after { right: 11px; width: 8px; height: 8px; border-width: 3px; }
+  #tab-contact::after { right: 10px; width: 12px; height: 16px; }
   .home-hero { grid-template-columns: .9fr 1.1fr; padding-inline: 36px; }
   .version-timeline article, .project-entry { grid-template-columns: .2fr .8fr; }
   .version-timeline img, .project-entry img { grid-column: 2; }
@@ -1350,15 +1346,6 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
   font: 700 16px/1.4 "Segoe UI", Arial, sans-serif;
 }
 .contact-hero strong span { color: var(--red); }
-.contact-identity {
-  width: min(760px, 100%);
-  margin: clamp(24px, 4vw, 42px) 0 0;
-}
-.contact-identity img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
 .contact-options {
   width: min(var(--max), calc(100% - 56px));
   margin: 0 auto;
@@ -1693,8 +1680,7 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
 .model-poster,
 .uniform-render img,
 .partner-visual img,
-.sponsor-logo-wall img,
-.contact-identity img {
+.sponsor-logo-wall img {
   filter: none !important;
 }
 

@@ -63,7 +63,7 @@ test("mobile navigation is touch-friendly, contained, and clear", async ({ page 
       background: style.backgroundColor,
       color: style.color,
       hasEnvelopeIcon: envelope.backgroundImage.includes("svg") && envelope.width !== "auto",
-      hasArrow: arrow.borderTopWidth !== "0px" && arrow.borderRightWidth !== "0px"
+      hasArrow: arrow.backgroundImage.includes("svg") && arrow.width !== "auto"
     };
   });
   expect(contactCta).toEqual({
@@ -237,10 +237,7 @@ test("contact tab exposes the direct email paths", async ({ page }) => {
   await expect(page.locator(".contact-option")).toHaveCount(2);
   await expect(page.getByRole("heading", { name: "Sponsorship" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "General Inquiry" })).toBeVisible();
-  await expect(page.locator(".contact-identity img")).toHaveAttribute("src", "/assets/contact-us-identity.jpeg");
-  await expect.poll(() => page.locator(".contact-identity img").evaluate((image) =>
-    Boolean(image.currentSrc && image.naturalWidth > 0)
-  )).toBe(true);
+  await expect(page.locator(".contact-identity")).toHaveCount(0);
   await expect(page.locator(".contact-option .action")).toHaveCount(0);
   await expect(page.getByRole("link", { name: /tonegari\.stefan@gmail\.com/ })).toHaveAttribute("href", /mailto:tonegari\.stefan@gmail\.com/);
   await expect(page.getByRole("link", { name: /david\.pintilei9@gmail\.com/ })).toHaveAttribute("href", /mailto:david\.pintilei9@gmail\.com/);
