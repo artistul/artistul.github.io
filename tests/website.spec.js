@@ -54,6 +54,12 @@ test("mobile hero essentials fit a Xiaomi-sized opening viewport", async ({ page
 test("mobile navigation is touch-friendly, contained, and clear", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/index.html?tab=versions");
+  await expect(page.locator(".utility-tabs button")).toHaveText(["Contact Us", "Sponsors"]);
+  const storyTabs = await page.locator(".story-tabs button").evaluateAll((buttons) =>
+    buttons.map((button) => button.textContent.trim())
+  );
+  expect(storyTabs).not.toContain("Downloads");
+  expect(storyTabs).not.toContain("Links");
 
   const menu = page.locator("[data-menu]");
   await expect(menu).toHaveAccessibleName("Open navigation menu");
@@ -136,12 +142,12 @@ test("downloads include current and ONCS auto-connect operator APKs", async ({ p
   expect(downloadLinks).toEqual(expect.arrayContaining([
     expect.objectContaining({
       label: "InFlux Operator APK",
-      href: "assets/influx-operator-latest.apk",
+      href: "/assets/influx-operator-latest.apk",
       hasDownload: true
     }),
     expect.objectContaining({
       label: "InFlux Operator Legacy",
-      href: "assets/influx-operator-auto-connect.apk",
+      href: "/assets/influx-operator-auto-connect.apk",
       hasDownload: true
     })
   ]));
@@ -163,13 +169,14 @@ test("hidden media and 3D load only when requested", async ({ page }) => {
   }
   await expect(page.locator("model-viewer")).toHaveCount(0);
   await page.getByRole("button", { name: "Load interactive 3D" }).click();
-  await expect(page.locator("model-viewer")).toHaveAttribute("src", "assets/machine-assembly-optimized.glb");
+  await expect(page.locator("model-viewer")).toHaveAttribute("src", "/assets/machine-assembly-optimized.glb");
 });
 
 test("team portraits and evidence landscape render", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=team");
   await expect(page.locator(".member-portrait")).toHaveCount(4);
+  await expect(page.locator(".member-portrait").first()).toHaveCSS("filter", "none");
   await expect(page.getByRole("heading", { name: "Ciprian Ursu" })).toBeVisible();
   await expect(page).toHaveScreenshot("team-desktop.png", { fullPage: false });
   await page.getByRole("tab", { name: "Proof" }).click();
@@ -183,11 +190,15 @@ test("contact tab exposes the direct email paths", async ({ page }) => {
 
   await expect(page).toHaveTitle("Contact Us | InFlux Origin");
   await expect(page.getByRole("tab", { name: "Contact Us" })).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByRole("heading", { name: "Contact US" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Contact Us" })).toBeVisible();
   await expect(page.getByText("We're here to connect.")).toBeVisible();
   await expect(page.locator(".contact-option")).toHaveCount(2);
   await expect(page.getByRole("heading", { name: "Sponsorship" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "General Inquiry" })).toBeVisible();
+  await expect(page.locator(".contact-identity img")).toHaveAttribute("src", "/assets/contact-us-identity.jpeg");
+  await expect.poll(() => page.locator(".contact-identity img").evaluate((image) =>
+    Boolean(image.currentSrc && image.naturalWidth > 0)
+  )).toBe(true);
   await expect(page.locator(".contact-option .action")).toHaveCount(0);
   await expect(page.getByRole("link", { name: /tonegari\.stefan@gmail\.com/ })).toHaveAttribute("href", /mailto:tonegari\.stefan@gmail\.com/);
   await expect(page.getByRole("link", { name: /david\.pintilei9@gmail\.com/ })).toHaveAttribute("href", /mailto:david\.pintilei9@gmail\.com/);
@@ -208,7 +219,7 @@ test("sponsors tab shows current sponsor tiers and visibility render", async ({ 
   await expect(page.getByRole("heading", { name: "Thank you to our sponsors!" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Interested in becoming a sponsor? Contact us! ↗" })).toHaveAttribute("href", "contact/");
   await expect(page.locator(".sponsor-logo-wall img")).toHaveCount(6);
-  await expect(page.locator(".sponsor-logo-wall img").first()).toHaveAttribute("src", "assets/sponsor-01-taggo.png");
+  await expect(page.locator(".sponsor-logo-wall img").first()).toHaveAttribute("src", "/assets/sponsor-01-taggo.png");
   await expect.poll(() => page.locator("#sponsorship img").evaluateAll((images) =>
     images.every((image) => image.currentSrc && image.naturalWidth > 0)
   )).toBe(true);
@@ -219,7 +230,10 @@ test("sponsors tab shows current sponsor tiers and visibility render", async ({ 
   expect(sponsorHeights[1]).toBeGreaterThan(sponsorHeights[3]);
   expect(sponsorHeights[1]).toBe(sponsorHeights[2]);
   await expect(page.getByRole("heading", { name: "Your brand can travel with the team." })).toBeVisible();
-  await expect(page.locator(".uniform-render img")).toHaveAttribute("src", "assets/sponsorship-uniform-render.jpeg");
+  await expect(page.locator(".uniform-render img")).toHaveAttribute("src", "/assets/sponsorship-uniform-render.jpeg");
+  await expect.poll(() => page.locator(".uniform-render img").evaluate((image) =>
+    Boolean(image.currentSrc && image.naturalWidth > 0)
+  )).toBe(true);
   await page.getByRole("link", { name: "Interested in becoming a sponsor? Contact us! ↗" }).click();
   await expect(page.getByRole("tab", { name: "Contact Us" })).toHaveAttribute("aria-selected", "true");
   await expect(page).toHaveTitle("Contact Us | InFlux Origin");
@@ -302,6 +316,7 @@ test("proof fluid meters and updated control copy render", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=proof");
   await expect(page.getByRole("heading", { name: "Not perfect. But it proves the concept." })).toBeVisible();
+  await expect(page.locator(".proof-hero figure img").last()).toHaveCSS("filter", "none");
   await expect(page.locator(".fluid-meter")).toHaveCount(4);
   await expect(page.getByRole("progressbar")).toHaveCount(4);
   await expect.poll(() => page.locator(".proof-progress[data-current][data-final]").evaluateAll((cards) =>

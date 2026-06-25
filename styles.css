@@ -1304,6 +1304,15 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
   font: 700 16px/1.4 "Segoe UI", Arial, sans-serif;
 }
 .contact-hero strong span { color: var(--red); }
+.contact-identity {
+  width: min(760px, 100%);
+  margin: clamp(24px, 4vw, 42px) 0 0;
+}
+.contact-identity img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 .contact-options {
   width: min(var(--max), calc(100% - 56px));
   margin: 0 auto;
@@ -1620,7 +1629,27 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
     border-right: 0;
     border-bottom: 1px solid var(--line);
   }
-  .partner-facts a:last-child, .partner-facts button:last-child { border-bottom: 0; }
+.partner-facts a:last-child, .partner-facts button:last-child { border-bottom: 0; }
+}
+
+/* Keep photographic and render assets in their original contrast and color. */
+.hero-artifact img,
+.version-timeline img,
+.project-entry img,
+.operator-gallery img,
+.board-main,
+.board-detail,
+.thermal-main,
+.thermal-context,
+.member-portrait,
+.proof-hero figure img,
+.proof-feature img,
+.model-poster,
+.uniform-render img,
+.partner-visual img,
+.sponsor-logo-wall img,
+.contact-identity img {
+  filter: none !important;
 }
 
 .proof-hero { min-height: 88svh; }

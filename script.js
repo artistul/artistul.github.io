@@ -75,6 +75,21 @@ let modelViewerPromise;
 let scrollFrame;
 let activeMediaObserver;
 
+function resolveSitePath(value) {
+  if (!value || /^(?:[a-z][a-z0-9+.-]*:|#|\/)/i.test(value)) return value;
+  if (window.location.protocol === "file:") return value;
+  if (value.startsWith("assets/") || value === "technical.html") return `/${value}`;
+  return value;
+}
+
+function resolveSrcset(value) {
+  return value.split(",").map((candidate) => {
+    const parts = candidate.trim().split(/\s+/);
+    if (!parts[0]) return "";
+    return [resolveSitePath(parts[0]), ...parts.slice(1)].join(" ");
+  }).filter(Boolean).join(", ");
+}
+
 function currentTabFromUrl() {
   const candidate = new URLSearchParams(window.location.search).get("tab");
   if (HUB.tabs[candidate]) return candidate;
@@ -120,12 +135,12 @@ function loadMediaAsset(asset, { eager = false } = {}) {
   if (eager && asset.loading === "lazy") asset.loading = "eager";
 
   if (asset.dataset.srcset) {
-    asset.srcset = asset.dataset.srcset;
+    asset.srcset = resolveSrcset(asset.dataset.srcset);
     asset.removeAttribute("data-srcset");
   }
 
   if (asset.dataset.src) {
-    asset.src = asset.dataset.src;
+    asset.src = resolveSitePath(asset.dataset.src);
     asset.removeAttribute("data-src");
     return;
   }
@@ -162,7 +177,7 @@ function hydratePanel(panel) {
   panel.querySelectorAll("img").forEach((asset, index) => {
     if (!asset.dataset.src && !asset.dataset.srcset && asset.currentSrc) return;
     registerMediaState(asset);
-    if (shouldLoadMediaNow(asset, index) || !observer) {
+    if (asset.hasAttribute("data-priority-media") || shouldLoadMediaNow(asset, index) || !observer) {
       loadMediaAsset(asset, { eager: true });
       return;
     }
@@ -338,7 +353,7 @@ function loadModelViewerRuntime() {
     modelViewerPromise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.type = "module";
-      script.src = "assets/model-viewer.min.js";
+      script.src = resolveSitePath("assets/model-viewer.min.js");
       script.onload = resolve;
       script.onerror = reject;
       document.head.append(script);
@@ -354,7 +369,7 @@ document.querySelector("[data-load-model]")?.addEventListener("click", async (ev
   try {
     await loadModelViewerRuntime();
     shell.innerHTML = `
-      <model-viewer src="assets/machine-assembly-optimized.glb" alt="Interactive 3D assembly of InFlux Origin MK1"
+      <model-viewer src="${resolveSitePath("assets/machine-assembly-optimized.glb")}" alt="Interactive 3D assembly of InFlux Origin MK1"
         camera-controls auto-rotate rotation-per-second="10deg" camera-orbit="38deg 64deg 3.3m"
         field-of-view="24deg" shadow-intensity="0.85" exposure="1.15"
         environment-image="neutral" interaction-prompt="none">
@@ -370,13 +385,17 @@ function renderDownloads() {
   const list = document.querySelector("#download-list");
   if (!list) return;
   list.innerHTML = HUB.downloads.map((file, index) => `
-    <a class="download-entry" href="${file.href}" ${file.download ? "download" : ""}>
+    <a class="download-entry" href="${resolveSitePath(file.href)}" ${file.download ? "download" : ""}>
       <span class="file-index">${String(index + 1).padStart(2, "0")}</span>
       <div><h2>${file.name}</h2><small>${file.meta}</small></div>
       <p>${file.description}</p>
       <span>↓</span>
     </a>`).join("");
 }
+
+document.querySelectorAll('a[href^="assets/"], a[href="technical.html"]').forEach((link) => {
+  link.setAttribute("href", resolveSitePath(link.getAttribute("href")));
+});
 
 renderDownloads();
 activateTab(currentTabFromUrl(), { fromHistory: true, instant: true, keepScroll: true });
@@ -426,7 +445,7 @@ function initFluidProgressMeters() {
       if (/^[€$£¥]$/.test(unit)) return `${unit}${formatNumber(number)}`;
       return `${formatNumber(number)}${displayedUnit ? ` ${displayedUnit}` : ""}`;
     };
-    const formatPercentage = (number) => `${formatNumber(number)}%`;
+    const formatPercentage = (number) => `${formatNumber(number, 1)}%`;
 
     value.textContent = formatPercentage(target);
     indicatorValue.textContent = formatNumber(currentTarget);
@@ -556,7 +575,7 @@ function initFluidProgressMeters() {
         position += velocity * delta;
 
         setFluidPosition(position);
-        const currentValue = Math.round(target * Math.min(1, Math.max(0, (position - trackStart) / (targetX - trackStart))));
+        const currentValue = Math.round(target * Math.min(1, Math.max(0, (position - trackStart) / (targetX - trackStart))) * 10) / 10;
         value.textContent = formatPercentage(currentValue);
         indicatorValue.textContent = formatNumber(currentTarget * Math.min(1, target > 0 ? currentValue / target : 0));
 
