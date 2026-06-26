@@ -151,15 +151,22 @@ test("display typography and hero machine alignment adapt by device", async ({ p
     const machine = document.querySelector(".hero-artifact img").getBoundingClientRect();
     return {
       fontFamily: getComputedStyle(document.querySelector(".home-hero h1")).fontFamily,
-      centerDelta: Math.round(Math.abs((artifact.left + artifact.width / 2) - (machine.left + machine.width / 2)))
+      centerDelta: Math.round(Math.abs((artifact.left + artifact.width / 2) - (machine.left + machine.width / 2))),
+      viewportOverflow: Math.round(Math.max(0, -machine.left) + Math.max(0, machine.right - innerWidth))
     };
   });
 
   expect(desktopState.fontFamily).toContain("Impact");
   expect(desktopState.centerDelta).toBeLessThanOrEqual(2);
+  expect(desktopState.viewportOverflow).toBe(0);
 
   await page.setViewportSize({ width: 407, height: 812 });
+  const mobileMachineOverflow = await page.locator(".hero-artifact img").evaluate((image) => {
+    const rect = image.getBoundingClientRect();
+    return Math.round(Math.max(0, -rect.left) + Math.max(0, rect.right - innerWidth));
+  });
   const mobileFont = await page.locator(".home-hero h1").evaluate((element) => getComputedStyle(element).fontFamily);
+  expect(mobileMachineOverflow).toBe(0);
   expect(mobileFont).toContain("InFlux Display");
 });
 
