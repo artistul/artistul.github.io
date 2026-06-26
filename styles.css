@@ -260,9 +260,12 @@ h1, h2 {
 
 .hero-artifact {
   position: relative;
+  width: 780px;
+  max-width: calc(100vw - 32px);
   min-height: min(72svh, 780px);
   display: grid;
   place-items: center;
+  justify-self: center;
   transition: transform 220ms ease-out;
 }
 .hero-artifact::before {
@@ -282,7 +285,7 @@ h1, h2 {
 .hero-artifact img {
   position: relative;
   z-index: 1;
-  width: min(112%, calc(100vw - 32px));
+  width: 100%;
   height: auto;
   max-width: none;
   filter: brightness(1.4) contrast(1.08) drop-shadow(0 45px 40px rgba(0,0,0,.75));
