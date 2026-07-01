@@ -31,7 +31,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="InFlux Thermal Mold Analyzer")
     parser.add_argument("--headless-smoke", action="store_true", help="Run offline smoke test without opening the GUI.")
     parser.add_argument("--benchmark", action="store_true", help="Run worker scaling benchmark.")
-    parser.add_argument("--benchmark-output", default="outputs/benchmark_scaling.csv")
+    parser.add_argument("--benchmark-output", default="outputs/benchmark_hybrid_max.csv")
     parser.add_argument("--import-step", default="", help="Import a STEP file and print detected bodies.")
     args = parser.parse_args()
 

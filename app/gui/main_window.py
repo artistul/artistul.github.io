@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from threading import Event
 from time import perf_counter
 
 from PySide6.QtCore import QThread, QTimer, Signal
@@ -15,6 +16,7 @@ from PySide6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QMainWindow,
     QMessageBox,
     QPushButton,
@@ -33,7 +35,14 @@ from app.geometry.bodies import Body
 from app.geometry.step_importer import StepImportError, import_step, load_demo_geometry
 from app.optimization.sweep import SweepConfig, run_sweep
 from app.reporting.exporter import create_session_dir, export_simulation, export_sweep
-from app.simulation.resources import apply_process_controls, detect_resources, live_usage, recommended_workers
+from app.simulation.backends import BackendMode, BackendSelection, run_simulation_backend
+from app.simulation.profiles import PRESET_LABELS, PRESET_CUSTOM, get_resource_profile, enforce_worker_limits
+from app.simulation.resources import (
+    ResourceLimits,
+    apply_process_controls,
+    detect_resources,
+    sample_resource_snapshot,
+)
 from app.simulation.solver import SimulationConfig, SimulationResult, run_transient_simulation
 from app.visualization.mpl_viewer import MoldFigureCanvas
 
@@ -42,14 +51,18 @@ class SimulationThread(QThread):
     finished_result = Signal(object)
     failed = Signal(str)
 
-    def __init__(self, bodies: list[Body], config: SimulationConfig) -> None:
+    def __init__(self, bodies: list[Body], config: SimulationConfig, backend: BackendMode, cpu_only: bool, gpu_enabled: bool) -> None:
         super().__init__()
         self.bodies = bodies
         self.config = config
+        self.backend = backend
+        self.cpu_only = cpu_only
+        self.gpu_enabled = gpu_enabled
 
     def run(self) -> None:
         try:
-            self.finished_result.emit(run_transient_simulation(self.bodies, self.config))
+            result, selection = run_simulation_backend(self.bodies, self.config, self.backend, self.cpu_only, self.gpu_enabled)
+            self.finished_result.emit((result, selection))
         except Exception as exc:
             self.failed.emit(str(exc))
 
@@ -57,20 +70,50 @@ class SimulationThread(QThread):
 class SweepThread(QThread):
     progress_changed = Signal(int, int, object)
     finished_rows = Signal(object)
+    throttle_changed = Signal(str)
     failed = Signal(str)
 
-    def __init__(self, bodies: list[Body], config: SimulationConfig, sweep: SweepConfig) -> None:
+    def __init__(self, bodies: list[Body], config: SimulationConfig, sweep: SweepConfig, limits: ResourceLimits) -> None:
         super().__init__()
         self.bodies = bodies
         self.config = config
         self.sweep = sweep
+        self.limits = limits
+        self.pause_event = Event()
+        self.cancel_event = Event()
 
     def run(self) -> None:
         try:
-            rows = run_sweep(self.bodies, self.config, self.sweep, self.progress_changed.emit)
+            rows = run_sweep(
+                self.bodies,
+                self.config,
+                self.sweep,
+                self.progress_changed.emit,
+                self._should_pause,
+                self.cancel_event.is_set,
+                self.throttle_changed.emit,
+            )
             self.finished_rows.emit(rows)
         except Exception as exc:
             self.failed.emit(str(exc))
+
+    def pause(self) -> None:
+        self.pause_event.set()
+
+    def resume(self) -> None:
+        self.pause_event.clear()
+
+    def cancel(self) -> None:
+        self.cancel_event.set()
+        self.pause_event.clear()
+
+    def _should_pause(self) -> tuple[bool, str]:
+        if self.pause_event.is_set():
+            return True, "Manual pause requested."
+        snapshot = sample_resource_snapshot(self.limits)
+        if snapshot.throttle_state in {"THROTTLE", "EMERGENCY_PAUSE", "GPU_THROTTLE"}:
+            return True, snapshot.throttle_reason
+        return False, ""
 
 
 class MainWindow(QMainWindow):
@@ -84,6 +127,11 @@ class MainWindow(QMainWindow):
         self.session_dir = create_session_dir()
         self.worker_thread: QThread | None = None
         self.active_workers = 0
+        self.active_jobs = 0
+        self.completed_jobs = 0
+        self.last_rate = 0.0
+        self.throttle_reason = "No throttling active."
+        self.backend_selection: BackendSelection | None = None
         self.started_at = perf_counter()
 
         self._build_ui()
@@ -134,46 +182,90 @@ class MainWindow(QMainWindow):
 
         resource_box = QGroupBox("Resources")
         resource_form = QFormLayout(resource_box)
-        self.mode_combo = QComboBox()
-        self.mode_combo.addItems(["background", "normal", "high", "max"])
-        self.mode_combo.setCurrentText("normal")
-        self.mode_combo.currentTextChanged.connect(self._refresh_resource_defaults)
-        self.aggressive_max = QCheckBox("Aggressive MAX")
-        self.aggressive_max.stateChanged.connect(self._refresh_resource_defaults)
+        self.profile_combo = QComboBox()
+        self.profile_combo.addItems(PRESET_LABELS)
+        self.profile_combo.setCurrentText("Normal")
+        self.profile_combo.currentTextChanged.connect(self._refresh_resource_defaults)
         self.worker_spin = _spin(1, 256, 1)
         self.ram_spin = _double_spin(0.5, 1024.0, 4.0, 0.5)
+        self.min_free_ram_spin = _double_spin(4.0, 128.0, 8.0, 0.5)
+        self.vram_spin = _double_spin(0.0, 128.0, 0.0, 0.5)
+        self.cache_path_edit = QLineEdit()
+        self.cache_browse_button = QPushButton("Browse")
+        self.cache_browse_button.clicked.connect(self._choose_cache_path)
         self.priority_combo = QComboBox()
-        self.priority_combo.addItems(["background", "normal", "high"])
+        self.priority_combo.addItems(["background", "below_normal", "normal", "high"])
         self.affinity_spin = _spin(0, 256, 0)
+        self.backend_combo = QComboBox()
+        self.backend_combo.addItems([mode.value for mode in BackendMode])
+        self.cpu_only_check = QCheckBox("CPU-only")
+        self.gpu_enabled_check = QCheckBox("GPU / Hybrid enabled")
         self.resource_label = QLabel("")
+        self.resource_label.setWordWrap(True)
+        cache_row = QWidget()
+        cache_layout = QHBoxLayout(cache_row)
+        cache_layout.setContentsMargins(0, 0, 0, 0)
+        cache_layout.addWidget(self.cache_path_edit)
+        cache_layout.addWidget(self.cache_browse_button)
         for label, widget in [
-            ("Mode", self.mode_combo),
-            ("MAX option", self.aggressive_max),
+            ("Preset", self.profile_combo),
             ("Workers", self.worker_spin),
             ("Max RAM GB", self.ram_spin),
+            ("Min free RAM GB", self.min_free_ram_spin),
+            ("VRAM cap GB", self.vram_spin),
+            ("Cache/output", cache_row),
             ("Priority", self.priority_combo),
             ("Affinity CPUs (0=auto)", self.affinity_spin),
+            ("Backend", self.backend_combo),
+            ("CPU override", self.cpu_only_check),
+            ("GPU option", self.gpu_enabled_check),
             ("Detected", self.resource_label),
         ]:
             resource_form.addRow(label, widget)
+
+        monitor_box = QGroupBox("Resource Monitor")
+        monitor_form = QFormLayout(monitor_box)
+        self.cpu_monitor_label = QLabel("CPU --")
+        self.ram_monitor_label = QLabel("RAM --")
+        self.disk_monitor_label = QLabel("Disk --")
+        self.gpu_monitor_label = QLabel("GPU telemetry unavailable")
+        self.throttle_label = QLabel("No throttling active.")
+        self.throttle_label.setWordWrap(True)
+        for label, widget in [
+            ("CPU", self.cpu_monitor_label),
+            ("RAM", self.ram_monitor_label),
+            ("Cache disk", self.disk_monitor_label),
+            ("GPU / VRAM", self.gpu_monitor_label),
+            ("Throttling", self.throttle_label),
+        ]:
+            monitor_form.addRow(label, widget)
 
         action_box = QGroupBox("Run")
         action_layout = QGridLayout(action_box)
         self.single_button = QPushButton("Run Single Simulation")
         self.sweep_button = QPushButton("Run Parameter Sweep")
+        self.pause_button = QPushButton("Pause")
+        self.resume_button = QPushButton("Resume")
+        self.cancel_button = QPushButton("Cancel")
         self.export_button = QPushButton("Export Current Result")
         self.single_button.clicked.connect(self._run_single)
         self.sweep_button.clicked.connect(self._run_sweep)
+        self.pause_button.clicked.connect(self._pause_run)
+        self.resume_button.clicked.connect(self._resume_run)
+        self.cancel_button.clicked.connect(self._cancel_run)
         self.export_button.clicked.connect(self._export_current)
         self.progress = QProgressBar()
         self.status_label = QLabel("Ready.")
         self.usage_label = QLabel("CPU 0% | RAM 0% | workers 0 | completed 0")
         action_layout.addWidget(self.single_button, 0, 0, 1, 2)
         action_layout.addWidget(self.sweep_button, 1, 0, 1, 2)
-        action_layout.addWidget(self.export_button, 2, 0, 1, 2)
-        action_layout.addWidget(self.progress, 3, 0, 1, 2)
-        action_layout.addWidget(self.status_label, 4, 0, 1, 2)
-        action_layout.addWidget(self.usage_label, 5, 0, 1, 2)
+        action_layout.addWidget(self.pause_button, 2, 0)
+        action_layout.addWidget(self.resume_button, 2, 1)
+        action_layout.addWidget(self.cancel_button, 3, 0)
+        action_layout.addWidget(self.export_button, 3, 1)
+        action_layout.addWidget(self.progress, 4, 0, 1, 2)
+        action_layout.addWidget(self.status_label, 5, 0, 1, 2)
+        action_layout.addWidget(self.usage_label, 6, 0, 1, 2)
 
         self.log = QTextEdit()
         self.log.setReadOnly(True)
@@ -182,6 +274,7 @@ class MainWindow(QMainWindow):
         controls_layout.addWidget(self.body_table, 2)
         controls_layout.addWidget(sim_box)
         controls_layout.addWidget(resource_box)
+        controls_layout.addWidget(monitor_box)
         controls_layout.addWidget(action_box)
         controls_layout.addWidget(self.log, 1)
 
@@ -189,8 +282,11 @@ class MainWindow(QMainWindow):
         self.viewer = MoldFigureCanvas()
         self.results_text = QTextEdit()
         self.results_text.setReadOnly(True)
+        self.leaderboard_table = QTableWidget(0, 5)
+        self.leaderboard_table.setHorizontalHeaderLabels(["Rank", "Score", "Water C", "Convection", "Cycle s"])
         tabs.addTab(self.viewer, "3D / Temperature")
         tabs.addTab(self.results_text, "Results")
+        tabs.addTab(self.leaderboard_table, "Optimization Leaderboard")
 
         root.addWidget(controls)
         root.addWidget(tabs)
@@ -256,7 +352,13 @@ class MainWindow(QMainWindow):
         self._sync_process_controls()
         self._set_running(True)
         self.progress.setRange(0, 0)
-        self.worker_thread = SimulationThread(self.bodies, self._sim_config())
+        self.worker_thread = SimulationThread(
+            self.bodies,
+            self._sim_config(),
+            BackendMode(self.backend_combo.currentText()),
+            self.cpu_only_check.isChecked(),
+            self.gpu_enabled_check.isChecked(),
+        )
         self.worker_thread.finished_result.connect(self._single_finished)
         self.worker_thread.failed.connect(self._run_failed)
         self.worker_thread.start()
@@ -268,28 +370,34 @@ class MainWindow(QMainWindow):
         self._set_running(True)
         self.progress.setRange(0, 100)
         self.progress.setValue(0)
-        ram_limited_workers = max(1, int(self.ram_spin.value() / 0.25))
-        effective_workers = min(self.worker_spin.value(), ram_limited_workers)
+        effective_workers = enforce_worker_limits(self._current_profile(), self.worker_spin.value(), self.ram_spin.value())
         sweep = SweepConfig(
             water_temperatures_c=(self.water_spin.value() - 4, self.water_spin.value(), self.water_spin.value() + 4),
             convection_w_m2k=(self.convection_spin.value() * 0.5, self.convection_spin.value(), self.convection_spin.value() * 2.0),
             cycle_times_s=(max(1.0, self.cycle_spin.value() - 10), self.cycle_spin.value(), self.cycle_spin.value() + 10),
             workers=effective_workers,
         )
-        self.worker_thread = SweepThread(self.bodies, self._sim_config(), sweep)
+        self.worker_thread = SweepThread(self.bodies, self._sim_config(), sweep, self._resource_limits())
         self.worker_thread.progress_changed.connect(self._sweep_progress)
         self.worker_thread.finished_rows.connect(self._sweep_finished)
+        self.worker_thread.throttle_changed.connect(self._throttle_changed)
         self.worker_thread.failed.connect(self._run_failed)
         self.worker_thread.start()
         self.active_workers = effective_workers
         self._log(f"Parameter sweep started with {sweep.workers} workers. RAM cap: {self.ram_spin.value():.1f} GB.")
 
-    def _single_finished(self, result: SimulationResult) -> None:
+    def _single_finished(self, payload: object) -> None:
+        result, selection = payload
+        self.backend_selection = selection
         self.last_result = result
         final_temps = {body_id: temps[-1] for body_id, temps in result.body_temperatures_c.items()}
         self.viewer.draw_bodies(self.bodies, final_temps)
         paths = export_simulation(self.session_dir, self.bodies, result)
-        self.results_text.setPlainText(f"Summary:\n{result.summary}\n\nExports:\n" + "\n".join(f"{k}: {v}" for k, v in paths.items()))
+        self.results_text.setPlainText(
+            f"Backend: requested {selection.requested.value}, effective {selection.effective.value}\n"
+            f"{selection.message}\n\nSummary:\n{result.summary}\n\nExports:\n"
+            + "\n".join(f"{k}: {v}" for k, v in paths.items())
+        )
         self._log(f"Simulation complete. Exported to {self.session_dir}")
         self.progress.setRange(0, 100)
         self.progress.setValue(100)
@@ -301,6 +409,9 @@ class MainWindow(QMainWindow):
         self.progress.setValue(percent)
         elapsed = max(0.001, perf_counter() - self.started_at)
         rate = done / elapsed * 60.0
+        self.completed_jobs = done
+        self.active_jobs = max(0, total - done)
+        self.last_rate = rate
         speedup = max(1, self.active_workers)
         self.status_label.setText(f"Sweep {done}/{total} | {rate:.1f} simulations/min | worker speedup target x{speedup}")
         self._log(f"Sweep case {done}/{total}: {row}")
@@ -310,6 +421,7 @@ class MainWindow(QMainWindow):
         path = export_sweep(self.session_dir, self.last_sweep_rows)
         best = self.last_sweep_rows[0] if self.last_sweep_rows else {}
         self.results_text.setPlainText(f"Best sweep result:\n{best}\n\nCSV: {path}")
+        self._update_leaderboard()
         self._log(f"Sweep complete. Best result: {best}")
         self.progress.setValue(100)
         self.active_workers = 0
@@ -322,6 +434,29 @@ class MainWindow(QMainWindow):
         self.active_workers = 0
         self._log(f"ERROR: {message}")
         QMessageBox.critical(self, "Simulation error", message)
+
+    def _pause_run(self) -> None:
+        if isinstance(self.worker_thread, SweepThread):
+            self.worker_thread.pause()
+            self._throttle_changed("Manual pause requested.")
+
+    def _resume_run(self) -> None:
+        if isinstance(self.worker_thread, SweepThread):
+            self.worker_thread.resume()
+            self._throttle_changed("No throttling active.")
+
+    def _cancel_run(self) -> None:
+        if isinstance(self.worker_thread, SweepThread):
+            self.worker_thread.cancel()
+            self._throttle_changed("Cancel requested; active jobs will finish, new jobs will not be scheduled.")
+        elif self.worker_thread and self.worker_thread.isRunning():
+            self.worker_thread.requestInterruption()
+            self._throttle_changed("Cancel requested; single simulation will stop after current solver call.")
+
+    def _throttle_changed(self, reason: str) -> None:
+        self.throttle_reason = reason
+        self.throttle_label.setText(reason)
+        self.status_label.setText(reason)
 
     def _export_current(self) -> None:
         if not self.last_result:
@@ -345,36 +480,105 @@ class MainWindow(QMainWindow):
 
     def _refresh_resource_defaults(self) -> None:
         resources = detect_resources()
-        workers = recommended_workers(self.mode_combo.currentText(), self.aggressive_max.isChecked())
+        profile = get_resource_profile(self.profile_combo.currentText(), resources)
         self.worker_spin.setMaximum(max(1, resources.logical_threads))
-        self.worker_spin.setValue(workers)
+        self.worker_spin.setValue(profile.cpu_workers)
         self.affinity_spin.setMaximum(max(0, resources.logical_threads))
+        self.affinity_spin.setValue(profile.cpu_affinity_workers)
         self.ram_spin.setMaximum(max(1.0, resources.total_ram_gb))
-        self.ram_spin.setValue(max(1.0, min(resources.available_ram_gb * 0.7, resources.total_ram_gb)))
+        self.ram_spin.setValue(profile.ram_cap_gb)
+        self.min_free_ram_spin.setValue(profile.min_free_ram_gb)
+        self.vram_spin.setValue(profile.vram_cap_gb)
+        self.cache_path_edit.setText(profile.cache_output_path)
+        self.priority_combo.setCurrentText(profile.process_priority)
+        self.backend_combo.setCurrentText(profile.backend_mode.value)
+        self.gpu_enabled_check.setChecked(profile.gpu_enabled)
+        self.cpu_only_check.setChecked(not profile.gpu_enabled)
         self.resource_label.setText(
-            f"{resources.physical_cores} cores / {resources.logical_threads} threads | "
-            f"{resources.available_ram_gb:.1f}/{resources.total_ram_gb:.1f} GB free | GPU: {resources.gpu_summary}"
+            f"{profile.name}: {resources.physical_cores} cores / {resources.logical_threads} threads | "
+            f"logical available {profile.logical_threads_available}, workers {profile.cpu_workers}, "
+            f"reserved threads {profile.logical_threads_reserved} | "
+            f"RAM cap {profile.ram_cap_gb:.1f} GB, aggressive cap {profile.aggressive_ram_cap_gb:.1f} GB, "
+            f"free reserve {profile.min_free_ram_gb:.1f} GB, emergency {profile.emergency_free_ram_gb:.1f} GB | "
+            f"VRAM cap {profile.vram_cap_gb:.1f} GB | GPU: {resources.gpu_summary} | {profile.notes}"
         )
 
     def _sync_process_controls(self) -> None:
-        message = apply_process_controls(self.priority_combo.currentText(), self.affinity_spin.value() or None)
+        if self.priority_combo.currentText() == "high":
+            self._log("WARNING: high process priority was explicitly selected. Desktop responsiveness may suffer.")
+        message = apply_process_controls(
+            self.priority_combo.currentText(),
+            self.affinity_spin.value() or None,
+            reserve_logical_threads=self._current_profile().logical_threads_reserved,
+        )
         self.started_at = perf_counter()
         self._log(message)
 
     def _update_usage(self) -> None:
-        usage = live_usage()
         worker_active = self.active_workers if self.worker_thread and self.worker_thread.isRunning() else 0
-        completed = len(self.last_sweep_rows)
+        snapshot = sample_resource_snapshot(
+            self._resource_limits(),
+            worker_active,
+            self.active_jobs,
+            self.completed_jobs,
+            self.last_rate,
+        )
+        completed = self.completed_jobs or len(self.last_sweep_rows)
+        self.cpu_monitor_label.setText(f"system {snapshot.cpu_percent:.0f}% | app {snapshot.app_cpu_percent:.0f}%")
+        self.ram_monitor_label.setText(
+            f"used {snapshot.ram_used_gb:.1f} GB | free {snapshot.ram_free_gb:.1f} GB | app {snapshot.app_ram_gb:.2f} GB"
+        )
+        self.disk_monitor_label.setText(f"free {snapshot.disk_free_gb:.1f} GB | used {snapshot.disk_used_percent:.0f}%")
+        self.gpu_monitor_label.setText(
+            f"{snapshot.gpu.name} | VRAM cap {self.vram_spin.value():.1f} GB | {snapshot.gpu.message}"
+        )
+        if snapshot.throttle_state != "OK":
+            self.throttle_reason = snapshot.throttle_reason
+        self.throttle_label.setText(self.throttle_reason if self.throttle_reason != "No throttling active." else snapshot.throttle_reason)
         self.usage_label.setText(
-            f"CPU {usage['cpu_percent']:.0f}% | RAM {usage['ram_percent']:.0f}% | "
-            f"free {usage['available_ram_gb']:.1f} GB | workers active {worker_active} | "
-            f"completed {completed} | speedup target x{max(1, worker_active)}"
+            f"CPU {snapshot.cpu_percent:.0f}% | RAM {snapshot.ram_percent:.0f}% | "
+            f"workers {worker_active} | active jobs {self.active_jobs} | completed {completed} | "
+            f"{snapshot.simulations_per_minute:.1f} sim/min"
         )
 
     def _set_running(self, running: bool) -> None:
         for button in [self.single_button, self.sweep_button, self.import_button, self.demo_button]:
             button.setEnabled(not running)
         self.status_label.setText("Running..." if running else "Ready.")
+
+    def _current_profile(self):
+        return get_resource_profile(self.profile_combo.currentText(), detect_resources())
+
+    def _resource_limits(self) -> ResourceLimits:
+        return ResourceLimits(
+            ram_cap_gb=self.ram_spin.value(),
+            aggressive_ram_cap_gb=max(self.ram_spin.value(), min(60.0, self.ram_spin.value() + 4.0)),
+            min_free_ram_gb=self.min_free_ram_spin.value(),
+            emergency_free_ram_gb=4.0,
+            vram_cap_gb=self.vram_spin.value(),
+            cache_output_path=self.cache_path_edit.text() or str(Path.cwd() / "outputs"),
+        )
+
+    def _choose_cache_path(self) -> None:
+        path = QFileDialog.getExistingDirectory(self, "Select cache/output folder", self.cache_path_edit.text())
+        if path:
+            self.cache_path_edit.setText(path)
+            self.profile_combo.setCurrentText(PRESET_CUSTOM)
+
+    def _update_leaderboard(self) -> None:
+        rows = self.last_sweep_rows[:10]
+        self.leaderboard_table.setRowCount(len(rows))
+        for row_idx, row in enumerate(rows):
+            values = [
+                str(row_idx + 1),
+                f"{float(row.get('score', 0.0)):.2f}",
+                f"{float(row.get('water_temperature_c', 0.0)):.1f}",
+                f"{float(row.get('convection_w_m2k', 0.0)):.0f}",
+                f"{float(row.get('cycle_time_s', 0.0)):.1f}",
+            ]
+            for col, value in enumerate(values):
+                self.leaderboard_table.setItem(row_idx, col, QTableWidgetItem(value))
+        self.leaderboard_table.resizeColumnsToContents()
 
     def _log(self, message: str) -> None:
         self.log.append(message)

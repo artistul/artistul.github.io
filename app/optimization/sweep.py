@@ -3,6 +3,7 @@ from __future__ import annotations
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from itertools import product
+from time import sleep
 from time import perf_counter
 from typing import Callable
 
@@ -60,6 +61,9 @@ def run_sweep(
     base: SimulationConfig,
     sweep: SweepConfig,
     progress: Callable[[int, int, dict[str, float | str]], None] | None = None,
+    should_pause: Callable[[], tuple[bool, str]] | None = None,
+    should_cancel: Callable[[], bool] | None = None,
+    throttle_update: Callable[[str], None] | None = None,
 ) -> list[dict[str, float | str]]:
     cases = make_cases(base, sweep)
     workers = max(1, min(int(sweep.workers), len(cases)))
@@ -67,6 +71,9 @@ def run_sweep(
     rows: list[dict[str, float | str]] = []
     if workers == 1:
         for done, config in enumerate(cases, start=1):
+            if should_cancel and should_cancel():
+                break
+            _wait_if_paused(should_pause, should_cancel, throttle_update)
             row = run_case((bodies, config))
             row["elapsed_s"] = perf_counter() - started
             rows.append(row)
@@ -75,12 +82,61 @@ def run_sweep(
         return rows
 
     with ProcessPoolExecutor(max_workers=workers) as executor:
-        futures = [executor.submit(run_case, (bodies, config)) for config in cases]
-        for done, future in enumerate(as_completed(futures), start=1):
-            row = future.result()
-            row["elapsed_s"] = perf_counter() - started
-            rows.append(row)
-            if progress:
-                progress(done, len(cases), row)
+        pending = []
+        case_iter = iter(cases)
+        submitted = 0
+        done = 0
+
+        while True:
+            if should_cancel and should_cancel():
+                for future in pending:
+                    future.cancel()
+                break
+
+            while len(pending) < workers and submitted < len(cases):
+                paused, reason = should_pause() if should_pause else (False, "")
+                if paused:
+                    if throttle_update:
+                        throttle_update(reason)
+                    break
+                config = next(case_iter)
+                pending.append(executor.submit(run_case, (bodies, config)))
+                submitted += 1
+
+            if not pending:
+                if submitted >= len(cases):
+                    break
+                _wait_if_paused(should_pause, should_cancel, throttle_update)
+                continue
+
+            completed_now = [future for future in pending if future.done()]
+            if not completed_now:
+                sleep(0.05)
+                continue
+
+            for future in completed_now:
+                pending.remove(future)
+                row = future.result()
+                row["elapsed_s"] = perf_counter() - started
+                rows.append(row)
+                done += 1
+                if progress:
+                    progress(done, len(cases), row)
     rows.sort(key=lambda item: float(item["score"]))
     return rows
+
+
+def _wait_if_paused(
+    should_pause: Callable[[], tuple[bool, str]] | None,
+    should_cancel: Callable[[], bool] | None,
+    throttle_update: Callable[[str], None] | None,
+) -> None:
+    while should_pause:
+        paused, reason = should_pause()
+        if not paused:
+            return
+        if throttle_update:
+            throttle_update(reason)
+        if should_cancel and should_cancel():
+            return
+        sleep(0.2)
