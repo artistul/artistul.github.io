@@ -1,0 +1,31 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('InFlux synthetic mold assembly for smoke tests'),'2;1');
+FILE_NAME('synthetic_mold_assembly.step','2026-07-01T00:00:00',('InFlux'),('InFlux'),'Codex','InFlux','');
+FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 3 1 1 }'));
+ENDSEC;
+DATA;
+#1=PRODUCT('mold half A','mold half A','',(#10));
+#2=PRODUCT('mold half B','mold half B','',(#10));
+#3=PRODUCT('injected plastic body','injected plastic body','',(#10));
+#4=PRODUCT('water body - cooling channel left','water body - cooling channel left','',(#10));
+#5=PRODUCT('water body - cooling channel right','water body - cooling channel right','',(#10));
+#10=PRODUCT_CONTEXT('',#11,'mechanical');
+#11=APPLICATION_CONTEXT('configuration controlled 3d designs');
+/* BODY: mold half A */
+#101=MANIFOLD_SOLID_BREP('mold half A',#201);
+/* BODY: mold half B */
+#102=MANIFOLD_SOLID_BREP('mold half B',#202);
+/* BODY: injected plastic body */
+#103=MANIFOLD_SOLID_BREP('injected plastic body',#203);
+/* BODY: water body - cooling channel left */
+#104=MANIFOLD_SOLID_BREP('water body - cooling channel left',#204);
+/* BODY: water body - cooling channel right */
+#105=MANIFOLD_SOLID_BREP('water body - cooling channel right',#205);
+#201=CLOSED_SHELL('synthetic shell A',());
+#202=CLOSED_SHELL('synthetic shell B',());
+#203=CLOSED_SHELL('synthetic plastic shell',());
+#204=CLOSED_SHELL('synthetic water shell L',());
+#205=CLOSED_SHELL('synthetic water shell R',());
+ENDSEC;
+END-ISO-10303-21;

@@ -1,5 +1,29 @@
-output/
-assets/caiet-tehnic-v1.docx
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / website test artifacts
 node_modules/
 playwright-report/
 test-results/
+
+# Local generated outputs
+output/
+outputs/thermal_run_*/
+outputs/*.png
+outputs/*.html
+outputs/*.log
+outputs/*.txt
+
+# Build artifacts
+build/
+dist/
+installer/Output/
+*.spec.bak
+
+# Local private source artifacts
+assets/caiet-tehnic-v1.docx
