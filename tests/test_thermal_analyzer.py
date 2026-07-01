@@ -2,6 +2,7 @@ from pathlib import Path
 import subprocess
 import sys
 
+import app.simulation.resources as resources_module
 from app.geometry.step_importer import import_step, load_demo_geometry
 from app.geometry.step_inspector import inspect_step
 from app.optimization.sweep import SweepConfig, run_sweep
@@ -114,6 +115,27 @@ def test_gpu_telemetry_is_honest_placeholder_when_usage_unavailable():
     if not telemetry.telemetry_available:
         assert telemetry.vram_used_gb is None
         assert "not available" in telemetry.message
+
+
+def test_gpu_detection_is_cached_for_gui_monitor(monkeypatch):
+    calls = []
+
+    def fake_powershell(command: str, timeout: float = 3.0) -> str:
+        calls.append(command)
+        if "AdapterRAM" in command:
+            return str(16 * 1024**3)
+        return "AMD Radeon RX 9070 XT\n"
+
+    resources_module._detect_gpu_summary.cache_clear()
+    resources_module._detect_adapter_ram_gb.cache_clear()
+    monkeypatch.setattr(resources_module, "_run_hidden_powershell", fake_powershell)
+
+    limits = ResourceLimits(56.0, 60.0, 8.0, 4.0, 14.0, "outputs")
+    resources_module.sample_resource_snapshot(limits)
+    resources_module.sample_resource_snapshot(limits)
+    resources_module.sample_resource_snapshot(limits)
+
+    assert len(calls) == 2
 
 
 def test_real_cad_import_path_handled_gracefully_if_present():

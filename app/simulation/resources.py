@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import subprocess
+from functools import lru_cache
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -180,15 +182,26 @@ def sample_gpu_telemetry() -> GpuTelemetry:
     )
 
 
+def _subprocess_creationflags() -> int:
+    return getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+
+def _run_hidden_powershell(command: str, timeout: float = 3.0) -> str:
+    return subprocess.check_output(
+        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command],
+        stderr=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL,
+        text=True,
+        timeout=timeout,
+        creationflags=_subprocess_creationflags(),
+    )
+
+
+@lru_cache(maxsize=1)
 def _detect_gpu_summary() -> str:
     try:
-        import subprocess
-
-        output = subprocess.check_output(
-            ["powershell", "-NoProfile", "-Command", "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name"],
-            stderr=subprocess.DEVNULL,
-            text=True,
-            timeout=3,
+        output = _run_hidden_powershell(
+            "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name",
         )
         names = [line.strip() for line in output.splitlines() if line.strip()]
         return ", ".join(names[:3]) if names else "Not detected"
@@ -196,20 +209,11 @@ def _detect_gpu_summary() -> str:
         return "Not detected"
 
 
+@lru_cache(maxsize=1)
 def _detect_adapter_ram_gb() -> float | None:
     try:
-        import subprocess
-
-        output = subprocess.check_output(
-            [
-                "powershell",
-                "-NoProfile",
-                "-Command",
-                "Get-CimInstance Win32_VideoController | Select-Object -First 1 -ExpandProperty AdapterRAM",
-            ],
-            stderr=subprocess.DEVNULL,
-            text=True,
-            timeout=3,
+        output = _run_hidden_powershell(
+            "Get-CimInstance Win32_VideoController | Select-Object -First 1 -ExpandProperty AdapterRAM",
         ).strip()
         if not output:
             return None

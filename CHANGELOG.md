@@ -24,3 +24,8 @@
 - Added per-body CadQuery tessellation for the 3D viewer with bounding-box fallback when tessellation fails.
 - Added GUI body metadata columns and import warning display.
 - Tested `C:\Users\Stefan\Desktop\design matrita watercooled -sim.step`; it is detected as 5 separate solids: main mold half, secondary mold half, injected part, and two water bodies.
+
+## 0.3.1 - 2026-07-01
+
+- Fixed resource monitor GPU detection so the GUI does not spawn visible PowerShell/CMD windows every refresh.
+- Cached static GPU adapter detection during a session while keeping VRAM usage telemetry honestly reported as unavailable when no robust AMD telemetry path exists.
