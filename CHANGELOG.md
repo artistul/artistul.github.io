@@ -32,3 +32,9 @@
 - Reduced the 3D viewer preview triangle budget for tessellated CAD bodies to improve responsiveness on real STEP imports.
 - Cached 3D viewer preview meshes and reused the Matplotlib axes between redraws to speed up classification and temperature display updates.
 - Removed the CadQuery runtime dependency from the STEP inspection path to avoid packaged-app CasADi DLL loading failures.
+
+## 0.3.2 - 2026-07-01
+
+- Fixed STEP assembly placement by reading tessellation and bounding boxes from positioned XCAF component instances before falling back to target part definitions.
+- Added a regression check for the real CAD file to catch secondary mold half placement regressions.
+- Rebuilt and reinstalled the packaged app so the desktop shortcut uses the corrected STEP importer.

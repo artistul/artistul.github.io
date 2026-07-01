@@ -143,3 +143,6 @@ def test_real_cad_recursive_traversal_and_tessellation_if_present():
     assert len(inspection.bodies) == 5
     assert any(body.mesh_vertices and body.mesh_triangles for body in inspection.bodies)
     assert {body.role for body in inspection.bodies} >= {"mold", "plastic", "water"}
+    secondary = next(body for body in inspection.bodies if body.name.startswith("Secondary half"))
+    assert secondary.bbox_mm[1] > 120.0
+    assert secondary.bbox_mm[2] > 20.0

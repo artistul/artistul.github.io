@@ -108,7 +108,9 @@ def _inspect_with_ocp(path: Path) -> StepInspection:
         target = target_label(label)
         target_name = label_name(target)
         path_parts = [*hierarchy, name]
-        shape = shape_tool.GetShape_s(target)
+        shape = shape_tool.GetShape_s(label)
+        if shape.IsNull():
+            shape = shape_tool.GetShape_s(target)
         indent = "  " * depth
         solids = [] if shape.IsNull() else solid_shapes(shape)
         tree_lines.append(
