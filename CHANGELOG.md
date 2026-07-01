@@ -21,11 +21,14 @@
 
 - Added `--inspect-step` CLI diagnostics for real STEP files.
 - Added recursive OCP/XCAF assembly traversal with hierarchy paths, body metadata, volume, bounding box, face count, and tessellation status.
-- Added per-body CadQuery tessellation for the 3D viewer with bounding-box fallback when tessellation fails.
+- Added per-body OCP tessellation for the 3D viewer with bounding-box fallback when tessellation fails.
 - Added GUI body metadata columns and import warning display.
 - Tested `C:\Users\Stefan\Desktop\design matrita watercooled -sim.step`; it is detected as 5 separate solids: main mold half, secondary mold half, injected part, and two water bodies.
 
 ## 0.3.1 - 2026-07-01
 
-- Fixed resource monitor GPU detection so the GUI does not spawn visible PowerShell/CMD windows every refresh.
-- Cached static GPU adapter detection during a session while keeping VRAM usage telemetry honestly reported as unavailable when no robust AMD telemetry path exists.
+- Fixed resource monitor GPU detection so the GUI does not spawn visible PowerShell/CMD windows during live refresh.
+- Disabled subprocess-based GPU/VRAM probing in the live GUI monitor while keeping GPU usage honestly reported as unavailable.
+- Reduced the 3D viewer preview triangle budget for tessellated CAD bodies to improve responsiveness on real STEP imports.
+- Cached 3D viewer preview meshes and reused the Matplotlib axes between redraws to speed up classification and temperature display updates.
+- Removed the CadQuery runtime dependency from the STEP inspection path to avoid packaged-app CasADi DLL loading failures.

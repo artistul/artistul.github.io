@@ -22,15 +22,17 @@ class MoldFigureCanvas(FigureCanvas):
         self.figure = Figure(figsize=(6, 5), dpi=100)
         super().__init__(self.figure)
         self.axes = self.figure.add_subplot(111, projection="3d")
-        self.figure.tight_layout()
+        self._mesh_face_cache: dict[tuple[int, int, int, int, int], list[list[tuple[float, float, float]]]] = {}
+        self.figure.subplots_adjust(left=0.02, right=0.98, bottom=0.04, top=0.94)
 
     def draw_bodies(self, bodies: list[Body], temperatures: Mapping[str, float] | None = None) -> None:
-        self.figure.clear()
-        self.axes = self.figure.add_subplot(111, projection="3d")
+        self.axes.cla()
         temps = list(temperatures.values()) if temperatures else []
         tmin = min(temps) if temps else 20.0
         tmax = max(temps) if temps else 220.0
         cmap = colormaps["inferno"]
+        mesh_body_count = sum(1 for body in bodies if body.mesh_vertices and body.mesh_triangles)
+        triangle_budget = max(1000, min(4500, 18000 // max(1, mesh_body_count)))
         for body in bodies:
             if temperatures and body.id in temperatures:
                 span = max(1e-9, tmax - tmin)
@@ -38,16 +40,16 @@ class MoldFigureCanvas(FigureCanvas):
             else:
                 color = ROLE_COLORS.get(body.role, "#d1d5db")
             if body.mesh_vertices and body.mesh_triangles:
-                self._add_mesh(body.mesh_vertices, body.mesh_triangles, color, body.name, body.center_mm)
+                self._add_mesh(body.mesh_vertices, body.mesh_triangles, color, body.name, body.center_mm, triangle_budget)
             else:
                 self._add_box(body.bbox_mm, color, body.name)
         self.axes.set_xlabel("X mm")
         self.axes.set_ylabel("Y mm")
         self.axes.set_zlabel("Z mm")
         self.axes.set_title("Imported assembly / temperature field")
+        self.axes.set_proj_type("ortho")
         self.axes.view_init(elev=24, azim=-55)
         self._autoscale(bodies)
-        self.figure.tight_layout()
         self.draw_idle()
 
     def save_screenshot(self, path: str) -> None:
@@ -75,14 +77,32 @@ class MoldFigureCanvas(FigureCanvas):
         color: object,
         label: str,
         center: tuple[float, float, float],
+        triangle_budget: int,
     ) -> None:
-        if len(triangles) > 12000:
-            stride = max(1, len(triangles) // 12000)
-            triangles = triangles[::stride]
-        faces = [[vertices[a], vertices[b], vertices[c]] for a, b, c in triangles]
-        collection = Poly3DCollection(faces, alpha=0.50, facecolor=color, edgecolor="#111827", linewidth=0.08)
+        faces = self._preview_faces(vertices, triangles, triangle_budget)
+        collection = Poly3DCollection(faces, alpha=0.50, facecolor=color, edgecolor="none", linewidth=0.0)
         self.axes.add_collection3d(collection)
         self.axes.text(center[0], center[1], center[2], label[:18], fontsize=7)
+
+    def _preview_faces(
+        self,
+        vertices: list[tuple[float, float, float]],
+        triangles: list[tuple[int, int, int]],
+        triangle_budget: int,
+    ) -> list[list[tuple[float, float, float]]]:
+        key = (id(vertices), id(triangles), len(vertices), len(triangles), triangle_budget)
+        cached = self._mesh_face_cache.get(key)
+        if cached is not None:
+            return cached
+        preview_triangles = triangles
+        if len(triangles) > triangle_budget:
+            stride = max(1, len(triangles) // triangle_budget)
+            preview_triangles = triangles[::stride]
+        faces = [[vertices[a], vertices[b], vertices[c]] for a, b, c in preview_triangles]
+        if len(self._mesh_face_cache) > 64:
+            self._mesh_face_cache.clear()
+        self._mesh_face_cache[key] = faces
+        return faces
 
     def _autoscale(self, bodies: list[Body]) -> None:
         if not bodies:

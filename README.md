@@ -42,7 +42,7 @@ This repository also contains a Windows 11 offline engineering prototype for the
 
 Current capabilities:
 
-- Import STEP files through an OCP/CadQuery geometry pipeline when available, recursively traversing assemblies, compounds, nested labels, components, and solids.
+- Import STEP files through an OCP geometry pipeline when available, recursively traversing assemblies, compounds, nested labels, components, and solids.
 - Preserve separate simulation bodies from real STEP solids and collect hierarchy path, volume, bounding box, face count, and tessellation status.
 - Save STEP diagnostics under `outputs\step_diagnostics\`.
 - Load a built-in synthetic clamped mold demo when a real CAD import is not ready.
@@ -57,7 +57,7 @@ Current capabilities:
 Still simplified:
 
 - The solver is a lumped transient heat-transfer prototype, not FEM and not CFD.
-- STEP visualization uses true per-body mesh tessellation through OCP/CadQuery when supported. If tessellation fails, the viewer keeps a labeled bounding-box fallback instead of crashing.
+- STEP visualization uses true per-body mesh tessellation through OCP when supported. If tessellation fails, the viewer keeps a labeled bounding-box fallback instead of crashing.
 - GPU compute is not implemented yet. GPU/HYBRID backend choices are exposed in the UI, but they clearly fall back to CPU and make no fake GPU utilization claims.
 - AMD VRAM usage telemetry is currently a clean placeholder when reliable offline telemetry is unavailable.
 
@@ -114,7 +114,7 @@ Build the Windows installer with desktop and Start Menu shortcuts:
 .\packaging\build_installer.ps1
 ```
 
-The current solver is a first-version lumped transient heat-transfer model for useful engineering iteration, not full CFD. Water bodies are modeled as fixed-temperature cooling regions with convection into mold bodies. STEP import uses OCP/CadQuery when available and falls back to the ASCII STEP body/product index when the CAD kernel cannot read the file.
+The current solver is a first-version lumped transient heat-transfer model for useful engineering iteration, not full CFD. Water bodies are modeled as fixed-temperature cooling regions with convection into mold bodies. STEP import uses OCP when available and falls back to the ASCII STEP body/product index when the CAD kernel cannot read the file.
 
 Generated reports, CSVs, charts, logs, screenshots, and scaling benchmarks are written under `outputs\`.
 

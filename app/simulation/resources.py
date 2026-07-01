@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import subprocess
 from functools import lru_cache
 from dataclasses import dataclass
 from pathlib import Path
@@ -172,51 +171,18 @@ def evaluate_throttle(limits: ResourceLimits, free_ram_gb: float, app_ram_gb: fl
 
 def sample_gpu_telemetry() -> GpuTelemetry:
     summary = _detect_gpu_summary()
-    total = _detect_adapter_ram_gb()
     return GpuTelemetry(
         name=summary,
-        vram_total_gb=total,
+        vram_total_gb=None,
         vram_used_gb=None,
         telemetry_available=False,
-        message="AMD VRAM usage telemetry is not available through the current offline monitor; GPU usage is not estimated.",
-    )
-
-
-def _subprocess_creationflags() -> int:
-    return getattr(subprocess, "CREATE_NO_WINDOW", 0)
-
-
-def _run_hidden_powershell(command: str, timeout: float = 3.0) -> str:
-    return subprocess.check_output(
-        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command],
-        stderr=subprocess.DEVNULL,
-        stdin=subprocess.DEVNULL,
-        text=True,
-        timeout=timeout,
-        creationflags=_subprocess_creationflags(),
+        message=(
+            "GPU/VRAM telemetry is disabled in console-safe live monitor mode to avoid spawning Windows console probes. "
+            "GPU usage is not estimated and VRAM usage is not available."
+        ),
     )
 
 
 @lru_cache(maxsize=1)
 def _detect_gpu_summary() -> str:
-    try:
-        output = _run_hidden_powershell(
-            "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name",
-        )
-        names = [line.strip() for line in output.splitlines() if line.strip()]
-        return ", ".join(names[:3]) if names else "Not detected"
-    except Exception:
-        return "Not detected"
-
-
-@lru_cache(maxsize=1)
-def _detect_adapter_ram_gb() -> float | None:
-    try:
-        output = _run_hidden_powershell(
-            "Get-CimInstance Win32_VideoController | Select-Object -First 1 -ExpandProperty AdapterRAM",
-        ).strip()
-        if not output:
-            return None
-        return int(output) / (1024**3)
-    except Exception:
-        return None
+    return "GPU adapter probe disabled in console-safe monitor mode"

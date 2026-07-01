@@ -1,5 +1,5 @@
 STEP: C:\Users\Stefan\Desktop\design matrita watercooled -sim.step
-- design matrita watercooled -sim v2 | target=design matrita watercooled -sim v2 | assembly=True | component=False | solids=5
+- design matrita watercooled -sim v3 | target=design matrita watercooled -sim v3 | assembly=True | component=False | solids=5
   - Mold:1 | target=Mold | assembly=True | component=True | solids=2
     - Main half:1 | target=Main half | assembly=False | component=True | solids=1
     - Secondary half:1 | target=Secondary half | assembly=False | component=True | solids=1

@@ -1,5 +1,5 @@
 STEP path: C:\Users\Stefan\Desktop\design matrita watercooled -sim.step
-Kernel: OCP/CadQuery
+Kernel: OCP
 Detected bodies: 5
 
 Warnings:

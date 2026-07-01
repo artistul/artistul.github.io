@@ -35,7 +35,6 @@ def inspect_step(path: str | Path, output_dir: str | Path = "outputs/step_diagno
 
 
 def _inspect_with_ocp(path: Path) -> StepInspection:
-    import cadquery as cq
     from OCP.IFSelect import IFSelect_RetDone
     from OCP.STEPCAFControl import STEPCAFControl_Reader
     from OCP.TCollection import TCollection_ExtendedString
@@ -126,13 +125,13 @@ def _inspect_with_ocp(path: Path) -> StepInspection:
 
         for solid_index, solid in enumerate(solids, start=1):
             body_name = name if len(solids) == 1 else f"{name} solid {solid_index}"
-            body = _body_from_cq_shape(
-                cq.Shape.cast(solid),
+            body = _body_from_ocp_shape(
+                solid,
                 path,
                 len(bodies) + 1,
                 body_name,
                 "/" + "/".join(path_parts),
-                "OCP XCAF + CadQuery tessellation",
+                "OCP XCAF tessellation",
                 label_color(label, target),
             )
             bodies.append(body)
@@ -140,24 +139,14 @@ def _inspect_with_ocp(path: Path) -> StepInspection:
     for index in range(1, free.Length() + 1):
         visit(free.Value(index), 0, [])
 
-    return StepInspection(path=path, bodies=bodies, tree_lines=tree_lines, log_lines=log_lines, used_kernel="OCP/CadQuery")
+    return StepInspection(path=path, bodies=bodies, tree_lines=tree_lines, log_lines=log_lines, used_kernel="OCP")
 
 
-def _body_from_cq_shape(shape, source: Path, index: int, name: str, hierarchy_path: str, importer: str, color: str = "") -> Body:
-    bbox = shape.BoundingBox()
-    bbox_tuple = (bbox.xmin, bbox.ymin, bbox.zmin, bbox.xmax, bbox.ymax, bbox.zmax)
-    volume = float(shape.Volume())
-    face_count = len(shape.Faces())
-    mesh_vertices: list[tuple[float, float, float]] = []
-    mesh_triangles: list[tuple[int, int, int]] = []
-    tessellation_status = "placeholder bbox fallback"
-    try:
-        vertices, triangles = shape.tessellate(0.75)
-        mesh_vertices = [(float(vertex.x), float(vertex.y), float(vertex.z)) for vertex in vertices]
-        mesh_triangles = [(int(a), int(b), int(c)) for a, b, c in triangles]
-        tessellation_status = f"tessellated {len(mesh_vertices)} vertices / {len(mesh_triangles)} triangles"
-    except Exception as exc:
-        tessellation_status = f"tessellation failed; using bbox fallback: {exc}"
+def _body_from_ocp_shape(shape, source: Path, index: int, name: str, hierarchy_path: str, importer: str, color: str = "") -> Body:
+    bbox_tuple = _ocp_bounding_box(shape)
+    volume = _ocp_volume(shape)
+    face_count = _ocp_face_count(shape)
+    mesh_vertices, mesh_triangles, tessellation_status = _ocp_tessellate(shape)
 
     role = _classify_from_metadata(name, volume, bbox_tuple)
     return Body(
@@ -177,6 +166,75 @@ def _body_from_cq_shape(shape, source: Path, index: int, name: str, hierarchy_pa
         mesh_triangles=mesh_triangles,
         metadata={"importer": importer},
     )
+
+
+def _ocp_bounding_box(shape) -> tuple[float, float, float, float, float, float]:
+    from OCP.Bnd import Bnd_Box
+    from OCP.BRepBndLib import BRepBndLib
+
+    box = Bnd_Box()
+    BRepBndLib.Add_s(shape, box)
+    x0, y0, z0, x1, y1, z1 = box.Get()
+    return (float(x0), float(y0), float(z0), float(x1), float(y1), float(z1))
+
+
+def _ocp_volume(shape) -> float:
+    from OCP.BRepGProp import BRepGProp
+    from OCP.GProp import GProp_GProps
+
+    props = GProp_GProps()
+    BRepGProp.VolumeProperties_s(shape, props)
+    return float(props.Mass())
+
+
+def _ocp_face_count(shape) -> int:
+    from OCP.TopAbs import TopAbs_FACE
+    from OCP.TopExp import TopExp_Explorer
+
+    count = 0
+    explorer = TopExp_Explorer(shape, TopAbs_FACE)
+    while explorer.More():
+        count += 1
+        explorer.Next()
+    return count
+
+
+def _ocp_tessellate(shape) -> tuple[list[tuple[float, float, float]], list[tuple[int, int, int]], str]:
+    from OCP.BRep import BRep_Tool
+    from OCP.BRepMesh import BRepMesh_IncrementalMesh
+    from OCP.TopAbs import TopAbs_FACE, TopAbs_REVERSED
+    from OCP.TopExp import TopExp_Explorer
+    from OCP.TopLoc import TopLoc_Location
+    from OCP.TopoDS import TopoDS
+
+    vertices: list[tuple[float, float, float]] = []
+    triangles: list[tuple[int, int, int]] = []
+    try:
+        BRepMesh_IncrementalMesh(shape, 0.75)
+        explorer = TopExp_Explorer(shape, TopAbs_FACE)
+        while explorer.More():
+            face = TopoDS.Face_s(explorer.Current())
+            location = TopLoc_Location()
+            triangulation = BRep_Tool.Triangulation_s(face, location)
+            if triangulation:
+                transform = location.Transformation()
+                offset = len(vertices)
+                for node_index in range(1, triangulation.NbNodes() + 1):
+                    point = triangulation.Node(node_index).Transformed(transform)
+                    vertices.append((float(point.X()), float(point.Y()), float(point.Z())))
+                reversed_face = face.Orientation() == TopAbs_REVERSED
+                for triangle_index in range(1, triangulation.NbTriangles() + 1):
+                    triangle = triangulation.Triangle(triangle_index)
+                    a = offset + triangle.Value(1) - 1
+                    b = offset + triangle.Value(2) - 1
+                    c = offset + triangle.Value(3) - 1
+                    triangles.append((a, c, b) if reversed_face else (a, b, c))
+            explorer.Next()
+        if not vertices or not triangles:
+            return [], [], "tessellation produced no triangles; using bbox fallback"
+        return vertices, triangles, f"tessellated {len(vertices)} vertices / {len(triangles)} triangles"
+    except Exception as exc:
+        return [], [], f"tessellation failed; using bbox fallback: {exc}"
 
 
 def _inspect_with_text_fallback(path: Path, error: str) -> StepInspection:
@@ -207,7 +265,7 @@ def _inspect_with_text_fallback(path: Path, error: str) -> StepInspection:
     return StepInspection(
         path=path,
         bodies=bodies,
-        tree_lines=[f"STEP: {path}", "OCP/CadQuery inspection failed; text fallback used.", *[f"- {name}" for name in names]],
+        tree_lines=[f"STEP: {path}", "OCP inspection failed; text fallback used.", *[f"- {name}" for name in names]],
         warnings=[f"CAD kernel inspection failed: {error}"],
         log_lines=[f"CAD kernel inspection failed: {error}", f"Text fallback detected {len(bodies)} bodies."],
         used_kernel="text fallback",
