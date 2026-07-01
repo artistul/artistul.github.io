@@ -1,6 +1,9 @@
 from pathlib import Path
+import subprocess
+import sys
 
 from app.geometry.step_importer import import_step, load_demo_geometry
+from app.geometry.step_inspector import inspect_step
 from app.optimization.sweep import SweepConfig, run_sweep
 from app.reporting.exporter import create_session_dir, export_simulation, export_sweep
 from app.simulation.backends import BackendMode, resolve_backend
@@ -13,6 +16,33 @@ def test_step_import_preserves_synthetic_bodies():
     bodies = import_step(Path("examples/synthetic_mold_assembly.step"))
     assert len(bodies) == 5
     assert {body.role for body in bodies} >= {"mold", "plastic", "water"}
+
+
+def test_inspect_step_writes_diagnostics(tmp_path):
+    inspection = inspect_step(Path("examples/synthetic_mold_assembly.step"), tmp_path)
+    assert len(inspection.bodies) == 5
+    assert (tmp_path / "step_tree.txt").exists()
+    assert (tmp_path / "step_bodies.csv").exists()
+    assert (tmp_path / "step_import_log.txt").exists()
+    assert all(body.hierarchy_path for body in inspection.bodies)
+
+
+def test_inspect_step_cli(tmp_path):
+    result = subprocess.run(
+        [sys.executable, "-m", "app.main", "--inspect-step", "examples/synthetic_mold_assembly.step"],
+        cwd=Path.cwd(),
+        text=True,
+        capture_output=True,
+        timeout=60,
+    )
+    assert result.returncode == 0
+    assert "STEP inspection OK" in result.stdout
+    assert Path("outputs/step_diagnostics/step_bodies.csv").exists()
+
+
+def test_tessellation_fallback_for_demo_step():
+    inspection = inspect_step(Path("examples/synthetic_mold_assembly.step"))
+    assert any("placeholder" in body.tessellation_status for body in inspection.bodies)
 
 
 def test_single_simulation_exports(tmp_path):
@@ -93,3 +123,15 @@ def test_real_cad_import_path_handled_gracefully_if_present():
     bodies = import_step(path)
     assert len(bodies) >= 1
     assert all(body.name for body in bodies)
+
+
+def test_real_cad_recursive_traversal_and_tessellation_if_present():
+    path = Path(r"C:\Users\Stefan\Desktop\design matrita watercooled -sim.step")
+    if not path.exists():
+        return
+    inspection = inspect_step(path)
+    tree = "\n".join(inspection.tree_lines)
+    assert "Mold:1" in tree
+    assert len(inspection.bodies) == 5
+    assert any(body.mesh_vertices and body.mesh_triangles for body in inspection.bodies)
+    assert {body.role for body in inspection.bodies} >= {"mold", "plastic", "water"}

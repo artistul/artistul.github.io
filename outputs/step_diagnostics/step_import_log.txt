@@ -1,0 +1,10 @@
+STEP path: C:\Users\Stefan\Desktop\design matrita watercooled -sim.step
+Kernel: OCP/CadQuery
+Detected bodies: 5
+
+Warnings:
+
+Log:
+OCP/XCAF STEP reader active.
+Read status: IFSelect_ReturnStatus.IFSelect_RetDone
+Free root shapes: 1

@@ -5,6 +5,7 @@ import multiprocessing as mp
 from pathlib import Path
 
 from app.geometry.step_importer import import_step, load_demo_geometry
+from app.geometry.step_inspector import inspect_step
 from app.optimization.benchmark import run_benchmark
 from app.optimization.sweep import SweepConfig, run_sweep
 from app.reporting.exporter import create_session_dir, export_simulation, export_sweep
@@ -33,11 +34,19 @@ def main() -> int:
     parser.add_argument("--benchmark", action="store_true", help="Run worker scaling benchmark.")
     parser.add_argument("--benchmark-output", default="outputs/benchmark_hybrid_max.csv")
     parser.add_argument("--import-step", default="", help="Import a STEP file and print detected bodies.")
+    parser.add_argument("--inspect-step", default="", help="Inspect a STEP file and save diagnostics under outputs/step_diagnostics.")
     args = parser.parse_args()
 
     if args.import_step:
         for body in import_step(Path(args.import_step)):
             print(body.as_dict())
+        return 0
+    if args.inspect_step:
+        inspection = inspect_step(Path(args.inspect_step))
+        print(f"STEP inspection OK: {len(inspection.bodies)} bodies, kernel={inspection.used_kernel}")
+        for warning in inspection.warnings:
+            print(f"WARNING: {warning}")
+        print("Diagnostics: outputs/step_diagnostics/step_tree.txt, step_bodies.csv, step_import_log.txt")
         return 0
     if args.headless_smoke:
         return run_headless_smoke()

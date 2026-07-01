@@ -16,6 +16,12 @@ class Body:
     bbox_mm: tuple[float, float, float, float, float, float] = (0, 0, 0, 10, 10, 10)
     volume_mm3: float = 1000.0
     source: str = "step"
+    hierarchy_path: str = ""
+    face_count: int = 0
+    color: str = ""
+    tessellation_status: str = "placeholder"
+    mesh_vertices: list[tuple[float, float, float]] = field(default_factory=list)
+    mesh_triangles: list[tuple[int, int, int]] = field(default_factory=list)
     metadata: dict[str, str] = field(default_factory=dict)
 
     @property
@@ -38,6 +44,10 @@ class Body:
             "bbox_mm": self.bbox_mm,
             "volume_mm3": self.volume_mm3,
             "source": self.source,
+            "hierarchy_path": self.hierarchy_path,
+            "face_count": self.face_count,
+            "color": self.color,
+            "tessellation_status": self.tessellation_status,
             "metadata": self.metadata,
         }
 
@@ -64,6 +74,9 @@ def demo_bodies() -> list[Body]:
             bbox_mm=(-45, -35, -16, 45, 35, 0),
             volume_mm3=90 * 70 * 16,
             source="demo",
+            hierarchy_path="/Demo/mold half A",
+            face_count=6,
+            tessellation_status="placeholder demo box",
         ),
         Body(
             id="body-002",
@@ -74,6 +87,9 @@ def demo_bodies() -> list[Body]:
             bbox_mm=(-45, -35, 0, 45, 35, 16),
             volume_mm3=90 * 70 * 16,
             source="demo",
+            hierarchy_path="/Demo/mold half B",
+            face_count=6,
+            tessellation_status="placeholder demo box",
         ),
         Body(
             id="body-003",
@@ -84,6 +100,9 @@ def demo_bodies() -> list[Body]:
             bbox_mm=(-23, -12, -3, 23, 12, 3),
             volume_mm3=46 * 24 * 6,
             source="demo",
+            hierarchy_path="/Demo/injected plastic body",
+            face_count=6,
+            tessellation_status="placeholder demo box",
         ),
         Body(
             id="body-004",
@@ -94,6 +113,9 @@ def demo_bodies() -> list[Body]:
             bbox_mm=(-36, -29, -7, -30, 29, 7),
             volume_mm3=6 * 58 * 14,
             source="demo",
+            hierarchy_path="/Demo/water body - cooling channel left",
+            face_count=6,
+            tessellation_status="placeholder demo box",
         ),
         Body(
             id="body-005",
@@ -104,6 +126,9 @@ def demo_bodies() -> list[Body]:
             bbox_mm=(30, -29, -7, 36, 29, 7),
             volume_mm3=6 * 58 * 14,
             source="demo",
+            hierarchy_path="/Demo/water body - cooling channel right",
+            face_count=6,
+            tessellation_status="placeholder demo box",
         ),
     ]
     return bodies

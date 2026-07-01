@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 from app.geometry.bodies import Body, default_role_for_name, demo_bodies
+from app.geometry.step_inspector import inspect_step
 
 BODY_PATTERNS = [
     re.compile(r"MANIFOLD_SOLID_BREP\s*\(\s*'([^']*)'", re.IGNORECASE),
@@ -22,6 +23,13 @@ def import_step(path: str | Path) -> list[Body]:
     step_path = Path(path)
     if not step_path.exists():
         raise StepImportError(f"STEP file not found: {step_path}")
+
+    try:
+        inspection = inspect_step(step_path)
+        if inspection.bodies:
+            return inspection.bodies
+    except Exception:
+        pass
 
     text = step_path.read_text(encoding="utf-8", errors="ignore")
     names = _extract_body_names(text)

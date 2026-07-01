@@ -16,3 +16,11 @@
 - Added runtime resource snapshots, visible throttling state/reason, pause/resume/cancel controls, and gradual sweep scheduling.
 - Added Hybrid MAX benchmark output at `outputs/benchmark_hybrid_max.csv`.
 - Added tests for resource profiles, worker/RAM limits, backend fallback, throttling, and real CAD import handling.
+
+## 0.3.0 - 2026-07-01
+
+- Added `--inspect-step` CLI diagnostics for real STEP files.
+- Added recursive OCP/XCAF assembly traversal with hierarchy paths, body metadata, volume, bounding box, face count, and tessellation status.
+- Added per-body CadQuery tessellation for the 3D viewer with bounding-box fallback when tessellation fails.
+- Added GUI body metadata columns and import warning display.
+- Tested `C:\Users\Stefan\Desktop\design matrita watercooled -sim.step`; it is detected as 5 separate solids: main mold half, secondary mold half, injected part, and two water bodies.

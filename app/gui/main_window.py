@@ -32,7 +32,8 @@ from PySide6.QtWidgets import (
 )
 
 from app.geometry.bodies import Body
-from app.geometry.step_importer import StepImportError, import_step, load_demo_geometry
+from app.geometry.step_importer import StepImportError, load_demo_geometry
+from app.geometry.step_inspector import inspect_step
 from app.optimization.sweep import SweepConfig, run_sweep
 from app.reporting.exporter import create_session_dir, export_simulation, export_sweep
 from app.simulation.backends import BackendMode, BackendSelection, run_simulation_backend
@@ -124,6 +125,7 @@ class MainWindow(QMainWindow):
         self.bodies: list[Body] = load_demo_geometry()
         self.last_result: SimulationResult | None = None
         self.last_sweep_rows: list[dict[str, float | str]] = []
+        self.import_warnings: list[str] = []
         self.session_dir = create_session_dir()
         self.worker_thread: QThread | None = None
         self.active_workers = 0
@@ -158,9 +160,15 @@ class MainWindow(QMainWindow):
         file_layout.addWidget(self.import_button)
         file_layout.addWidget(self.demo_button)
 
-        self.body_table = QTableWidget(0, 5)
-        self.body_table.setHorizontalHeaderLabels(["Body", "Role", "Material", "Initial C", "Volume mm3"])
+        self.body_table = QTableWidget(0, 9)
+        self.body_table.setHorizontalHeaderLabels(
+            ["Body", "Role", "Material", "Initial C", "Volume mm3", "Hierarchy", "BBox mm", "Faces", "Tessellation"]
+        )
         self.body_table.cellChanged.connect(self._body_table_changed)
+        self.body_count_label = QLabel("Bodies: 0")
+        self.import_warning_box = QTextEdit()
+        self.import_warning_box.setReadOnly(True)
+        self.import_warning_box.setMaximumHeight(72)
 
         sim_box = QGroupBox("Simulation")
         sim_form = QFormLayout(sim_box)
@@ -271,6 +279,8 @@ class MainWindow(QMainWindow):
         self.log.setReadOnly(True)
 
         controls_layout.addWidget(file_box)
+        controls_layout.addWidget(self.body_count_label)
+        controls_layout.addWidget(self.import_warning_box)
         controls_layout.addWidget(self.body_table, 2)
         controls_layout.addWidget(sim_box)
         controls_layout.addWidget(resource_box)
@@ -298,16 +308,24 @@ class MainWindow(QMainWindow):
         if not path:
             return
         try:
-            self.bodies = import_step(path)
+            inspection = inspect_step(path)
+            self.bodies = inspection.bodies
+            self.import_warnings = inspection.warnings
             self._load_body_table()
             self.viewer.draw_bodies(self.bodies)
-            self._log(f"Imported {len(self.bodies)} bodies from {path}")
+            self._log(f"Imported {len(self.bodies)} bodies from {path}. Diagnostics saved to outputs/step_diagnostics.")
+            for warning in inspection.warnings:
+                self._log(f"IMPORT WARNING: {warning}")
         except StepImportError as exc:
+            QMessageBox.warning(self, "STEP import diagnostic", str(exc))
+            self._log(str(exc))
+        except Exception as exc:
             QMessageBox.warning(self, "STEP import diagnostic", str(exc))
             self._log(str(exc))
 
     def _load_demo(self) -> None:
         self.bodies = load_demo_geometry()
+        self.import_warnings = []
         self._load_body_table()
         self.viewer.draw_bodies(self.bodies)
         self._log("Loaded synthetic clamped mold assembly.")
@@ -315,6 +333,8 @@ class MainWindow(QMainWindow):
     def _load_body_table(self) -> None:
         self.body_table.blockSignals(True)
         self.body_table.setRowCount(len(self.bodies))
+        self.body_count_label.setText(f"Bodies: {len(self.bodies)}")
+        self.import_warning_box.setPlainText("\n".join(self.import_warnings) if self.import_warnings else "No import warnings.")
         for row, body in enumerate(self.bodies):
             self.body_table.setItem(row, 0, QTableWidgetItem(body.name))
             role_combo = QComboBox()
@@ -329,6 +349,10 @@ class MainWindow(QMainWindow):
             self.body_table.setCellWidget(row, 2, material_combo)
             self.body_table.setItem(row, 3, QTableWidgetItem(f"{body.initial_temperature_c:.1f}"))
             self.body_table.setItem(row, 4, QTableWidgetItem(f"{body.volume_mm3:.1f}"))
+            self.body_table.setItem(row, 5, QTableWidgetItem(body.hierarchy_path))
+            self.body_table.setItem(row, 6, QTableWidgetItem(", ".join(f"{value:.2f}" for value in body.bbox_mm)))
+            self.body_table.setItem(row, 7, QTableWidgetItem(str(body.face_count)))
+            self.body_table.setItem(row, 8, QTableWidgetItem(body.tessellation_status))
         self.body_table.resizeColumnsToContents()
         self.body_table.blockSignals(False)
 

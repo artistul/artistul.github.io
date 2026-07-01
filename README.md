@@ -42,7 +42,9 @@ This repository also contains a Windows 11 offline engineering prototype for the
 
 Current capabilities:
 
-- Import STEP files while preserving separate named bodies when the STEP export contains body/product names.
+- Import STEP files through an OCP/CadQuery geometry pipeline when available, recursively traversing assemblies, compounds, nested labels, components, and solids.
+- Preserve separate simulation bodies from real STEP solids and collect hierarchy path, volume, bounding box, face count, and tessellation status.
+- Save STEP diagnostics under `outputs\step_diagnostics\`.
 - Load a built-in synthetic clamped mold demo when a real CAD import is not ready.
 - Classify bodies as mold, injected plastic, water/cooling channel, or ignored.
 - Run a first-version transient thermal model over repeated injection cycles.
@@ -55,7 +57,7 @@ Current capabilities:
 Still simplified:
 
 - The solver is a lumped transient heat-transfer prototype, not FEM and not CFD.
-- STEP visualization currently uses placeholder bounding boxes based on detected bodies. True CAD tessellation should be added as an optional importer path using OCP/CadQuery/FreeCAD without breaking the current fallback.
+- STEP visualization uses true per-body mesh tessellation through OCP/CadQuery when supported. If tessellation fails, the viewer keeps a labeled bounding-box fallback instead of crashing.
 - GPU compute is not implemented yet. GPU/HYBRID backend choices are exposed in the UI, but they clearly fall back to CPU and make no fake GPU utilization claims.
 - AMD VRAM usage telemetry is currently a clean placeholder when reliable offline telemetry is unavailable.
 
@@ -71,6 +73,28 @@ Headless smoke test:
 ```powershell
 .\scripts\run_thermal_smoke_tests.ps1
 ```
+
+Inspect a STEP file without opening the GUI:
+
+```powershell
+python -m app.main --inspect-step "C:\Users\Stefan\Desktop\design matrita watercooled -sim.step"
+```
+
+Diagnostics are written to:
+
+- `outputs\step_diagnostics\step_tree.txt`
+- `outputs\step_diagnostics\step_bodies.csv`
+- `outputs\step_diagnostics\step_import_log.txt`
+
+The current real CAD test file `C:\Users\Stefan\Desktop\design matrita watercooled -sim.step` is detected as 5 separate solids through OCP/XCAF:
+
+- `Main half:1`
+- `Secondary half:1`
+- `Injected part:1`
+- `Main half water:1`
+- `Secondary half water:1`
+
+If a future STEP file only detects 1-2 bodies when more domains are expected, re-export the CAD so mold halves, water volumes, and injected plastic are separate bodies/components with preserved names.
 
 Hybrid MAX benchmark:
 
@@ -90,7 +114,7 @@ Build the Windows installer with desktop and Start Menu shortcuts:
 .\packaging\build_installer.ps1
 ```
 
-The current solver is a first-version lumped transient heat-transfer model for useful engineering iteration, not full CFD. Water bodies are modeled as fixed-temperature cooling regions with convection into mold bodies. STEP import preserves separate named STEP bodies through the ASCII STEP body/product index; if a CAD export lacks named solids, use `examples\synthetic_mold_assembly.step` or the built-in demo mode while a stronger CAD-kernel importer is added.
+The current solver is a first-version lumped transient heat-transfer model for useful engineering iteration, not full CFD. Water bodies are modeled as fixed-temperature cooling regions with convection into mold bodies. STEP import uses OCP/CadQuery when available and falls back to the ASCII STEP body/product index when the CAD kernel cannot read the file.
 
 Generated reports, CSVs, charts, logs, screenshots, and scaling benchmarks are written under `outputs\`.
 

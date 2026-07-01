@@ -37,7 +37,10 @@ class MoldFigureCanvas(FigureCanvas):
                 color = cmap((temperatures[body.id] - tmin) / span)
             else:
                 color = ROLE_COLORS.get(body.role, "#d1d5db")
-            self._add_box(body.bbox_mm, color, body.name)
+            if body.mesh_vertices and body.mesh_triangles:
+                self._add_mesh(body.mesh_vertices, body.mesh_triangles, color, body.name, body.center_mm)
+            else:
+                self._add_box(body.bbox_mm, color, body.name)
         self.axes.set_xlabel("X mm")
         self.axes.set_ylabel("Y mm")
         self.axes.set_zlabel("Z mm")
@@ -64,6 +67,22 @@ class MoldFigureCanvas(FigureCanvas):
         self.axes.add_collection3d(collection)
         cx, cy, cz = ((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)
         self.axes.text(cx, cy, cz, label[:18], fontsize=7)
+
+    def _add_mesh(
+        self,
+        vertices: list[tuple[float, float, float]],
+        triangles: list[tuple[int, int, int]],
+        color: object,
+        label: str,
+        center: tuple[float, float, float],
+    ) -> None:
+        if len(triangles) > 12000:
+            stride = max(1, len(triangles) // 12000)
+            triangles = triangles[::stride]
+        faces = [[vertices[a], vertices[b], vertices[c]] for a, b, c in triangles]
+        collection = Poly3DCollection(faces, alpha=0.50, facecolor=color, edgecolor="#111827", linewidth=0.08)
+        self.axes.add_collection3d(collection)
+        self.axes.text(center[0], center[1], center[2], label[:18], fontsize=7)
 
     def _autoscale(self, bodies: list[Body]) -> None:
         if not bodies:
