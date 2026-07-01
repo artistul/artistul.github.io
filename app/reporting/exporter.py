@@ -42,6 +42,8 @@ def export_simulation(session_dir: Path, bodies: list[Body], result: SimulationR
     _plot_temperature_history(chart_path, result)
     log_text = {
         "summary": result.summary,
+        "mesh_summary": result.mesh_summary,
+        "solver_files": result.solver_files,
         "assumptions": result.assumptions,
         "bodies": [body.as_dict() for body in bodies],
     }
@@ -88,6 +90,14 @@ def _html_report(bodies: list[Body], result: SimulationResult, chart_name: str) 
         for key, value in result.summary.items()
     )
     assumptions = "\n".join(f"<li>{html.escape(item)}</li>" for item in result.assumptions)
+    mesh_rows = "\n".join(
+        f"<tr><td>{html.escape(str(key))}</td><td>{html.escape(str(value))}</td></tr>"
+        for key, value in result.mesh_summary.items()
+    )
+    file_rows = "\n".join(
+        f"<tr><td>{html.escape(str(key))}</td><td>{html.escape(str(value))}</td></tr>"
+        for key, value in result.solver_files.items()
+    )
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -108,6 +118,10 @@ def _html_report(bodies: list[Body], result: SimulationResult, chart_name: str) 
   <table><tbody>{summary_rows}</tbody></table>
   <h2>Temperature History</h2>
   <img src="{html.escape(chart_name)}" alt="Temperature chart">
+  <h2>Mesh / Solver Diagnostics</h2>
+  <table><tbody>{mesh_rows or '<tr><td colspan="2">No mesh diagnostics for this solver mode.</td></tr>'}</tbody></table>
+  <h2>Solver Files</h2>
+  <table><tbody>{file_rows or '<tr><td colspan="2">No external solver files for this run.</td></tr>'}</tbody></table>
   <h2>Bodies</h2>
   <table><thead><tr><th>Body</th><th>Role</th><th>Material</th><th>Initial deg C</th></tr></thead><tbody>{body_rows}</tbody></table>
   <h2>Model Assumptions</h2>

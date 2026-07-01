@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -10,6 +10,7 @@ from app.simulation.materials import get_material
 
 @dataclass(frozen=True, slots=True)
 class SimulationConfig:
+    solver_mode: str = "FAST_PREVIEW"
     timestep_s: float = 0.5
     cycle_time_s: float = 30.0
     cycles: int = 3
@@ -17,6 +18,14 @@ class SimulationConfig:
     convection_w_m2k: float = 3000.0
     target_ejection_temperature_c: float = 75.0
     mold_contact_multiplier: float = 1.0
+    mesh_size_mm: float = 4.0
+    max_mesh_elements: int = 200_000
+    plastic_mold_contact_conductance_w_m2k: float = 1800.0
+    mold_mold_contact_conductance_w_m2k: float = 5000.0
+    water_boundary_mode: str = "convection"
+    elmer_processes: int = 1
+    solver_timeout_s: int = 900
+    keep_solver_files: bool = False
 
 
 @dataclass(slots=True)
@@ -27,6 +36,8 @@ class SimulationResult:
     body_roles: dict[str, str]
     summary: dict[str, float | str]
     assumptions: list[str]
+    mesh_summary: dict[str, float | int | str] = field(default_factory=dict)
+    solver_files: dict[str, str] = field(default_factory=dict)
 
 
 def run_transient_simulation(bodies: list[Body], config: SimulationConfig) -> SimulationResult:
@@ -91,6 +102,7 @@ def run_transient_simulation(bodies: list[Body], config: SimulationConfig) -> Si
         max(history[body.id]) for body in active if body.role == "mold"
     )
     summary: dict[str, float | str] = {
+        "solver_mode": config.solver_mode,
         "final_max_plastic_c": float(max(final_plastic)),
         "final_avg_mold_c": float(np.mean(final_mold)),
         "peak_mold_c": float(peak_mold),
@@ -105,10 +117,10 @@ def run_transient_simulation(bodies: list[Body], config: SimulationConfig) -> Si
         body_roles={body.id: body.role for body in active},
         summary=summary,
         assumptions=[
-            "First-version lumped transient model, not CFD.",
+            "FAST_PREVIEW lumped transient model, not FEM and not CFD.",
             "Water bodies are fixed-temperature cooling regions with convection to mold bodies.",
             "Plastic is reheated at the start of each cycle; mold temperature carries between cycles.",
-            "STEP ASCII body names are preserved; visual bounding boxes are placeholders unless a CAD kernel is added.",
+            "STEP bodies are imported through the available geometry pipeline; tessellation falls back to bounding boxes when needed.",
         ],
     )
 

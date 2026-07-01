@@ -9,6 +9,7 @@ from app.geometry.step_inspector import inspect_step
 from app.optimization.benchmark import run_benchmark
 from app.optimization.sweep import SweepConfig, run_sweep
 from app.reporting.exporter import create_session_dir, export_simulation, export_sweep
+from app.simulation.backends import BackendMode, run_simulation_backend
 from app.simulation.solver import SimulationConfig, run_transient_simulation
 
 
@@ -27,10 +28,31 @@ def run_headless_smoke() -> int:
     return 0
 
 
+def run_elmer_smoke() -> int:
+    bodies = load_demo_geometry()
+    config = SimulationConfig(
+        solver_mode=BackendMode.ELMER_THERMAL_FEM.value,
+        timestep_s=1.0,
+        cycle_time_s=1.0,
+        cycles=1,
+        mesh_size_mm=35.0,
+        max_mesh_elements=50_000,
+        solver_timeout_s=120,
+        keep_solver_files=True,
+    )
+    result, selection = run_simulation_backend(bodies, config, BackendMode.ELMER_THERMAL_FEM)
+    print(f"Elmer smoke OK: requested={selection.requested.value}, effective={selection.effective.value}")
+    print(f"Summary: {result.summary}")
+    print(f"Mesh: {result.mesh_summary}")
+    print(f"Workspace: {result.solver_files.get('workspace', '')}")
+    return 0 if selection.effective == BackendMode.ELMER_THERMAL_FEM else 2
+
+
 def main() -> int:
     mp.freeze_support()
     parser = argparse.ArgumentParser(description="InFlux Thermal Mold Analyzer")
     parser.add_argument("--headless-smoke", action="store_true", help="Run offline smoke test without opening the GUI.")
+    parser.add_argument("--elmer-smoke", action="store_true", help="Run a tiny Elmer FEM smoke test without opening the GUI.")
     parser.add_argument("--benchmark", action="store_true", help="Run worker scaling benchmark.")
     parser.add_argument("--benchmark-output", default="outputs/benchmark_hybrid_max.csv")
     parser.add_argument("--import-step", default="", help="Import a STEP file and print detected bodies.")
@@ -50,6 +72,8 @@ def main() -> int:
         return 0
     if args.headless_smoke:
         return run_headless_smoke()
+    if args.elmer_smoke:
+        return run_elmer_smoke()
     if args.benchmark:
         run_benchmark(Path(args.benchmark_output))
         return 0

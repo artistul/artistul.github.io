@@ -6,7 +6,8 @@ from app.geometry.step_importer import import_step, load_demo_geometry
 from app.geometry.step_inspector import inspect_step
 from app.optimization.sweep import SweepConfig, run_sweep
 from app.reporting.exporter import create_session_dir, export_simulation, export_sweep
-from app.simulation.backends import BackendMode, resolve_backend
+from app.simulation.backends import BackendMode, resolve_backend, run_simulation_backend
+from app.simulation.mesh_pipeline import MeshPipelineError, build_gmsh_mesh
 from app.simulation.profiles import PRESET_HYBRID_STEFAN_RO, enforce_worker_limits, get_resource_profile
 from app.simulation.resources import SystemResources, ResourceLimits, evaluate_throttle, sample_gpu_telemetry
 from app.simulation.solver import SimulationConfig, run_transient_simulation
@@ -100,6 +101,48 @@ def test_backend_selection_falls_back_without_gpu_solver():
     selection = resolve_backend(BackendMode.HYBRID_MAX_STEFAN, cpu_only=False, gpu_available=False)
     assert selection.effective == BackendMode.CPU_MAX
     assert "CPU fallback" in selection.message
+
+
+def test_elmer_thermal_fem_config_can_be_created():
+    config = SimulationConfig(
+        solver_mode=BackendMode.ELMER_THERMAL_FEM.value,
+        mesh_size_mm=5.0,
+        max_mesh_elements=12345,
+        plastic_mold_contact_conductance_w_m2k=2400.0,
+        mold_mold_contact_conductance_w_m2k=6000.0,
+        water_boundary_mode="convection",
+        elmer_processes=2,
+        solver_timeout_s=120,
+        keep_solver_files=True,
+    )
+    assert config.solver_mode == "ELMER_THERMAL_FEM"
+    assert config.mesh_size_mm == 5.0
+    assert config.max_mesh_elements == 12345
+    assert config.elmer_processes == 2
+
+
+def test_elmer_backend_missing_runtime_falls_back_cleanly(monkeypatch):
+    from app.simulation import elmer_backend
+
+    monkeypatch.setattr(elmer_backend, "find_elmer_runtime", lambda: None)
+    bodies = load_demo_geometry()
+    config = SimulationConfig(solver_mode=BackendMode.ELMER_THERMAL_FEM.value, timestep_s=1.0, cycle_time_s=4.0, cycles=1)
+    result, selection = run_simulation_backend(bodies, config, BackendMode.ELMER_THERMAL_FEM)
+    assert selection.effective == BackendMode.FAST_PREVIEW
+    assert result.summary["solver_mode"] == "FAST_PREVIEW_FALLBACK"
+    assert "unavailable" in " ".join(result.assumptions).lower()
+
+
+def test_demo_mesh_pipeline_either_meshes_or_reports_clear_error(tmp_path):
+    config = SimulationConfig(solver_mode=BackendMode.ELMER_THERMAL_FEM.value, mesh_size_mm=20.0, max_mesh_elements=100000)
+    try:
+        mesh = build_gmsh_mesh(load_demo_geometry(), config, tmp_path)
+    except MeshPipelineError as exc:
+        assert "Gmsh" in str(exc) or "meshing failed" in str(exc) or "mesh" in str(exc).lower()
+    else:
+        assert mesh.gmsh_mesh_path.exists()
+        assert mesh.element_count > 0
+        assert mesh.body_domain_ids
 
 
 def test_throttle_limits():

@@ -22,6 +22,7 @@ class SweepConfig:
 def make_cases(base: SimulationConfig, sweep: SweepConfig) -> list[SimulationConfig]:
     return [
         SimulationConfig(
+            solver_mode=base.solver_mode,
             timestep_s=base.timestep_s,
             cycle_time_s=cycle_time,
             cycles=base.cycles,
@@ -29,6 +30,14 @@ def make_cases(base: SimulationConfig, sweep: SweepConfig) -> list[SimulationCon
             convection_w_m2k=convection,
             target_ejection_temperature_c=base.target_ejection_temperature_c,
             mold_contact_multiplier=base.mold_contact_multiplier,
+            mesh_size_mm=base.mesh_size_mm,
+            max_mesh_elements=base.max_mesh_elements,
+            plastic_mold_contact_conductance_w_m2k=base.plastic_mold_contact_conductance_w_m2k,
+            mold_mold_contact_conductance_w_m2k=base.mold_mold_contact_conductance_w_m2k,
+            water_boundary_mode=base.water_boundary_mode,
+            elmer_processes=base.elmer_processes,
+            solver_timeout_s=base.solver_timeout_s,
+            keep_solver_files=base.keep_solver_files,
         )
         for water_temp, convection, cycle_time in product(
             sweep.water_temperatures_c,

@@ -38,3 +38,19 @@
 - Fixed STEP assembly placement by reading tessellation and bounding boxes from positioned XCAF component instances before falling back to target part definitions.
 - Added a regression check for the real CAD file to catch secondary mold half placement regressions.
 - Rebuilt and reinstalled the packaged app so the desktop shortcut uses the corrected STEP importer.
+
+## 0.4.0 - 2026-07-01
+
+- Added the first Elmer FEM accurate-backend integration path with new `FAST_PREVIEW` and `ELMER_THERMAL_FEM` solver modes.
+- Added a Gmsh mesh pipeline that can mesh classified STEP bodies when possible and demo bodies as positioned boxes.
+- Added Elmer workspace generation, ElmerGrid conversion, transient heat-transfer `.sif` writing, hidden ElmerSolver execution, and solver artifact reporting.
+- Added GUI controls for solver mode, mesh size, mesh limit, contact conductance values, water boundary mode, Elmer process count, timeout, and solver-file retention.
+- Added honest fallback behavior when Elmer/Gmsh are unavailable; fallback results are labeled as `FAST_PREVIEW_FALLBACK`, not FEM output.
+
+## 0.4.1 - 2026-07-01
+
+- Completed the Elmer FEM path so it runs ElmerSolver, reads VTU point temperatures through meshio, and returns Elmer-derived body temperature histories.
+- Installed and auto-detects Stefan's local Elmer no-GUI Windows runtime under `%LOCALAPPDATA%\InFlux\Elmer\`.
+- Replaced ElmerGrid conversion with direct Elmer native `mesh.*` writing to avoid ElmerGrid crashes on generated Gmsh meshes.
+- Added repeated-cycle support for Elmer using body-average thermal restart: plastic reheats while mold carries prior FEM body averages.
+- Added exact STEP mesh failure handling for the real CAD file; when Gmsh rejects duplicate/overlapping facets, Elmer runs a clearly labeled positioned bounding-box FEM fallback.

@@ -48,6 +48,18 @@ from app.simulation.solver import SimulationConfig, SimulationResult, run_transi
 from app.visualization.mpl_viewer import MoldFigureCanvas
 
 
+BACKEND_OPTIONS = [
+    ("Fast Preview", BackendMode.FAST_PREVIEW),
+    ("Elmer FEM Accurate", BackendMode.ELMER_THERMAL_FEM),
+    ("CPU Safe", BackendMode.CPU_SAFE),
+    ("CPU Max", BackendMode.CPU_MAX),
+    ("Hybrid MAX - Stefan Workstation", BackendMode.HYBRID_MAX_STEFAN),
+    ("GPU Placeholder", BackendMode.GPU_PLACEHOLDER),
+    ("Future GPU OpenCL", BackendMode.GPU_OPENCL),
+    ("Future GPU HIP", BackendMode.GPU_HIP),
+]
+
+
 class SimulationThread(QThread):
     finished_result = Signal(object)
     failed = Signal(str)
@@ -178,6 +190,15 @@ class MainWindow(QMainWindow):
         self.water_spin = _double_spin(0.0, 95.0, 22.0, 1.0)
         self.convection_spin = _double_spin(50.0, 50000.0, 3000.0, 100.0)
         self.target_spin = _double_spin(20.0, 250.0, 75.0, 1.0)
+        self.mesh_size_spin = _double_spin(0.25, 100.0, 4.0, 0.25)
+        self.max_mesh_elements_spin = _spin(100, 5_000_000, 200_000)
+        self.plastic_contact_spin = _double_spin(10.0, 200_000.0, 1800.0, 100.0)
+        self.mold_contact_spin = _double_spin(10.0, 500_000.0, 5000.0, 100.0)
+        self.water_boundary_combo = QComboBox()
+        self.water_boundary_combo.addItems(["convection", "fixed_temperature"])
+        self.elmer_processes_spin = _spin(1, 64, 1)
+        self.solver_timeout_spin = _spin(30, 86_400, 900)
+        self.keep_solver_files_check = QCheckBox("Keep Elmer/Gmsh solver files")
         for label, widget in [
             ("Timestep (s)", self.dt_spin),
             ("Cycle time (s)", self.cycle_spin),
@@ -185,6 +206,14 @@ class MainWindow(QMainWindow):
             ("Water temp (C)", self.water_spin),
             ("Convection W/m2K", self.convection_spin),
             ("Target ejection (C)", self.target_spin),
+            ("Mesh size mm", self.mesh_size_spin),
+            ("Max mesh elements", self.max_mesh_elements_spin),
+            ("Plastic/mold contact W/m2K", self.plastic_contact_spin),
+            ("Mold/mold contact W/m2K", self.mold_contact_spin),
+            ("Water boundary mode", self.water_boundary_combo),
+            ("Elmer processes", self.elmer_processes_spin),
+            ("Solver timeout s", self.solver_timeout_spin),
+            ("Solver files", self.keep_solver_files_check),
         ]:
             sim_form.addRow(label, widget)
 
@@ -205,7 +234,8 @@ class MainWindow(QMainWindow):
         self.priority_combo.addItems(["background", "below_normal", "normal", "high"])
         self.affinity_spin = _spin(0, 256, 0)
         self.backend_combo = QComboBox()
-        self.backend_combo.addItems([mode.value for mode in BackendMode])
+        for label, mode in BACKEND_OPTIONS:
+            self.backend_combo.addItem(label, mode.value)
         self.cpu_only_check = QCheckBox("CPU-only")
         self.gpu_enabled_check = QCheckBox("GPU / Hybrid enabled")
         self.resource_label = QLabel("")
@@ -379,7 +409,7 @@ class MainWindow(QMainWindow):
         self.worker_thread = SimulationThread(
             self.bodies,
             self._sim_config(),
-            BackendMode(self.backend_combo.currentText()),
+            self._selected_backend_mode(),
             self.cpu_only_check.isChecked(),
             self.gpu_enabled_check.isChecked(),
         )
@@ -419,7 +449,7 @@ class MainWindow(QMainWindow):
         paths = export_simulation(self.session_dir, self.bodies, result)
         self.results_text.setPlainText(
             f"Backend: requested {selection.requested.value}, effective {selection.effective.value}\n"
-            f"{selection.message}\n\nSummary:\n{result.summary}\n\nExports:\n"
+            f"{selection.message}\n\nSummary:\n{result.summary}\n\nMesh:\n{result.mesh_summary}\n\nSolver files:\n{result.solver_files}\n\nExports:\n"
             + "\n".join(f"{k}: {v}" for k, v in paths.items())
         )
         self._log(f"Simulation complete. Exported to {self.session_dir}")
@@ -494,12 +524,21 @@ class MainWindow(QMainWindow):
 
     def _sim_config(self) -> SimulationConfig:
         return SimulationConfig(
+            solver_mode=self._selected_backend_mode().value,
             timestep_s=self.dt_spin.value(),
             cycle_time_s=self.cycle_spin.value(),
             cycles=self.cycles_spin.value(),
             water_temperature_c=self.water_spin.value(),
             convection_w_m2k=self.convection_spin.value(),
             target_ejection_temperature_c=self.target_spin.value(),
+            mesh_size_mm=self.mesh_size_spin.value(),
+            max_mesh_elements=self.max_mesh_elements_spin.value(),
+            plastic_mold_contact_conductance_w_m2k=self.plastic_contact_spin.value(),
+            mold_mold_contact_conductance_w_m2k=self.mold_contact_spin.value(),
+            water_boundary_mode=self.water_boundary_combo.currentText(),
+            elmer_processes=self.elmer_processes_spin.value(),
+            solver_timeout_s=self.solver_timeout_spin.value(),
+            keep_solver_files=self.keep_solver_files_check.isChecked(),
         )
 
     def _refresh_resource_defaults(self) -> None:
@@ -515,7 +554,7 @@ class MainWindow(QMainWindow):
         self.vram_spin.setValue(profile.vram_cap_gb)
         self.cache_path_edit.setText(profile.cache_output_path)
         self.priority_combo.setCurrentText(profile.process_priority)
-        self.backend_combo.setCurrentText(profile.backend_mode.value)
+        self._set_backend_mode(profile.backend_mode)
         self.gpu_enabled_check.setChecked(profile.gpu_enabled)
         self.cpu_only_check.setChecked(not profile.gpu_enabled)
         self.resource_label.setText(
@@ -582,6 +621,17 @@ class MainWindow(QMainWindow):
             vram_cap_gb=self.vram_spin.value(),
             cache_output_path=self.cache_path_edit.text() or str(Path.cwd() / "outputs"),
         )
+
+    def _selected_backend_mode(self) -> BackendMode:
+        value = self.backend_combo.currentData() or self.backend_combo.currentText()
+        return BackendMode(str(value))
+
+    def _set_backend_mode(self, mode: BackendMode) -> None:
+        for index in range(self.backend_combo.count()):
+            if self.backend_combo.itemData(index) == mode.value:
+                self.backend_combo.setCurrentIndex(index)
+                return
+        self.backend_combo.setCurrentText(mode.value)
 
     def _choose_cache_path(self) -> None:
         path = QFileDialog.getExistingDirectory(self, "Select cache/output folder", self.cache_path_edit.text())

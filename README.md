@@ -48,6 +48,7 @@ Current capabilities:
 - Load a built-in synthetic clamped mold demo when a real CAD import is not ready.
 - Classify bodies as mold, injected plastic, water/cooling channel, or ignored.
 - Run a first-version transient thermal model over repeated injection cycles.
+- Select an `Elmer FEM Accurate` backend path that prepares an external Gmsh/Elmer transient thermal workflow when the Elmer runtime is installed.
 - Treat water bodies as fixed-temperature cooling regions with convection into mold bodies.
 - Run parameter sweeps in parallel on CPU workers.
 - Monitor CPU, app CPU, RAM, disk, active jobs, completed jobs, simulations/minute, and throttling state.
@@ -57,6 +58,7 @@ Current capabilities:
 Still simplified:
 
 - The solver is a lumped transient heat-transfer prototype, not FEM and not CFD.
+- The new Elmer FEM path is an early external-solver integration. It can create Gmsh/Elmer run artifacts when the external runtime is present, but falls back loudly to `FAST_PREVIEW` if Elmer is not installed.
 - STEP visualization uses true per-body mesh tessellation through OCP when supported. If tessellation fails, the viewer keeps a labeled bounding-box fallback instead of crashing.
 - GPU compute is not implemented yet. GPU/HYBRID backend choices are exposed in the UI, but they clearly fall back to CPU and make no fake GPU utilization claims.
 - AMD VRAM usage telemetry is currently a clean placeholder when reliable offline telemetry is unavailable.
@@ -115,6 +117,25 @@ Build the Windows installer with desktop and Start Menu shortcuts:
 ```
 
 The current solver is a first-version lumped transient heat-transfer model for useful engineering iteration, not full CFD. Water bodies are modeled as fixed-temperature cooling regions with convection into mold bodies. STEP import uses OCP when available and falls back to the ASCII STEP body/product index when the CAD kernel cannot read the file.
+
+### Accurate Elmer FEM backend
+
+The GUI includes `Fast Preview` and `Elmer FEM Accurate` solver choices.
+
+`Fast Preview` is the existing lumped thermal network and remains the default usable solver.
+
+`Elmer FEM Accurate` is the new external FEM path:
+
+- Uses Gmsh to create a volume mesh from the positioned classified bodies.
+- Writes Elmer native `mesh.*` files directly from the Gmsh mesh. This avoids an observed ElmerGrid crash on some generated multi-body meshes.
+- Writes a transient Elmer heat-transfer `.sif` case.
+- Runs `ElmerSolver` as a hidden background process when Elmer is installed and available on `PATH`.
+- Also auto-detects Stefan's local Elmer runtime under `%LOCALAPPDATA%\InFlux\Elmer\`.
+- Reads Elmer VTU point temperatures back into InFlux and reports body-average temperature histories.
+- Records mesh diagnostics, generated solver files, and assumptions in the exported report.
+- Does not perform CFD and does not claim GPU acceleration.
+
+If exact STEP tetrahedral meshing fails because the CAD contains duplicate/overlapping facets, the app runs a clearly labeled positioned bounding-box FEM fallback so Elmer remains usable while the CAD meshing issue is visible in the report. If `ElmerSolver` is not found, the app returns a clearly labeled `FAST_PREVIEW_FALLBACK` result instead of pretending FEM temperatures were produced.
 
 Generated reports, CSVs, charts, logs, screenshots, and scaling benchmarks are written under `outputs\`.
 
