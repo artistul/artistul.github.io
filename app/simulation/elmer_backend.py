@@ -539,6 +539,8 @@ def _validation_status(mesh: MeshPipelineResult) -> str:
     warnings = " ".join(mesh.warnings).lower()
     if "bounding-box simplification" in warnings or "generated box volumes" in warnings:
         return "NOT_VALIDATION_GRADE_SIMPLIFIED_GEOMETRY"
+    if "repaired per-body surface tetra fallback" in warnings or "nonconformal per-body" in warnings:
+        return "FEM_READY_MESH_NOT_VALIDATION_GRADE_NONCONFORMAL_INTERFACES"
     return "EXACT_GEOMETRY_MESHED_REQUIRES_CONVERGENCE_VALIDATION"
 
 

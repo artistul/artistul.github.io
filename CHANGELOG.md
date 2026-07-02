@@ -73,3 +73,10 @@
 - Added `GMSH_OCC_HEALED_PER_BODY` as the default exact meshing strategy.
 - Added OCP ShapeFix and same-domain unification before positioned per-body STEP export.
 - Updated mesh diagnostics to compare raw and healed body exports when raw tetra meshing fails.
+
+## 0.4.5 - 2026-07-02
+
+- Added `AUTO_EXACT_THEN_REPAIRED_SURFACE` as the default meshing cascade.
+- Added `SURFACE_REPAIR_TETGEN_PER_BODY`, which triangulates each positioned STEP body surface, repairs it with MeshFix, tetrahedralizes with TetGen, and writes physical body IDs for Elmer.
+- Verified Stefan's current 5-body CAD model produces nonzero tetrahedral domains for all five bodies through the repaired-surface fallback.
+- Labeled repaired-surface fallback results as FEM setup-ready but not validation-grade because per-body interfaces are currently nonconformal.

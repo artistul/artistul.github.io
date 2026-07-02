@@ -70,7 +70,7 @@ class MeshPipelineResult:
     warnings: list[str] = field(default_factory=list)
     used_source_step: str = ""
     coordinate_scale_to_m: float = 0.001
-    mesher_strategy: str = "GMSH_OCC_PER_BODY"
+    mesher_strategy: str = "AUTO_EXACT_THEN_REPAIRED_SURFACE"
     diagnostics_dir: str = ""
 
     def summary(self) -> dict[str, int | float | str]:
@@ -106,7 +106,7 @@ def write_mesh_diagnostics(
     output.mkdir(parents=True, exist_ok=True)
     diagnostics: list[BodyMeshDiagnostic] = []
     warnings: list[str] = []
-    strategy = (config.mesh_strategy or "GMSH_OCC_HEALED_PER_BODY").upper()
+    strategy = (config.mesh_strategy or "AUTO_EXACT_THEN_REPAIRED_SURFACE").upper()
     source_step = _shared_existing_step(active)
     raw_steps: list[tuple[Body, Path]] = []
     healed_steps: list[tuple[Body, Path]] = []
@@ -271,15 +271,19 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
 
     workspace.mkdir(parents=True, exist_ok=True)
     mesh_path = workspace / "thermal_model.msh"
-    strategy = (config.mesh_strategy or "GMSH_OCC_HEALED_PER_BODY").upper()
+    strategy = (config.mesh_strategy or "AUTO_EXACT_THEN_REPAIRED_SURFACE").upper()
+    if strategy == "SURFACE_REPAIR_TETGEN_PER_BODY":
+        return _build_surface_repair_tetgen_mesh(active, config, workspace, "SURFACE_REPAIR_TETGEN_PER_BODY")
+    exact_strategy = "GMSH_OCC_HEALED_PER_BODY" if strategy == "AUTO_EXACT_THEN_REPAIRED_SURFACE" else strategy
     result = MeshPipelineResult(
         workspace=workspace,
         gmsh_mesh_path=mesh_path,
         body_domain_ids={},
         body_domain_names={},
-        mesher_strategy=strategy,
+        mesher_strategy=exact_strategy,
     )
 
+    gmsh_finalized = False
     gmsh.initialize()
     try:
         gmsh.option.setNumber("General.Terminal", 0)
@@ -293,8 +297,8 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
         gmsh.option.setNumber("Mesh.MeshSizeMin", max(mesh_size * 0.1, mesh_size * 0.25))
         gmsh.model.add("influx_thermal_model")
 
-        source_step = None if strategy == "SIMPLIFIED_BBOX_PREVIEW" else _shared_existing_step(active)
-        if source_step and strategy == "GMSH_OCC_WHOLE_STEP":
+        source_step = None if exact_strategy == "SIMPLIFIED_BBOX_PREVIEW" else _shared_existing_step(active)
+        if source_step and exact_strategy == "GMSH_OCC_WHOLE_STEP":
             result.used_source_step = str(source_step)
             dimtags = gmsh.model.occ.importShapes(str(source_step))
             gmsh.model.occ.synchronize()
@@ -312,7 +316,7 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
                 source_step,
                 workspace,
                 result.warnings,
-                heal_shapes=strategy != "GMSH_OCC_PER_BODY",
+                heal_shapes=exact_strategy != "GMSH_OCC_PER_BODY",
             )
             volume_tags = [tag for tags in assignments.values() for tag in tags]
             if not volume_tags:
@@ -328,7 +332,7 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
             gmsh.model.occ.synchronize()
             volume_tags = _fragment_volumes(gmsh, volume_tags, result.warnings)
             assignments = _assign_gmsh_volumes_to_bodies(gmsh, volume_tags, active, result.warnings)
-            if strategy == "SIMPLIFIED_BBOX_PREVIEW":
+            if exact_strategy == "SIMPLIFIED_BBOX_PREVIEW":
                 result.warnings.append("SIMPLIFIED_BBOX_PREVIEW strategy was selected; generated box volumes from body bounding boxes.")
             else:
                 result.warnings.append("No shared STEP source was available; generated box volumes from body bounding boxes.")
@@ -349,12 +353,22 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
                 f"Generated mesh has {result.element_count} volume elements, above configured limit {config.max_mesh_elements}."
             )
         gmsh.write(str(mesh_path))
-    except MeshPipelineError:
+    except MeshPipelineError as exc:
+        if strategy == "AUTO_EXACT_THEN_REPAIRED_SURFACE":
+            gmsh.finalize()
+            gmsh_finalized = True
+            fallback = _build_surface_repair_tetgen_mesh(active, config, workspace, "AUTO_EXACT_THEN_REPAIRED_SURFACE")
+            fallback.warnings.insert(0, f"Exact Gmsh CAD volume meshing failed; used repaired per-body surface tetra fallback. Exact error: {exc}")
+            return fallback
         raise
     except Exception as exc:  # pragma: no cover - depends on CAD/mesher details
         raise MeshPipelineError(f"Gmsh meshing failed: {exc}") from exc
     finally:
-        gmsh.finalize()
+        if not gmsh_finalized:
+            try:
+                gmsh.finalize()
+            except Exception:
+                pass
 
     return result
 
@@ -367,6 +381,162 @@ def _shared_existing_step(bodies: Iterable[Body]) -> Path | None:
     if path.exists() and path.suffix.lower() in {".step", ".stp"}:
         return path
     return None
+
+
+def _build_surface_repair_tetgen_mesh(
+    bodies: list[Body],
+    config: SimulationConfig,
+    workspace: Path,
+    strategy: str,
+) -> MeshPipelineResult:
+    try:
+        import meshio  # type: ignore[import-not-found]
+        import numpy as np
+        import tetgen  # type: ignore[import-not-found]
+        from pymeshfix import MeshFix  # type: ignore[import-not-found]
+    except Exception as exc:  # pragma: no cover - optional runtime
+        raise MeshPipelineError(f"Surface-repair TetGen fallback dependencies are unavailable: {exc}") from exc
+
+    source_step = _shared_existing_step(bodies)
+    if not source_step:
+        raise MeshPipelineError("Surface-repair TetGen fallback requires a shared real STEP source.")
+
+    workspace.mkdir(parents=True, exist_ok=True)
+    warnings: list[str] = [
+        "Using repaired per-body surface tetra fallback. This creates nonconformal per-body tetra meshes from real surface triangles.",
+        "Use this to unblock Elmer FEM setup; contact/interface coupling still needs validation before engineering sign-off.",
+    ]
+    body_steps = _export_positioned_body_steps(source_step, bodies, workspace / "surface_repair_body_steps", warnings)
+    if len(body_steps) != len(bodies):
+        raise MeshPipelineError(f"Surface-repair fallback exported {len(body_steps)} body STEP files for {len(bodies)} bodies.")
+
+    all_points: list[object] = []
+    all_tets: list[object] = []
+    all_tris: list[object] = []
+    tet_tags: list[object] = []
+    tri_tags: list[object] = []
+    point_offset = 0
+    total_tets = 0
+    mesh_path = workspace / "thermal_model.msh"
+    result = MeshPipelineResult(
+        workspace=workspace,
+        gmsh_mesh_path=mesh_path,
+        body_domain_ids={},
+        body_domain_names={},
+        mesher_strategy=strategy,
+    )
+
+    for body_index, (body, step_path) in enumerate(body_steps, start=1):
+        surface_points, surface_faces = _gmsh_surface_mesh_from_step(step_path, config.mesh_size_mm)
+        if len(surface_points) == 0 or len(surface_faces) == 0:
+            raise MeshPipelineError(f"Surface-repair fallback produced no surface mesh for {body.name}.")
+        fixer = MeshFix(surface_points, surface_faces)
+        boundary_count_before = fixer.n_boundaries
+        fixer.repair(joincomp=True, remove_smallest_components=False)
+        fixed_points = np.asarray(fixer.points, dtype=float)
+        fixed_faces = np.asarray(fixer.faces, dtype=np.int64)
+        if len(fixed_points) == 0 or len(fixed_faces) == 0:
+            raise MeshPipelineError(f"MeshFix produced an empty repaired surface for {body.name}.")
+
+        tet = tetgen.TetGen(fixed_points, fixed_faces)
+        try:
+            nodes, elements, _, _ = tet.tetrahedralize(
+                quality=True,
+                minratio=1.2,
+                mindihedral=1.0,
+                steinerleft=300000,
+                quiet=True,
+            )
+        except Exception as exc:
+            raise MeshPipelineError(f"TetGen failed on repaired surface for {body.name}: {exc}") from exc
+
+        nodes = np.asarray(nodes, dtype=float) * result.coordinate_scale_to_m
+        elements = np.asarray(elements, dtype=np.int64)
+        if len(nodes) == 0 or len(elements) == 0:
+            raise MeshPipelineError(f"TetGen produced no tetrahedra for {body.name}.")
+        all_points.append(nodes)
+        all_tets.append(elements + point_offset)
+        tet_tags.append(np.full(len(elements), body_index, dtype=np.int32))
+        result.body_domain_ids[body.id] = body_index
+        result.body_domain_names[body_index] = f"{body.role}:{body.name}"
+        total_tets += len(elements)
+
+        boundary_faces = np.asarray(getattr(tet, "trifaces", fixed_faces), dtype=np.int64)
+        if body.role == "water" and len(boundary_faces):
+            boundary_id = 1000 + len(result.cooling_boundary_ids) + 1
+            all_tris.append(boundary_faces + point_offset)
+            tri_tags.append(np.full(len(boundary_faces), boundary_id, dtype=np.int32))
+            result.cooling_boundary_ids[body.id] = boundary_id
+
+        warnings.append(
+            f"{body.name}: repaired surface {len(surface_faces)} -> {len(fixed_faces)} triangles, "
+            f"boundaries {boundary_count_before}->{fixer.n_boundaries}, tetrahedra {len(elements)}."
+        )
+        point_offset += len(nodes)
+
+    if total_tets > config.max_mesh_elements:
+        raise MeshPipelineError(
+            f"Surface-repair TetGen mesh has {total_tets} volume elements, above configured limit {config.max_mesh_elements}."
+        )
+
+    points = np.vstack(all_points)
+    tetra = np.vstack(all_tets)
+    triangle = np.vstack(all_tris) if all_tris else np.empty((0, 3), dtype=np.int64)
+    tetra_tags = np.concatenate(tet_tags)
+    triangle_tags = np.concatenate(tri_tags) if tri_tags else np.empty((0,), dtype=np.int32)
+    cells = [("tetra", tetra)]
+    cell_data_physical = [tetra_tags]
+    cell_data_geometrical = [tetra_tags]
+    if len(triangle):
+        cells.append(("triangle", triangle))
+        cell_data_physical.append(triangle_tags)
+        cell_data_geometrical.append(triangle_tags)
+    mesh = meshio.Mesh(
+        points,
+        cells,
+        cell_data={"gmsh:physical": cell_data_physical, "gmsh:geometrical": cell_data_geometrical},
+    )
+    meshio.write(mesh_path, mesh, file_format="gmsh22", binary=False)
+
+    result.node_count = len(points)
+    result.element_count = int(total_tets)
+    result.boundary_count = int(len(triangle))
+    result.used_source_step = str(source_step)
+    result.warnings.extend(warnings)
+    return result
+
+
+def _gmsh_surface_mesh_from_step(step_path: Path, mesh_size_mm: float):
+    import gmsh  # type: ignore[import-not-found]
+    import numpy as np
+
+    gmsh.initialize()
+    try:
+        gmsh.option.setNumber("General.Terminal", 0)
+        gmsh.option.setNumber("Mesh.MshFileVersion", 2.2)
+        size = max(0.001, float(mesh_size_mm))
+        gmsh.option.setNumber("Mesh.MeshSizeMax", size)
+        gmsh.option.setNumber("Mesh.MeshSizeMin", max(size * 0.1, size * 0.25))
+        gmsh.model.add(f"surface_repair_{_safe_filename(step_path.stem)}")
+        gmsh.model.occ.importShapes(str(step_path))
+        gmsh.model.occ.synchronize()
+        gmsh.model.mesh.generate(2)
+        node_tags, coords, _ = gmsh.model.mesh.getNodes()
+        points = np.asarray(coords, dtype=float).reshape((-1, 3))
+        tag_to_index = {int(tag): index for index, tag in enumerate(node_tags)}
+        faces: list[list[int]] = []
+        element_types, _, element_node_tags = gmsh.model.mesh.getElements(2)
+        for element_type, nodes in zip(element_types, element_node_tags):
+            if element_type != 2:
+                continue
+            triangles = np.asarray(nodes, dtype=np.int64).reshape((-1, 3))
+            for triangle in triangles:
+                face = [tag_to_index[int(node)] for node in triangle]
+                if len(set(face)) == 3:
+                    faces.append(face)
+        return points, np.asarray(faces, dtype=np.int64)
+    finally:
+        gmsh.finalize()
 
 
 def _import_positioned_body_steps(

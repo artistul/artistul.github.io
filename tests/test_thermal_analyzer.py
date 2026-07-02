@@ -114,13 +114,13 @@ def test_elmer_thermal_fem_config_can_be_created():
         elmer_processes=2,
         solver_timeout_s=120,
         keep_solver_files=True,
-        mesh_strategy="GMSH_OCC_HEALED_PER_BODY",
+        mesh_strategy="AUTO_EXACT_THEN_REPAIRED_SURFACE",
     )
     assert config.solver_mode == "ELMER_THERMAL_FEM"
     assert config.mesh_size_mm == 5.0
     assert config.max_mesh_elements == 12345
     assert config.elmer_processes == 2
-    assert config.mesh_strategy == "GMSH_OCC_HEALED_PER_BODY"
+    assert config.mesh_strategy == "AUTO_EXACT_THEN_REPAIRED_SURFACE"
 
 
 def test_mesh_diagnostics_writes_files_for_demo_bodies(tmp_path):

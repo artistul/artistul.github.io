@@ -198,9 +198,11 @@ class MainWindow(QMainWindow):
         self.water_boundary_combo.addItems(["convection", "fixed_temperature"])
         self.mesh_strategy_combo = QComboBox()
         self.mesh_strategy_combo.addItems([
+            "AUTO_EXACT_THEN_REPAIRED_SURFACE",
             "GMSH_OCC_HEALED_PER_BODY",
             "GMSH_OCC_PER_BODY",
             "GMSH_OCC_WHOLE_STEP",
+            "SURFACE_REPAIR_TETGEN_PER_BODY",
             "SIMPLIFIED_BBOX_PREVIEW",
         ])
         self.elmer_processes_spin = _spin(1, 64, 1)
