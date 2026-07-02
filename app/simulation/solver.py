@@ -27,6 +27,7 @@ class SimulationConfig:
     solver_timeout_s: int = 900
     keep_solver_files: bool = False
     allow_simplified_geometry_fallback: bool = False
+    mesh_strategy: str = "GMSH_OCC_PER_BODY"
 
 
 @dataclass(slots=True)

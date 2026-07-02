@@ -7,7 +7,7 @@ from app.geometry.step_inspector import inspect_step
 from app.optimization.sweep import SweepConfig, run_sweep
 from app.reporting.exporter import create_session_dir, export_simulation, export_sweep
 from app.simulation.backends import BackendMode, resolve_backend, run_simulation_backend
-from app.simulation.mesh_pipeline import MeshPipelineError, build_gmsh_mesh
+from app.simulation.mesh_pipeline import MeshPipelineError, build_gmsh_mesh, write_mesh_diagnostics
 from app.simulation.profiles import PRESET_HYBRID_STEFAN_RO, enforce_worker_limits, get_resource_profile
 from app.simulation.resources import SystemResources, ResourceLimits, evaluate_throttle, sample_gpu_telemetry
 from app.simulation.solver import SimulationConfig, run_transient_simulation
@@ -114,11 +114,25 @@ def test_elmer_thermal_fem_config_can_be_created():
         elmer_processes=2,
         solver_timeout_s=120,
         keep_solver_files=True,
+        mesh_strategy="GMSH_OCC_PER_BODY",
     )
     assert config.solver_mode == "ELMER_THERMAL_FEM"
     assert config.mesh_size_mm == 5.0
     assert config.max_mesh_elements == 12345
     assert config.elmer_processes == 2
+    assert config.mesh_strategy == "GMSH_OCC_PER_BODY"
+
+
+def test_mesh_diagnostics_writes_files_for_demo_bodies(tmp_path):
+    diagnostics = write_mesh_diagnostics(
+        load_demo_geometry(),
+        SimulationConfig(solver_mode=BackendMode.ELMER_THERMAL_FEM.value, mesh_size_mm=20.0),
+        tmp_path,
+    )
+    assert diagnostics
+    assert (tmp_path / "mesh_diagnostics.txt").exists()
+    assert (tmp_path / "mesh_body_diagnostics.csv").exists()
+    assert all("skipped" in diagnostic.status for diagnostic in diagnostics)
 
 
 def test_elmer_backend_missing_runtime_falls_back_cleanly(monkeypatch):

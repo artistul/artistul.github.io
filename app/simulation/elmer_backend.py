@@ -14,7 +14,7 @@ import numpy as np
 
 from app.geometry.bodies import Body
 from app.simulation.materials import get_material
-from app.simulation.mesh_pipeline import MeshPipelineError, MeshPipelineResult, build_gmsh_mesh
+from app.simulation.mesh_pipeline import MeshPipelineError, MeshPipelineResult, build_gmsh_mesh, write_mesh_diagnostics
 from app.simulation.solver import SimulationConfig, SimulationResult, run_transient_simulation
 
 
@@ -79,10 +79,18 @@ def run_elmer_transient(bodies: list[Body], config: SimulationConfig, output_roo
     except MeshPipelineError as exc:
         if "Gmsh Python module is not installed" in str(exc):
             raise ElmerUnavailable(str(exc)) from exc
+        diagnostics_note = ""
+        try:
+            diagnostics_dir = workspace / "mesh_diagnostics"
+            write_mesh_diagnostics(bodies, config, diagnostics_dir)
+            diagnostics_note = f" Mesh diagnostics written to {diagnostics_dir}."
+        except Exception as diag_exc:
+            diagnostics_note = f" Mesh diagnostics could not be completed: {diag_exc}."
         if not config.allow_simplified_geometry_fallback:
             raise ElmerRuntimeError(
                 "Exact CAD tetra meshing failed and simplified geometry fallback is disabled. "
-                f"Enable 'Allow simplified bbox fallback' only for non-validation preview runs. Exact mesh error: {exc}"
+                f"Enable 'Allow simplified bbox fallback' only for non-validation preview runs. Exact mesh error: {exc}."
+                f"{diagnostics_note}"
             ) from exc
         exact_error = str(exc)
         simplified = []
@@ -553,4 +561,5 @@ def _replace_solver_mode(config: SimulationConfig, solver_mode: str) -> Simulati
         solver_timeout_s=config.solver_timeout_s,
         keep_solver_files=config.keep_solver_files,
         allow_simplified_geometry_fallback=config.allow_simplified_geometry_fallback,
+        mesh_strategy=config.mesh_strategy,
     )

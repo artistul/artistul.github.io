@@ -196,6 +196,8 @@ class MainWindow(QMainWindow):
         self.mold_contact_spin = _double_spin(10.0, 500_000.0, 5000.0, 100.0)
         self.water_boundary_combo = QComboBox()
         self.water_boundary_combo.addItems(["convection", "fixed_temperature"])
+        self.mesh_strategy_combo = QComboBox()
+        self.mesh_strategy_combo.addItems(["GMSH_OCC_PER_BODY", "GMSH_OCC_WHOLE_STEP", "SIMPLIFIED_BBOX_PREVIEW"])
         self.elmer_processes_spin = _spin(1, 64, 1)
         self.solver_timeout_spin = _spin(30, 86_400, 900)
         self.keep_solver_files_check = QCheckBox("Keep Elmer/Gmsh solver files")
@@ -212,6 +214,7 @@ class MainWindow(QMainWindow):
             ("Plastic/mold contact W/m2K", self.plastic_contact_spin),
             ("Mold/mold contact W/m2K", self.mold_contact_spin),
             ("Water boundary mode", self.water_boundary_combo),
+            ("Mesher strategy", self.mesh_strategy_combo),
             ("Elmer processes", self.elmer_processes_spin),
             ("Solver timeout s", self.solver_timeout_spin),
             ("Solver files", self.keep_solver_files_check),
@@ -542,6 +545,7 @@ class MainWindow(QMainWindow):
             solver_timeout_s=self.solver_timeout_spin.value(),
             keep_solver_files=self.keep_solver_files_check.isChecked(),
             allow_simplified_geometry_fallback=self.allow_simplified_fallback_check.isChecked(),
+            mesh_strategy=self.mesh_strategy_combo.currentText(),
         )
 
     def _refresh_resource_defaults(self) -> None:

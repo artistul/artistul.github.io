@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import csv
+import json
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
@@ -10,6 +13,46 @@ from app.simulation.solver import SimulationConfig
 
 class MeshPipelineError(RuntimeError):
     """Raised when the external meshing pipeline cannot produce a volume mesh."""
+
+
+@dataclass(slots=True)
+class BodyMeshDiagnostic:
+    body_id: str
+    name: str
+    role: str
+    hierarchy_path: str
+    source_step: str
+    exported_step: str
+    bbox_mm: tuple[float, float, float, float, float, float]
+    volume_mm3: float
+    face_count: int
+    surface_ok: bool = False
+    volume_ok: bool = False
+    node_count: int = 0
+    element_count: int = 0
+    duration_s: float = 0.0
+    status: str = "not run"
+    warnings: list[str] = field(default_factory=list)
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "body_id": self.body_id,
+            "name": self.name,
+            "role": self.role,
+            "hierarchy_path": self.hierarchy_path,
+            "source_step": self.source_step,
+            "exported_step": self.exported_step,
+            "bbox_mm": self.bbox_mm,
+            "volume_mm3": self.volume_mm3,
+            "face_count": self.face_count,
+            "surface_ok": self.surface_ok,
+            "volume_ok": self.volume_ok,
+            "node_count": self.node_count,
+            "element_count": self.element_count,
+            "duration_s": round(self.duration_s, 3),
+            "status": self.status,
+            "warnings": " | ".join(self.warnings),
+        }
 
 
 @dataclass(slots=True)
@@ -25,6 +68,8 @@ class MeshPipelineResult:
     warnings: list[str] = field(default_factory=list)
     used_source_step: str = ""
     coordinate_scale_to_m: float = 0.001
+    mesher_strategy: str = "GMSH_OCC_PER_BODY"
+    diagnostics_dir: str = ""
 
     def summary(self) -> dict[str, int | float | str]:
         return {
@@ -36,8 +81,145 @@ class MeshPipelineResult:
             "cooling_boundary_count": len(self.cooling_boundary_ids),
             "used_source_step": self.used_source_step or "generated from body bounding boxes",
             "coordinate_scale_to_m": self.coordinate_scale_to_m,
+            "mesher_strategy": self.mesher_strategy,
+            "diagnostics_dir": self.diagnostics_dir,
             "warnings": " | ".join(self.warnings),
         }
+
+
+def write_mesh_diagnostics(
+    bodies: list[Body],
+    config: SimulationConfig,
+    output_dir: str | Path = "outputs/mesh_diagnostics",
+) -> list[BodyMeshDiagnostic]:
+    """Probe exact per-body CAD meshability and write evidence files.
+
+    This does not certify the model. It answers the narrower question the
+    engineer needs before FEM: which positioned bodies can be tetra meshed by
+    the current CAD-to-Gmsh path, and which exported bodies fail.
+    """
+
+    active = [body for body in bodies if body.role != "ignored"]
+    output = Path(output_dir)
+    output.mkdir(parents=True, exist_ok=True)
+    diagnostics: list[BodyMeshDiagnostic] = []
+    warnings: list[str] = []
+    source_step = _shared_existing_step(active)
+    body_steps: list[tuple[Body, Path]] = []
+    if source_step:
+        body_steps = _export_positioned_body_steps(source_step, active, output / "positioned_body_steps", warnings)
+    else:
+        warnings.append("No shared real STEP source was available; exact per-body CAD diagnostics cannot run.")
+
+    step_by_id = {body.id: step for body, step in body_steps}
+    for body in active:
+        diag = BodyMeshDiagnostic(
+            body_id=body.id,
+            name=body.name,
+            role=body.role,
+            hierarchy_path=body.hierarchy_path,
+            source_step=body.source,
+            exported_step=str(step_by_id.get(body.id, "")),
+            bbox_mm=body.bbox_mm,
+            volume_mm3=body.volume_mm3,
+            face_count=body.face_count,
+        )
+        if body.id not in step_by_id:
+            diag.status = "skipped: no positioned STEP export"
+            diag.warnings.extend(warnings)
+            diagnostics.append(diag)
+            continue
+        _diagnose_body_step(step_by_id[body.id], config, diag)
+        diagnostics.append(diag)
+
+    _write_mesh_diagnostics_files(output, diagnostics, warnings)
+    return diagnostics
+
+
+def _diagnose_body_step(step_path: Path, config: SimulationConfig, diag: BodyMeshDiagnostic) -> None:
+    started = time.perf_counter()
+    try:
+        import gmsh  # type: ignore[import-not-found]
+    except Exception as exc:  # pragma: no cover - depends on optional runtime
+        diag.status = "failed: gmsh python module unavailable"
+        diag.warnings.append(str(exc))
+        diag.duration_s = time.perf_counter() - started
+        return
+
+    gmsh.initialize()
+    try:
+        gmsh.option.setNumber("General.Terminal", 0)
+        gmsh.option.setNumber("Geometry.OCCFixDegenerated", 1)
+        gmsh.option.setNumber("Geometry.OCCFixSmallEdges", 1)
+        gmsh.option.setNumber("Geometry.OCCFixSmallFaces", 1)
+        gmsh.option.setNumber("Mesh.MshFileVersion", 2.2)
+        mesh_size = max(0.001, float(config.mesh_size_mm) * 0.001)
+        gmsh.option.setNumber("Mesh.MeshSizeMax", mesh_size)
+        gmsh.option.setNumber("Mesh.MeshSizeMin", max(mesh_size * 0.1, mesh_size * 0.25))
+        gmsh.model.add(f"diagnostic_{_safe_filename(diag.name)}")
+        gmsh.model.occ.importShapes(str(step_path))
+        gmsh.model.occ.synchronize()
+        volume_tags = [tag for dim, tag in gmsh.model.getEntities(3)]
+        if not volume_tags:
+            raise MeshPipelineError("Gmsh imported no solid volume from this body STEP.")
+        _scale_volumes_to_meters(gmsh, volume_tags, 0.001)
+        try:
+            gmsh.model.mesh.generate(2)
+            diag.surface_ok = True
+        except Exception as exc:
+            diag.warnings.append(f"surface mesh failed: {exc}")
+            raise MeshPipelineError(f"surface mesh failed: {exc}") from exc
+        _generate_3d_mesh_with_fallbacks(gmsh, diag.warnings)
+        diag.node_count = len(gmsh.model.mesh.getNodes()[0])
+        diag.element_count = _element_count(gmsh.model.mesh.getElements(3)[1])
+        diag.volume_ok = diag.element_count > 0
+        if diag.element_count > config.max_mesh_elements:
+            diag.status = f"failed: {diag.element_count} elements above limit {config.max_mesh_elements}"
+        elif diag.volume_ok:
+            diag.status = "ok: exact per-body tetra mesh generated"
+        else:
+            diag.status = "failed: empty volume mesh"
+    except Exception as exc:
+        diag.status = f"failed: {exc}"
+        if not diag.warnings or str(exc) not in diag.warnings[-1]:
+            diag.warnings.append(str(exc))
+    finally:
+        diag.duration_s = time.perf_counter() - started
+        gmsh.finalize()
+
+
+def _write_mesh_diagnostics_files(output: Path, diagnostics: list[BodyMeshDiagnostic], warnings: list[str]) -> None:
+    fieldnames = list(BodyMeshDiagnostic("", "", "", "", "", "", (0, 0, 0, 0, 0, 0), 0.0, 0).as_dict().keys())
+    with (output / "mesh_body_diagnostics.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for diagnostic in diagnostics:
+            writer.writerow(diagnostic.as_dict())
+    (output / "mesh_body_diagnostics.json").write_text(
+        json.dumps([diagnostic.as_dict() for diagnostic in diagnostics], indent=2),
+        encoding="utf-8",
+    )
+    lines = [
+        "InFlux exact CAD mesh diagnostics",
+        f"bodies_checked: {len(diagnostics)}",
+        f"bodies_exact_tetra_ok: {sum(1 for diagnostic in diagnostics if diagnostic.volume_ok)}",
+        "",
+    ]
+    if warnings:
+        lines.append("pipeline_warnings:")
+        lines.extend(f"- {warning}" for warning in warnings)
+        lines.append("")
+    for diagnostic in diagnostics:
+        lines.extend(
+            [
+                f"{diagnostic.body_id} | {diagnostic.name} | {diagnostic.role}",
+                f"  status: {diagnostic.status}",
+                f"  exported_step: {diagnostic.exported_step}",
+                f"  surface_ok: {diagnostic.surface_ok}, volume_ok: {diagnostic.volume_ok}, elements: {diagnostic.element_count}",
+                f"  warnings: {' | '.join(diagnostic.warnings) if diagnostic.warnings else 'none'}",
+            ]
+        )
+    (output / "mesh_diagnostics.txt").write_text("\n".join(lines), encoding="utf-8")
 
 
 def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Path) -> MeshPipelineResult:
@@ -59,7 +241,14 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
 
     workspace.mkdir(parents=True, exist_ok=True)
     mesh_path = workspace / "thermal_model.msh"
-    result = MeshPipelineResult(workspace=workspace, gmsh_mesh_path=mesh_path, body_domain_ids={}, body_domain_names={})
+    strategy = (config.mesh_strategy or "GMSH_OCC_PER_BODY").upper()
+    result = MeshPipelineResult(
+        workspace=workspace,
+        gmsh_mesh_path=mesh_path,
+        body_domain_ids={},
+        body_domain_names={},
+        mesher_strategy=strategy,
+    )
 
     gmsh.initialize()
     try:
@@ -74,8 +263,18 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
         gmsh.option.setNumber("Mesh.MeshSizeMin", max(mesh_size * 0.1, mesh_size * 0.25))
         gmsh.model.add("influx_thermal_model")
 
-        source_step = _shared_existing_step(active)
-        if source_step:
+        source_step = None if strategy == "SIMPLIFIED_BBOX_PREVIEW" else _shared_existing_step(active)
+        if source_step and strategy == "GMSH_OCC_WHOLE_STEP":
+            result.used_source_step = str(source_step)
+            dimtags = gmsh.model.occ.importShapes(str(source_step))
+            gmsh.model.occ.synchronize()
+            volume_tags = [tag for dim, tag in dimtags if dim == 3] or [tag for dim, tag in gmsh.model.getEntities(3)]
+            if not volume_tags:
+                raise MeshPipelineError(f"Gmsh imported {source_step} but found no 3D volume entities.")
+            volume_tags = _fragment_volumes(gmsh, volume_tags, result.warnings)
+            assignments = _assign_gmsh_volumes_to_bodies(gmsh, volume_tags, active, result.warnings)
+            result.warnings.append("Whole-STEP Gmsh import was used; per-body instance exports were bypassed.")
+        elif source_step:
             result.used_source_step = str(source_step)
             assignments = _import_positioned_body_steps(gmsh, active, source_step, workspace, result.warnings)
             volume_tags = [tag for tags in assignments.values() for tag in tags]
@@ -92,7 +291,10 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
             gmsh.model.occ.synchronize()
             volume_tags = _fragment_volumes(gmsh, volume_tags, result.warnings)
             assignments = _assign_gmsh_volumes_to_bodies(gmsh, volume_tags, active, result.warnings)
-            result.warnings.append("No shared STEP source was available; generated box volumes from body bounding boxes.")
+            if strategy == "SIMPLIFIED_BBOX_PREVIEW":
+                result.warnings.append("SIMPLIFIED_BBOX_PREVIEW strategy was selected; generated box volumes from body bounding boxes.")
+            else:
+                result.warnings.append("No shared STEP source was available; generated box volumes from body bounding boxes.")
 
         _scale_volumes_to_meters(gmsh, [tag for tags in assignments.values() for tag in tags], result.coordinate_scale_to_m)
         _create_physical_domains(gmsh, active, assignments, result)
@@ -317,6 +519,10 @@ def _generate_3d_mesh_with_fallbacks(gmsh, warnings: list[str]) -> None:
             return
         except Exception as exc:
             errors.append(f"algorithm {algorithm}: {exc}")
+            try:
+                gmsh.model.mesh.clear()
+            except Exception:
+                pass
     raise MeshPipelineError("Gmsh meshing failed with all 3D algorithms. " + " | ".join(errors))
 
 

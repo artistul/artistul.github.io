@@ -10,6 +10,7 @@ from app.optimization.benchmark import run_benchmark
 from app.optimization.sweep import SweepConfig, run_sweep
 from app.reporting.exporter import create_session_dir, export_simulation, export_sweep
 from app.simulation.backends import BackendMode, run_simulation_backend
+from app.simulation.mesh_pipeline import write_mesh_diagnostics
 from app.simulation.solver import SimulationConfig, run_transient_simulation
 
 
@@ -57,6 +58,8 @@ def main() -> int:
     parser.add_argument("--benchmark-output", default="outputs/benchmark_hybrid_max.csv")
     parser.add_argument("--import-step", default="", help="Import a STEP file and print detected bodies.")
     parser.add_argument("--inspect-step", default="", help="Inspect a STEP file and save diagnostics under outputs/step_diagnostics.")
+    parser.add_argument("--mesh-diagnostics", default="", help="Probe exact per-body STEP meshing and save diagnostics under outputs/mesh_diagnostics.")
+    parser.add_argument("--mesh-size-mm", type=float, default=8.0, help="Mesh size used by --mesh-diagnostics.")
     args = parser.parse_args()
 
     if args.import_step:
@@ -69,6 +72,21 @@ def main() -> int:
         for warning in inspection.warnings:
             print(f"WARNING: {warning}")
         print("Diagnostics: outputs/step_diagnostics/step_tree.txt, step_bodies.csv, step_import_log.txt")
+        return 0
+    if args.mesh_diagnostics:
+        bodies = import_step(Path(args.mesh_diagnostics))
+        config = SimulationConfig(
+            solver_mode=BackendMode.ELMER_THERMAL_FEM.value,
+            mesh_size_mm=args.mesh_size_mm,
+            max_mesh_elements=500_000,
+            mesh_strategy="GMSH_OCC_PER_BODY",
+        )
+        diagnostics = write_mesh_diagnostics(bodies, config)
+        ok = sum(1 for diagnostic in diagnostics if diagnostic.volume_ok)
+        print(f"Mesh diagnostics complete: {ok}/{len(diagnostics)} bodies exact-tetra meshed.")
+        print("Diagnostics: outputs/mesh_diagnostics/mesh_diagnostics.txt, mesh_body_diagnostics.csv")
+        for diagnostic in diagnostics:
+            print(f"{diagnostic.body_id}: {diagnostic.name} -> {diagnostic.status}")
         return 0
     if args.headless_smoke:
         return run_headless_smoke()

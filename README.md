@@ -137,6 +137,20 @@ The GUI includes `Fast Preview` and `Elmer FEM Accurate` solver choices.
 
 Exact STEP tetrahedral meshing is required for validation-grade results. If exact STEP meshing fails, the app now stops by default and reports the meshing error. A separate `Allow simplified bbox fallback` checkbox can be enabled for non-validation preview runs; those results are labeled `NOT_VALIDATION_GRADE_SIMPLIFIED_GEOMETRY`. If `ElmerSolver` is not found, the app returns a clearly labeled `FAST_PREVIEW_FALLBACK` result instead of pretending FEM temperatures were produced.
 
+The FEM panel now exposes a mesher strategy selector:
+
+- `GMSH_OCC_PER_BODY`: default exact-CAD path; exports positioned solids per body and imports them into Gmsh.
+- `GMSH_OCC_WHOLE_STEP`: alternate exact-CAD path; asks Gmsh to import the full STEP assembly directly.
+- `SIMPLIFIED_BBOX_PREVIEW`: non-validation preview only; meshes bounding boxes instead of the true CAD.
+
+To diagnose exact CAD meshability without running Elmer:
+
+```powershell
+python -m app.main --mesh-diagnostics "C:\Users\Stefan\Desktop\design matrita watercooled -sim.step" --mesh-size-mm 8
+```
+
+This writes `outputs\mesh_diagnostics\mesh_diagnostics.txt`, `mesh_body_diagnostics.csv`, `mesh_body_diagnostics.json`, and per-body positioned STEP exports. A body that fails here is not ready for validation-grade FEM until the CAD-to-mesh issue is resolved or a stronger mesher path is added.
+
 Generated reports, CSVs, charts, logs, screenshots, and scaling benchmarks are written under `outputs\`.
 
 ### Hybrid MAX - Ștefan Workstation

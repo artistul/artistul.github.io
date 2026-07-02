@@ -60,3 +60,10 @@
 - Added positioned per-body STEP export before Gmsh meshing so exact FEM preparation uses the same placed OCP solids as the viewer/import pipeline.
 - Changed simplified bounding-box FEM fallback from automatic to explicit opt-in through `Allow simplified bbox fallback`.
 - Added Elmer result validation status labels so reports distinguish exact-geometry FEM from non-validation simplified-geometry preview runs.
+
+## 0.4.3 - 2026-07-02
+
+- Added `--mesh-diagnostics` to probe exact per-body CAD meshability before running Elmer.
+- Added mesh diagnostic exports under `outputs/mesh_diagnostics/`, including per-body positioned STEP exports, CSV, JSON, and a human-readable summary.
+- Added selectable mesher strategies: `GMSH_OCC_PER_BODY`, `GMSH_OCC_WHOLE_STEP`, and `SIMPLIFIED_BBOX_PREVIEW`.
+- Updated failed Elmer exact-mesh runs to write mesh diagnostics when possible, so CAD/mesher failures are actionable.
