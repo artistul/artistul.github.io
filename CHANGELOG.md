@@ -80,3 +80,4 @@
 - Added `SURFACE_REPAIR_TETGEN_PER_BODY`, which triangulates each positioned STEP body surface, repairs it with MeshFix, tetrahedralizes with TetGen, and writes physical body IDs for Elmer.
 - Verified Stefan's current 5-body CAD model produces nonzero tetrahedral domains for all five bodies through the repaired-surface fallback.
 - Labeled repaired-surface fallback results as FEM setup-ready but not validation-grade because per-body interfaces are currently nonconformal.
+- Added `mesh_readiness.json` with tetra quality metrics, interface proximity evidence, cooling/contact summaries, and explicit FEM readiness status.

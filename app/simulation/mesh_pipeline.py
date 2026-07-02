@@ -72,8 +72,15 @@ class MeshPipelineResult:
     coordinate_scale_to_m: float = 0.001
     mesher_strategy: str = "AUTO_EXACT_THEN_REPAIRED_SURFACE"
     diagnostics_dir: str = ""
+    quality_summary: dict[str, float | int | str] = field(default_factory=dict)
+    interface_summary: list[dict[str, float | int | str]] = field(default_factory=list)
+    readiness_status: str = "UNASSESSED"
 
     def summary(self) -> dict[str, int | float | str]:
+        interface_text = " | ".join(
+            f"{item.get('body_a')}->{item.get('body_b')} {item.get('relationship')} close={item.get('close_triangle_count_a', 0)}"
+            for item in self.interface_summary
+        )
         return {
             "mesh_path": str(self.gmsh_mesh_path),
             "node_count": self.node_count,
@@ -85,6 +92,9 @@ class MeshPipelineResult:
             "coordinate_scale_to_m": self.coordinate_scale_to_m,
             "mesher_strategy": self.mesher_strategy,
             "diagnostics_dir": self.diagnostics_dir,
+            "readiness_status": self.readiness_status,
+            "quality_summary": " | ".join(f"{key}={value}" for key, value in self.quality_summary.items()),
+            "interface_summary": interface_text,
             "warnings": " | ".join(self.warnings),
         }
 
@@ -415,6 +425,7 @@ def _build_surface_repair_tetgen_mesh(
     all_tris: list[object] = []
     tet_tags: list[object] = []
     tri_tags: list[object] = []
+    body_surfaces: list[dict[str, object]] = []
     point_offset = 0
     total_tets = 0
     mesh_path = workspace / "thermal_model.msh"
@@ -472,6 +483,15 @@ def _build_surface_repair_tetgen_mesh(
             f"{body.name}: repaired surface {len(surface_faces)} -> {len(fixed_faces)} triangles, "
             f"boundaries {boundary_count_before}->{fixer.n_boundaries}, tetrahedra {len(elements)}."
         )
+        body_surfaces.append(
+            {
+                "id": body.id,
+                "name": body.name,
+                "role": body.role,
+                "points_mm": fixed_points,
+                "faces": fixed_faces,
+            }
+        )
         point_offset += len(nodes)
 
     if total_tets > config.max_mesh_elements:
@@ -502,6 +522,10 @@ def _build_surface_repair_tetgen_mesh(
     result.element_count = int(total_tets)
     result.boundary_count = int(len(triangle))
     result.used_source_step = str(source_step)
+    result.quality_summary = _tet_quality_summary(points, tetra)
+    result.interface_summary = _surface_interface_summary(body_surfaces, config.mesh_size_mm)
+    result.readiness_status = _mesh_readiness_status(result)
+    _write_mesh_readiness_manifest(workspace, result)
     result.warnings.extend(warnings)
     return result
 
@@ -537,6 +561,127 @@ def _gmsh_surface_mesh_from_step(step_path: Path, mesh_size_mm: float):
         return points, np.asarray(faces, dtype=np.int64)
     finally:
         gmsh.finalize()
+
+
+def _tet_quality_summary(points, tetra) -> dict[str, float | int | str]:
+    import numpy as np
+
+    if len(points) == 0 or len(tetra) == 0:
+        return {"status": "empty", "tet_count": 0}
+    p = np.asarray(points, dtype=float)
+    t = np.asarray(tetra, dtype=np.int64)
+    a = p[t[:, 0]]
+    b = p[t[:, 1]]
+    c = p[t[:, 2]]
+    d = p[t[:, 3]]
+    volumes = np.abs(np.einsum("ij,ij->i", np.cross(b - a, c - a), d - a)) / 6.0
+    edges = np.stack(
+        [
+            np.linalg.norm(a - b, axis=1),
+            np.linalg.norm(a - c, axis=1),
+            np.linalg.norm(a - d, axis=1),
+            np.linalg.norm(b - c, axis=1),
+            np.linalg.norm(b - d, axis=1),
+            np.linalg.norm(c - d, axis=1),
+        ],
+        axis=1,
+    )
+    min_edge = np.maximum(np.min(edges, axis=1), 1e-18)
+    max_edge = np.max(edges, axis=1)
+    edge_ratio = max_edge / min_edge
+    near_zero_floor = max(float(np.max(volumes)) * 1e-14, 1e-30)
+    zero_volume = int(np.sum(volumes <= 1e-30))
+    near_zero = int(np.sum((volumes > 1e-30) & (volumes <= near_zero_floor)))
+    bad_ratio = int(np.sum(edge_ratio > 100.0))
+    status = "ok"
+    if zero_volume:
+        status = "invalid_zero_volume"
+    elif bad_ratio or near_zero:
+        status = "warning_sliver_elements"
+    return {
+        "status": status,
+        "tet_count": int(len(t)),
+        "near_zero_volume_floor_m3": float(near_zero_floor),
+        "min_volume_m3": float(np.min(volumes)),
+        "mean_volume_m3": float(np.mean(volumes)),
+        "max_edge_ratio": float(np.max(edge_ratio)),
+        "mean_edge_ratio": float(np.mean(edge_ratio)),
+        "zero_volume_tets": zero_volume,
+        "near_zero_volume_tets": near_zero,
+        "edge_ratio_gt_100": bad_ratio,
+    }
+
+
+def _surface_interface_summary(body_surfaces: list[dict[str, object]], mesh_size_mm: float) -> list[dict[str, float | int | str]]:
+    import numpy as np
+    from scipy.spatial import cKDTree  # type: ignore[import-not-found]
+
+    threshold_mm = max(0.25, float(mesh_size_mm) * 0.05)
+    summaries: list[dict[str, float | int | str]] = []
+    for i, a in enumerate(body_surfaces):
+        points_a = np.asarray(a["points_mm"], dtype=float)
+        faces_a = np.asarray(a["faces"], dtype=np.int64)
+        if len(points_a) == 0 or len(faces_a) == 0:
+            continue
+        centroids_a = points_a[faces_a].mean(axis=1)
+        for b in body_surfaces[i + 1:]:
+            role_pair = {str(a["role"]), str(b["role"])}
+            if role_pair not in [{"plastic", "mold"}, {"mold", "water"}, {"mold"}]:
+                continue
+            points_b = np.asarray(b["points_mm"], dtype=float)
+            if len(points_b) == 0:
+                continue
+            distances, _ = cKDTree(points_b).query(centroids_a, workers=-1)
+            close = distances <= threshold_mm
+            close_count = int(np.sum(close))
+            if close_count == 0:
+                continue
+            relationship = "plastic_mold_contact" if role_pair == {"plastic", "mold"} else "mold_water_cooling" if role_pair == {"mold", "water"} else "mold_mold_contact"
+            summaries.append(
+                {
+                    "body_a": str(a["name"]),
+                    "role_a": str(a["role"]),
+                    "body_b": str(b["name"]),
+                    "role_b": str(b["role"]),
+                    "relationship": relationship,
+                    "threshold_mm": float(threshold_mm),
+                    "close_triangle_count_a": close_count,
+                    "surface_triangle_count_a": int(len(faces_a)),
+                    "coverage_fraction_a": float(close_count / max(1, len(faces_a))),
+                    "min_distance_mm": float(np.min(distances)),
+                    "mean_close_distance_mm": float(np.mean(distances[close])),
+                    "max_close_distance_mm": float(np.max(distances[close])),
+                }
+            )
+    return summaries
+
+
+def _mesh_readiness_status(result: MeshPipelineResult) -> str:
+    quality_status = str(result.quality_summary.get("status", "unknown"))
+    if quality_status.startswith("invalid"):
+        return "NOT_FEM_READY_INVALID_TET_QUALITY"
+    if "SURFACE" in result.mesher_strategy:
+        if not result.interface_summary:
+            return "FEM_MESHED_NEEDS_INTERFACE_CONTACT_EVIDENCE"
+        return "FEM_READY_NONCONFORMAL_REQUIRES_CONTACT_COUPLING_VALIDATION"
+    return "FEM_READY_EXACT_MESH_REQUIRES_CONVERGENCE_VALIDATION"
+
+
+def _write_mesh_readiness_manifest(workspace: Path, result: MeshPipelineResult) -> None:
+    manifest = {
+        "readiness_status": result.readiness_status,
+        "mesher_strategy": result.mesher_strategy,
+        "mesh_path": str(result.gmsh_mesh_path),
+        "node_count": result.node_count,
+        "element_count": result.element_count,
+        "boundary_count": result.boundary_count,
+        "body_domain_ids": result.body_domain_ids,
+        "cooling_boundary_ids": result.cooling_boundary_ids,
+        "quality_summary": result.quality_summary,
+        "interface_summary": result.interface_summary,
+        "warnings": result.warnings,
+    }
+    (workspace / "mesh_readiness.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
 
 def _import_positioned_body_steps(

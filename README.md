@@ -156,6 +156,8 @@ This writes `outputs\mesh_diagnostics\mesh_diagnostics.txt`, `mesh_body_diagnost
 
 For Stefan's current real CAD model, exact Gmsh CAD volume meshing still fails on the mold halves and injected plastic, but the repaired-surface TetGen fallback produces nonzero tetrahedral domains for all five bodies and exports to Elmer native `mesh.*` files. This is FEM setup-ready but not yet validation-grade for thermal contact because the fallback meshes bodies independently with nonconformal interfaces.
 
+Each FEM mesh workspace now writes `mesh_readiness.json` with the mesh strategy, node/element counts, body IDs, cooling IDs, tetra quality metrics, interface proximity evidence, and a readiness label. For the current repaired-surface fallback, the expected readiness label is `FEM_READY_NONCONFORMAL_REQUIRES_CONTACT_COUPLING_VALIDATION`.
+
 Generated reports, CSVs, charts, logs, screenshots, and scaling benchmarks are written under `outputs\`.
 
 ### Hybrid MAX - Ștefan Workstation

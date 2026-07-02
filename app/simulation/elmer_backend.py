@@ -536,6 +536,8 @@ def _result_from_histories(
 
 
 def _validation_status(mesh: MeshPipelineResult) -> str:
+    if mesh.readiness_status and mesh.readiness_status != "UNASSESSED":
+        return mesh.readiness_status
     warnings = " ".join(mesh.warnings).lower()
     if "bounding-box simplification" in warnings or "generated box volumes" in warnings:
         return "NOT_VALIDATION_GRADE_SIMPLIFIED_GEOMETRY"

@@ -159,6 +159,25 @@ def test_demo_mesh_pipeline_either_meshes_or_reports_clear_error(tmp_path):
         assert mesh.body_domain_ids
 
 
+def test_mesh_quality_summary_flags_valid_simple_tets(tmp_path):
+    from app.simulation.mesh_pipeline import _mesh_readiness_status, _tet_quality_summary, MeshPipelineResult
+    import numpy as np
+
+    points = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+    tetra = np.array([[0, 1, 2, 3]])
+    quality = _tet_quality_summary(points, tetra)
+    mesh = MeshPipelineResult(
+        tmp_path,
+        tmp_path / "mesh.msh",
+        {"a": 1},
+        {1: "mold:a"},
+        mesher_strategy="GMSH_OCC_HEALED_PER_BODY",
+        quality_summary=quality,
+    )
+    assert quality["status"] == "ok"
+    assert _mesh_readiness_status(mesh).startswith("FEM_READY")
+
+
 def test_throttle_limits():
     limits = ResourceLimits(56.0, 60.0, 8.0, 4.0, 14.0, "outputs")
     assert evaluate_throttle(limits, free_ram_gb=7.5, app_ram_gb=2.0)[0] == "THROTTLE"
