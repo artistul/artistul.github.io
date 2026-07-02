@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$repo = "C:\Users\Stefan\Documents\Influx"
+$repo = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location -LiteralPath $repo
 
 function Invoke-Checked {

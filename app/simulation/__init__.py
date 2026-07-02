@@ -1,1 +1,0 @@
-"""Transient thermal simulation core."""
