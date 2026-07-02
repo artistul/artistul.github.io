@@ -143,6 +143,7 @@ The FEM panel now exposes a mesher strategy selector:
 - `GMSH_OCC_HEALED_PER_BODY`: default exact-CAD path; runs OCP ShapeFix and same-domain unification before exporting positioned bodies to Gmsh.
 - `GMSH_OCC_PER_BODY`: raw exact-CAD path; exports positioned solids per body without healing.
 - `GMSH_OCC_WHOLE_STEP`: alternate exact-CAD path; asks Gmsh to import the full STEP assembly directly.
+- `CONTROLLED_APPROX_CONFORMING_GRID`: conforming approximation path; classifies repaired CAD surfaces onto a shared grid, generates shared-node tetrahedra across material interfaces, and reports cell size plus maximum geometry deviation.
 - `SURFACE_REPAIR_TETGEN_PER_BODY`: surface-repair fallback; triangulates each positioned body surface, repairs holes/self-intersections, tetrahedralizes each body independently, and writes body physical IDs for Elmer.
 - `SIMPLIFIED_BBOX_PREVIEW`: non-validation preview only; meshes bounding boxes instead of the true CAD.
 
@@ -157,6 +158,8 @@ This writes `outputs\mesh_diagnostics\mesh_diagnostics.txt`, `mesh_body_diagnost
 For Stefan's current real CAD model, exact Gmsh CAD volume meshing still fails on the mold halves and injected plastic, but the repaired-surface TetGen fallback produces nonzero tetrahedral domains for all five bodies and exports to Elmer native `mesh.*` files. This is FEM setup-ready but not yet validation-grade for thermal contact because the fallback meshes bodies independently with nonconformal interfaces.
 
 Each FEM mesh workspace now writes `mesh_readiness.json` with the mesh strategy, node/element counts, body IDs, cooling IDs, tetra quality metrics, interface proximity evidence, and a readiness label. For the current repaired-surface fallback, the expected readiness label is `FEM_READY_NONCONFORMAL_REQUIRES_CONTACT_COUPLING_VALIDATION`.
+
+The controlled conforming grid strategy has been verified on Stefan's current 5-body CAD at 2 mm cells: it produced 48,669 nodes, 252,168 tetrahedra, all 5 body domains, cooling interface triangles, zero zero-volume tetrahedra, and `FEM_READY_CONFORMING_APPROX_REQUIRES_DEVIATION_AND_CONVERGENCE_VALIDATION`. Its reported geometric deviation bound at 2 mm cells is about 1.73 mm, so it is a serious FEM setup path but still requires mesh-size convergence before validation-grade conclusions.
 
 Generated reports, CSVs, charts, logs, screenshots, and scaling benchmarks are written under `outputs\`.
 

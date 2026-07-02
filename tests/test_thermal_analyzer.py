@@ -178,6 +178,27 @@ def test_mesh_quality_summary_flags_valid_simple_tets(tmp_path):
     assert _mesh_readiness_status(mesh).startswith("FEM_READY")
 
 
+def test_conforming_grid_tetrahedralizer_preserves_domains_and_cooling_faces():
+    from app.geometry.bodies import Body
+    from app.simulation.mesh_pipeline import _grid_interface_summary, _tetrahedralize_labeled_grid
+    import numpy as np
+
+    bodies = [
+        Body("mold", "mold", role="mold"),
+        Body("water", "water", role="water"),
+    ]
+    labels = np.asarray([[[1], [2]]], dtype=np.int16)
+    points, tetra, tags, triangles, triangle_tags, cooling = _tetrahedralize_labeled_grid(labels, (0.0, 0.0, 0.0), 1.0, bodies)
+    interfaces = _grid_interface_summary(labels, bodies, 1.0)
+    assert len(points) > 0
+    assert len(tetra) == 12
+    assert set(tags.tolist()) == {1, 2}
+    assert len(triangles) == 2
+    assert set(triangle_tags.tolist()) == {1001}
+    assert cooling == {"water": 1001}
+    assert interfaces[0]["relationship"] == "mold_water_cooling"
+
+
 def test_throttle_limits():
     limits = ResourceLimits(56.0, 60.0, 8.0, 4.0, 14.0, "outputs")
     assert evaluate_throttle(limits, free_ram_gb=7.5, app_ram_gb=2.0)[0] == "THROTTLE"

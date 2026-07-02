@@ -202,6 +202,7 @@ class MainWindow(QMainWindow):
             "GMSH_OCC_HEALED_PER_BODY",
             "GMSH_OCC_PER_BODY",
             "GMSH_OCC_WHOLE_STEP",
+            "CONTROLLED_APPROX_CONFORMING_GRID",
             "SURFACE_REPAIR_TETGEN_PER_BODY",
             "SIMPLIFIED_BBOX_PREVIEW",
         ])

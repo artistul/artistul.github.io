@@ -284,6 +284,8 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
     strategy = (config.mesh_strategy or "AUTO_EXACT_THEN_REPAIRED_SURFACE").upper()
     if strategy == "SURFACE_REPAIR_TETGEN_PER_BODY":
         return _build_surface_repair_tetgen_mesh(active, config, workspace, "SURFACE_REPAIR_TETGEN_PER_BODY")
+    if strategy == "CONTROLLED_APPROX_CONFORMING_GRID":
+        return _build_controlled_approx_conforming_grid_mesh(active, config, workspace)
     exact_strategy = "GMSH_OCC_HEALED_PER_BODY" if strategy == "AUTO_EXACT_THEN_REPAIRED_SURFACE" else strategy
     result = MeshPipelineResult(
         workspace=workspace,
@@ -530,6 +532,281 @@ def _build_surface_repair_tetgen_mesh(
     return result
 
 
+def _build_controlled_approx_conforming_grid_mesh(
+    bodies: list[Body],
+    config: SimulationConfig,
+    workspace: Path,
+) -> MeshPipelineResult:
+    try:
+        import meshio  # type: ignore[import-not-found]
+        import numpy as np
+    except Exception as exc:  # pragma: no cover - optional runtime
+        raise MeshPipelineError(f"Controlled conforming grid dependencies are unavailable: {exc}") from exc
+
+    source_step = _shared_existing_step(bodies)
+    if not source_step:
+        raise MeshPipelineError("Controlled conforming grid mesh requires a shared real STEP source.")
+
+    workspace.mkdir(parents=True, exist_ok=True)
+    warnings: list[str] = [
+        "Using controlled approximation conforming grid mesh. Material interfaces share grid nodes.",
+        "Geometry is approximated by grid cells; use mesh convergence before validation-grade engineering decisions.",
+    ]
+    body_steps = _export_positioned_body_steps(source_step, bodies, workspace / "conforming_grid_body_steps", warnings)
+    if len(body_steps) != len(bodies):
+        raise MeshPipelineError(f"Conforming grid exported {len(body_steps)} body STEP files for {len(bodies)} bodies.")
+
+    cell_size_mm = max(0.25, float(config.mesh_size_mm))
+    labels, origin_mm, surface_records = _classify_conforming_grid_cells(body_steps, cell_size_mm, warnings)
+    if not np.any(labels):
+        raise MeshPipelineError("Controlled conforming grid classifier produced no occupied cells.")
+
+    points_mm, tetra, tetra_tags, triangles, triangle_tags, cooling_ids = _tetrahedralize_labeled_grid(labels, origin_mm, cell_size_mm, bodies)
+    if len(tetra) == 0:
+        raise MeshPipelineError("Controlled conforming grid produced no tetrahedra.")
+    if len(tetra) > config.max_mesh_elements:
+        raise MeshPipelineError(f"Controlled conforming grid has {len(tetra)} tetrahedra, above limit {config.max_mesh_elements}.")
+
+    mesh_path = workspace / "thermal_model.msh"
+    cells = [("tetra", tetra)]
+    cell_data_physical = [tetra_tags]
+    cell_data_geometrical = [tetra_tags]
+    if len(triangles):
+        cells.append(("triangle", triangles))
+        cell_data_physical.append(triangle_tags)
+        cell_data_geometrical.append(triangle_tags)
+    points_m = points_mm * 0.001
+    meshio.write(
+        mesh_path,
+        meshio.Mesh(points_m, cells, cell_data={"gmsh:physical": cell_data_physical, "gmsh:geometrical": cell_data_geometrical}),
+        file_format="gmsh22",
+        binary=False,
+    )
+
+    result = MeshPipelineResult(
+        workspace=workspace,
+        gmsh_mesh_path=mesh_path,
+        body_domain_ids={body.id: index for index, body in enumerate(bodies, start=1)},
+        body_domain_names={index: f"{body.role}:{body.name}" for index, body in enumerate(bodies, start=1)},
+        cooling_boundary_ids=cooling_ids,
+        node_count=int(len(points_m)),
+        element_count=int(len(tetra)),
+        boundary_count=int(len(triangles)),
+        used_source_step=str(source_step),
+        mesher_strategy="CONTROLLED_APPROX_CONFORMING_GRID",
+    )
+    result.quality_summary = _tet_quality_summary(points_m, tetra)
+    result.interface_summary = _grid_interface_summary(labels, bodies, cell_size_mm)
+    result.quality_summary["cell_size_mm"] = float(cell_size_mm)
+    result.quality_summary["occupied_cells"] = int(np.sum(labels > 0))
+    result.quality_summary["grid_dimensions"] = "x".join(str(value) for value in labels.shape)
+    result.quality_summary["max_geometry_deviation_mm"] = float(cell_size_mm * (3.0 ** 0.5) * 0.5)
+    result.warnings.extend(warnings)
+    result.warnings.extend(surface_records)
+    result.readiness_status = _mesh_readiness_status(result)
+    _write_mesh_readiness_manifest(workspace, result)
+    return result
+
+
+def _classify_conforming_grid_cells(body_steps: list[tuple[Body, Path]], cell_size_mm: float, warnings: list[str]):
+    import numpy as np
+    import pyvista as pv  # type: ignore[import-not-found]
+
+    bodies = [body for body, _ in body_steps]
+    pad = cell_size_mm
+    x0 = min(body.bbox_mm[0] for body in bodies) - pad
+    y0 = min(body.bbox_mm[1] for body in bodies) - pad
+    z0 = min(body.bbox_mm[2] for body in bodies) - pad
+    x1 = max(body.bbox_mm[3] for body in bodies) + pad
+    y1 = max(body.bbox_mm[4] for body in bodies) + pad
+    z1 = max(body.bbox_mm[5] for body in bodies) + pad
+    nx = int(np.ceil((x1 - x0) / cell_size_mm))
+    ny = int(np.ceil((y1 - y0) / cell_size_mm))
+    nz = int(np.ceil((z1 - z0) / cell_size_mm))
+    centers = _grid_cell_centers((x0, y0, z0), (nx, ny, nz), cell_size_mm)
+    offsets = np.asarray(
+        [
+            (0.0, 0.0, 0.0),
+            (-0.35, -0.35, -0.35),
+            (0.35, -0.35, -0.35),
+            (-0.35, 0.35, -0.35),
+            (0.35, 0.35, -0.35),
+            (-0.35, -0.35, 0.35),
+            (0.35, -0.35, 0.35),
+            (-0.35, 0.35, 0.35),
+            (0.35, 0.35, 0.35),
+        ],
+        dtype=float,
+    ) * cell_size_mm
+    labels = np.zeros(len(centers), dtype=np.int16)
+    scores = np.zeros(len(centers), dtype=np.int16)
+    priorities = np.zeros(len(centers), dtype=np.int16)
+    priority = {"plastic": 3, "water": 2, "mold": 1}
+    records: list[str] = []
+
+    for body_index, (body, step_path) in enumerate(body_steps, start=1):
+        surface_points, surface_faces = _gmsh_surface_mesh_from_step(step_path, cell_size_mm)
+        repaired_points, repaired_faces, before_boundaries, after_boundaries = _repair_surface(surface_points, surface_faces)
+        poly_faces = np.hstack([np.full((len(repaired_faces), 1), 3), repaired_faces]).astype(np.int64).ravel()
+        poly = pv.PolyData(repaired_points, poly_faces)
+        votes = np.zeros(len(centers), dtype=np.int16)
+        for offset in offsets:
+            cloud = pv.PolyData(centers + offset)
+            if hasattr(cloud, "select_interior_points"):
+                enclosed = cloud.select_interior_points(poly, check_surface=False)
+                selected = enclosed.point_data["selected_points"]
+            else:  # pragma: no cover - compatibility for older PyVista
+                enclosed = cloud.select_enclosed_points(poly, tolerance=1e-6, check_surface=False)
+                selected = enclosed.point_data["SelectedPoints"]
+            votes += selected.astype(np.int16)
+        body_priority = priority.get(body.role, 0)
+        mask = (votes > scores) | ((votes == scores) & (votes > 0) & (body_priority > priorities))
+        labels[mask] = body_index
+        scores[mask] = votes[mask]
+        priorities[mask] = body_priority
+        records.append(
+            f"{body.name}: grid classifier votes on {int(np.sum(votes > 0))} cells; "
+            f"surface triangles {len(surface_faces)}->{len(repaired_faces)}, boundaries {before_boundaries}->{after_boundaries}."
+        )
+
+    labels_3d = labels.reshape((nx, ny, nz))
+    for body_index, body in enumerate(bodies, start=1):
+        count = int(np.sum(labels_3d == body_index))
+        records.append(f"{body.name}: conforming grid occupied cells={count}.")
+        if count == 0:
+            raise MeshPipelineError(f"Controlled conforming grid missed body {body.name}; reduce mesh size.")
+    warnings.append(f"Controlled conforming grid dimensions: {nx} x {ny} x {nz} cells at {cell_size_mm:.3g} mm.")
+    return labels_3d, (x0, y0, z0), records
+
+
+def _grid_cell_centers(origin: tuple[float, float, float], dims: tuple[int, int, int], cell_size_mm: float):
+    import numpy as np
+
+    x0, y0, z0 = origin
+    nx, ny, nz = dims
+    xs = x0 + (np.arange(nx) + 0.5) * cell_size_mm
+    ys = y0 + (np.arange(ny) + 0.5) * cell_size_mm
+    zs = z0 + (np.arange(nz) + 0.5) * cell_size_mm
+    x, y, z = np.meshgrid(xs, ys, zs, indexing="ij")
+    return np.c_[x.ravel(), y.ravel(), z.ravel()]
+
+
+def _repair_surface(surface_points, surface_faces):
+    import numpy as np
+    from pymeshfix import MeshFix  # type: ignore[import-not-found]
+
+    fixer = MeshFix(surface_points, surface_faces)
+    before = fixer.n_boundaries
+    fixer.repair(joincomp=True, remove_smallest_components=False)
+    return np.asarray(fixer.points, dtype=float), np.asarray(fixer.faces, dtype=np.int64), int(before), int(fixer.n_boundaries)
+
+
+def _tetrahedralize_labeled_grid(labels, origin_mm: tuple[float, float, float], cell_size_mm: float, bodies: list[Body]):
+    import numpy as np
+
+    nx, ny, nz = labels.shape
+    node_index: dict[tuple[int, int, int], int] = {}
+    points: list[tuple[float, float, float]] = []
+    tetra: list[tuple[int, int, int, int]] = []
+    tetra_tags: list[int] = []
+    triangles: list[tuple[int, int, int]] = []
+    triangle_tags: list[int] = []
+    cooling_ids: dict[str, int] = {}
+    water_indices = {index for index, body in enumerate(bodies, start=1) if body.role == "water"}
+
+    def node(i: int, j: int, k: int) -> int:
+        key = (i, j, k)
+        if key not in node_index:
+            node_index[key] = len(points)
+            points.append((origin_mm[0] + i * cell_size_mm, origin_mm[1] + j * cell_size_mm, origin_mm[2] + k * cell_size_mm))
+        return node_index[key]
+
+    cube_tets = ((0, 1, 3, 7), (0, 3, 2, 7), (0, 2, 6, 7), (0, 6, 4, 7), (0, 4, 5, 7), (0, 5, 1, 7))
+    for i in range(nx):
+        for j in range(ny):
+            for k in range(nz):
+                tag = int(labels[i, j, k])
+                if tag <= 0:
+                    continue
+                n = [
+                    node(i, j, k),
+                    node(i + 1, j, k),
+                    node(i, j + 1, k),
+                    node(i + 1, j + 1, k),
+                    node(i, j, k + 1),
+                    node(i + 1, j, k + 1),
+                    node(i, j + 1, k + 1),
+                    node(i + 1, j + 1, k + 1),
+                ]
+                for tet in cube_tets:
+                    tetra.append((n[tet[0]], n[tet[1]], n[tet[2]], n[tet[3]]))
+                    tetra_tags.append(tag)
+                if tag in water_indices:
+                    _append_grid_water_boundaries(labels, i, j, k, tag, n, bodies, cooling_ids, triangles, triangle_tags)
+
+    return (
+        np.asarray(points, dtype=float),
+        np.asarray(tetra, dtype=np.int64),
+        np.asarray(tetra_tags, dtype=np.int32),
+        np.asarray(triangles, dtype=np.int64),
+        np.asarray(triangle_tags, dtype=np.int32),
+        cooling_ids,
+    )
+
+
+def _append_grid_water_boundaries(labels, i, j, k, water_tag, cube_nodes, bodies, cooling_ids, triangles, triangle_tags) -> None:
+    face_defs = [
+        ((-1, 0, 0), (0, 2, 6, 4)),
+        ((1, 0, 0), (1, 5, 7, 3)),
+        ((0, -1, 0), (0, 4, 5, 1)),
+        ((0, 1, 0), (2, 3, 7, 6)),
+        ((0, 0, -1), (0, 1, 3, 2)),
+        ((0, 0, 1), (4, 6, 7, 5)),
+    ]
+    nx, ny, nz = labels.shape
+    body = bodies[water_tag - 1]
+    boundary_id = cooling_ids.setdefault(body.id, 1000 + len(cooling_ids) + 1)
+    for (di, dj, dk), corners in face_defs:
+        ni, nj, nk = i + di, j + dj, k + dk
+        neighbor = 0 if ni < 0 or nj < 0 or nk < 0 or ni >= nx or nj >= ny or nk >= nz else int(labels[ni, nj, nk])
+        if neighbor > 0 and bodies[neighbor - 1].role == "mold":
+            a, b, c, d = [cube_nodes[index] for index in corners]
+            triangles.append((a, b, c))
+            triangles.append((a, c, d))
+            triangle_tags.extend([boundary_id, boundary_id])
+
+
+def _grid_interface_summary(labels, bodies: list[Body], cell_size_mm: float) -> list[dict[str, float | int | str]]:
+    import numpy as np
+
+    summaries: dict[tuple[int, int], int] = {}
+    for axis in range(3):
+        left = np.take(labels, range(labels.shape[axis] - 1), axis=axis)
+        right = np.take(labels, range(1, labels.shape[axis]), axis=axis)
+        mask = (left > 0) & (right > 0) & (left != right)
+        for a, b in zip(left[mask].ravel(), right[mask].ravel()):
+            key = tuple(sorted((int(a), int(b))))
+            summaries[key] = summaries.get(key, 0) + 1
+    output: list[dict[str, float | int | str]] = []
+    for (a, b), face_count in sorted(summaries.items()):
+        body_a = bodies[a - 1]
+        body_b = bodies[b - 1]
+        roles = {body_a.role, body_b.role}
+        relationship = "plastic_mold_contact" if roles == {"plastic", "mold"} else "mold_water_cooling" if roles == {"mold", "water"} else "mold_mold_contact" if roles == {"mold"} else "other_contact"
+        output.append(
+            {
+                "body_a": body_a.name,
+                "role_a": body_a.role,
+                "body_b": body_b.name,
+                "role_b": body_b.role,
+                "relationship": relationship,
+                "shared_grid_face_count": int(face_count),
+                "approx_interface_area_m2": float(face_count * (cell_size_mm * 1e-3) ** 2),
+            }
+        )
+    return output
+
+
 def _gmsh_surface_mesh_from_step(step_path: Path, mesh_size_mm: float):
     import gmsh  # type: ignore[import-not-found]
     import numpy as np
@@ -660,6 +937,10 @@ def _mesh_readiness_status(result: MeshPipelineResult) -> str:
     quality_status = str(result.quality_summary.get("status", "unknown"))
     if quality_status.startswith("invalid"):
         return "NOT_FEM_READY_INVALID_TET_QUALITY"
+    if result.mesher_strategy == "CONTROLLED_APPROX_CONFORMING_GRID":
+        if not result.interface_summary:
+            return "FEM_MESHED_NEEDS_INTERFACE_CONTACT_EVIDENCE"
+        return "FEM_READY_CONFORMING_APPROX_REQUIRES_DEVIATION_AND_CONVERGENCE_VALIDATION"
     if "SURFACE" in result.mesher_strategy:
         if not result.interface_summary:
             return "FEM_MESHED_NEEDS_INTERFACE_CONTACT_EVIDENCE"
