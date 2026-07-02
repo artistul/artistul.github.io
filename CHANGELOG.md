@@ -67,3 +67,9 @@
 - Added mesh diagnostic exports under `outputs/mesh_diagnostics/`, including per-body positioned STEP exports, CSV, JSON, and a human-readable summary.
 - Added selectable mesher strategies: `GMSH_OCC_PER_BODY`, `GMSH_OCC_WHOLE_STEP`, and `SIMPLIFIED_BBOX_PREVIEW`.
 - Updated failed Elmer exact-mesh runs to write mesh diagnostics when possible, so CAD/mesher failures are actionable.
+
+## 0.4.4 - 2026-07-02
+
+- Added `GMSH_OCC_HEALED_PER_BODY` as the default exact meshing strategy.
+- Added OCP ShapeFix and same-domain unification before positioned per-body STEP export.
+- Updated mesh diagnostics to compare raw and healed body exports when raw tetra meshing fails.

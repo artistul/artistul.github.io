@@ -79,14 +79,14 @@ def main() -> int:
             solver_mode=BackendMode.ELMER_THERMAL_FEM.value,
             mesh_size_mm=args.mesh_size_mm,
             max_mesh_elements=500_000,
-            mesh_strategy="GMSH_OCC_PER_BODY",
+            mesh_strategy="GMSH_OCC_HEALED_PER_BODY",
         )
         diagnostics = write_mesh_diagnostics(bodies, config)
         ok = sum(1 for diagnostic in diagnostics if diagnostic.volume_ok)
-        print(f"Mesh diagnostics complete: {ok}/{len(diagnostics)} bodies exact-tetra meshed.")
+        print(f"Mesh diagnostics complete: {ok}/{len(diagnostics)} body variants exact-tetra meshed.")
         print("Diagnostics: outputs/mesh_diagnostics/mesh_diagnostics.txt, mesh_body_diagnostics.csv")
         for diagnostic in diagnostics:
-            print(f"{diagnostic.body_id}: {diagnostic.name} -> {diagnostic.status}")
+            print(f"{diagnostic.body_id}: {diagnostic.name} [{diagnostic.variant}] -> {diagnostic.status}")
         return 0
     if args.headless_smoke:
         return run_headless_smoke()

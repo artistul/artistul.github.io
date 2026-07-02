@@ -197,7 +197,12 @@ class MainWindow(QMainWindow):
         self.water_boundary_combo = QComboBox()
         self.water_boundary_combo.addItems(["convection", "fixed_temperature"])
         self.mesh_strategy_combo = QComboBox()
-        self.mesh_strategy_combo.addItems(["GMSH_OCC_PER_BODY", "GMSH_OCC_WHOLE_STEP", "SIMPLIFIED_BBOX_PREVIEW"])
+        self.mesh_strategy_combo.addItems([
+            "GMSH_OCC_HEALED_PER_BODY",
+            "GMSH_OCC_PER_BODY",
+            "GMSH_OCC_WHOLE_STEP",
+            "SIMPLIFIED_BBOX_PREVIEW",
+        ])
         self.elmer_processes_spin = _spin(1, 64, 1)
         self.solver_timeout_spin = _spin(30, 86_400, 900)
         self.keep_solver_files_check = QCheckBox("Keep Elmer/Gmsh solver files")

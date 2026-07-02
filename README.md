@@ -139,7 +139,8 @@ Exact STEP tetrahedral meshing is required for validation-grade results. If exac
 
 The FEM panel now exposes a mesher strategy selector:
 
-- `GMSH_OCC_PER_BODY`: default exact-CAD path; exports positioned solids per body and imports them into Gmsh.
+- `GMSH_OCC_HEALED_PER_BODY`: default exact-CAD path; runs OCP ShapeFix and same-domain unification before exporting positioned bodies to Gmsh.
+- `GMSH_OCC_PER_BODY`: raw exact-CAD path; exports positioned solids per body without healing.
 - `GMSH_OCC_WHOLE_STEP`: alternate exact-CAD path; asks Gmsh to import the full STEP assembly directly.
 - `SIMPLIFIED_BBOX_PREVIEW`: non-validation preview only; meshes bounding boxes instead of the true CAD.
 
@@ -149,7 +150,7 @@ To diagnose exact CAD meshability without running Elmer:
 python -m app.main --mesh-diagnostics "C:\Users\Stefan\Desktop\design matrita watercooled -sim.step" --mesh-size-mm 8
 ```
 
-This writes `outputs\mesh_diagnostics\mesh_diagnostics.txt`, `mesh_body_diagnostics.csv`, `mesh_body_diagnostics.json`, and per-body positioned STEP exports. A body that fails here is not ready for validation-grade FEM until the CAD-to-mesh issue is resolved or a stronger mesher path is added.
+This writes `outputs\mesh_diagnostics\mesh_diagnostics.txt`, `mesh_body_diagnostics.csv`, `mesh_body_diagnostics.json`, and raw/healed per-body positioned STEP exports. Diagnostics try the raw export first and then the healed export when needed. A body that still fails here is not ready for validation-grade FEM until the CAD-to-mesh issue is resolved or a stronger mesher path is added.
 
 Generated reports, CSVs, charts, logs, screenshots, and scaling benchmarks are written under `outputs\`.
 

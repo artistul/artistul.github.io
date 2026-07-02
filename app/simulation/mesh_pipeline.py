@@ -20,6 +20,7 @@ class BodyMeshDiagnostic:
     body_id: str
     name: str
     role: str
+    variant: str
     hierarchy_path: str
     source_step: str
     exported_step: str
@@ -39,6 +40,7 @@ class BodyMeshDiagnostic:
             "body_id": self.body_id,
             "name": self.name,
             "role": self.role,
+            "variant": self.variant,
             "hierarchy_path": self.hierarchy_path,
             "source_step": self.source_step,
             "exported_step": self.exported_step,
@@ -104,33 +106,61 @@ def write_mesh_diagnostics(
     output.mkdir(parents=True, exist_ok=True)
     diagnostics: list[BodyMeshDiagnostic] = []
     warnings: list[str] = []
+    strategy = (config.mesh_strategy or "GMSH_OCC_HEALED_PER_BODY").upper()
     source_step = _shared_existing_step(active)
-    body_steps: list[tuple[Body, Path]] = []
+    raw_steps: list[tuple[Body, Path]] = []
+    healed_steps: list[tuple[Body, Path]] = []
     if source_step:
-        body_steps = _export_positioned_body_steps(source_step, active, output / "positioned_body_steps", warnings)
+        raw_steps = _export_positioned_body_steps(source_step, active, output / "positioned_body_steps_raw", warnings)
+        if strategy != "GMSH_OCC_PER_BODY":
+            healed_steps = _export_positioned_body_steps(
+                source_step,
+                active,
+                output / "positioned_body_steps_healed",
+                warnings,
+                heal_shapes=True,
+            )
     else:
         warnings.append("No shared real STEP source was available; exact per-body CAD diagnostics cannot run.")
 
-    step_by_id = {body.id: step for body, step in body_steps}
+    raw_by_id = {body.id: step for body, step in raw_steps}
+    healed_by_id = {body.id: step for body, step in healed_steps}
     for body in active:
-        diag = BodyMeshDiagnostic(
+        raw_diag = BodyMeshDiagnostic(
             body_id=body.id,
             name=body.name,
             role=body.role,
+            variant="raw",
             hierarchy_path=body.hierarchy_path,
             source_step=body.source,
-            exported_step=str(step_by_id.get(body.id, "")),
+            exported_step=str(raw_by_id.get(body.id, "")),
             bbox_mm=body.bbox_mm,
             volume_mm3=body.volume_mm3,
             face_count=body.face_count,
         )
-        if body.id not in step_by_id:
-            diag.status = "skipped: no positioned STEP export"
-            diag.warnings.extend(warnings)
-            diagnostics.append(diag)
+        if body.id not in raw_by_id:
+            raw_diag.status = "skipped: no positioned STEP export"
+            raw_diag.warnings.extend(warnings)
+            diagnostics.append(raw_diag)
             continue
-        _diagnose_body_step(step_by_id[body.id], config, diag)
-        diagnostics.append(diag)
+        _diagnose_body_step(raw_by_id[body.id], config, raw_diag)
+        diagnostics.append(raw_diag)
+        if raw_diag.volume_ok or body.id not in healed_by_id:
+            continue
+        healed_diag = BodyMeshDiagnostic(
+            body_id=body.id,
+            name=body.name,
+            role=body.role,
+            variant="healed",
+            hierarchy_path=body.hierarchy_path,
+            source_step=body.source,
+            exported_step=str(healed_by_id[body.id]),
+            bbox_mm=body.bbox_mm,
+            volume_mm3=body.volume_mm3,
+            face_count=body.face_count,
+        )
+        _diagnose_body_step(healed_by_id[body.id], config, healed_diag)
+        diagnostics.append(healed_diag)
 
     _write_mesh_diagnostics_files(output, diagnostics, warnings)
     return diagnostics
@@ -189,7 +219,7 @@ def _diagnose_body_step(step_path: Path, config: SimulationConfig, diag: BodyMes
 
 
 def _write_mesh_diagnostics_files(output: Path, diagnostics: list[BodyMeshDiagnostic], warnings: list[str]) -> None:
-    fieldnames = list(BodyMeshDiagnostic("", "", "", "", "", "", (0, 0, 0, 0, 0, 0), 0.0, 0).as_dict().keys())
+    fieldnames = list(BodyMeshDiagnostic("", "", "", "", "", "", "", (0, 0, 0, 0, 0, 0), 0.0, 0).as_dict().keys())
     with (output / "mesh_body_diagnostics.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
@@ -202,7 +232,7 @@ def _write_mesh_diagnostics_files(output: Path, diagnostics: list[BodyMeshDiagno
     lines = [
         "InFlux exact CAD mesh diagnostics",
         f"bodies_checked: {len(diagnostics)}",
-        f"bodies_exact_tetra_ok: {sum(1 for diagnostic in diagnostics if diagnostic.volume_ok)}",
+        f"body_variants_exact_tetra_ok: {sum(1 for diagnostic in diagnostics if diagnostic.volume_ok)}",
         "",
     ]
     if warnings:
@@ -212,7 +242,7 @@ def _write_mesh_diagnostics_files(output: Path, diagnostics: list[BodyMeshDiagno
     for diagnostic in diagnostics:
         lines.extend(
             [
-                f"{diagnostic.body_id} | {diagnostic.name} | {diagnostic.role}",
+                f"{diagnostic.body_id} | {diagnostic.name} | {diagnostic.role} | {diagnostic.variant}",
                 f"  status: {diagnostic.status}",
                 f"  exported_step: {diagnostic.exported_step}",
                 f"  surface_ok: {diagnostic.surface_ok}, volume_ok: {diagnostic.volume_ok}, elements: {diagnostic.element_count}",
@@ -241,7 +271,7 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
 
     workspace.mkdir(parents=True, exist_ok=True)
     mesh_path = workspace / "thermal_model.msh"
-    strategy = (config.mesh_strategy or "GMSH_OCC_PER_BODY").upper()
+    strategy = (config.mesh_strategy or "GMSH_OCC_HEALED_PER_BODY").upper()
     result = MeshPipelineResult(
         workspace=workspace,
         gmsh_mesh_path=mesh_path,
@@ -276,7 +306,14 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
             result.warnings.append("Whole-STEP Gmsh import was used; per-body instance exports were bypassed.")
         elif source_step:
             result.used_source_step = str(source_step)
-            assignments = _import_positioned_body_steps(gmsh, active, source_step, workspace, result.warnings)
+            assignments = _import_positioned_body_steps(
+                gmsh,
+                active,
+                source_step,
+                workspace,
+                result.warnings,
+                heal_shapes=strategy != "GMSH_OCC_PER_BODY",
+            )
             volume_tags = [tag for tags in assignments.values() for tag in tags]
             if not volume_tags:
                 raise MeshPipelineError(f"Gmsh imported {source_step} body exports but found no 3D volume entities.")
@@ -332,8 +369,16 @@ def _shared_existing_step(bodies: Iterable[Body]) -> Path | None:
     return None
 
 
-def _import_positioned_body_steps(gmsh, bodies: list[Body], source_step: Path, workspace: Path, warnings: list[str]) -> dict[str, list[int]]:
-    body_steps = _export_positioned_body_steps(source_step, bodies, workspace / "positioned_body_steps", warnings)
+def _import_positioned_body_steps(
+    gmsh,
+    bodies: list[Body],
+    source_step: Path,
+    workspace: Path,
+    warnings: list[str],
+    heal_shapes: bool = False,
+) -> dict[str, list[int]]:
+    directory = workspace / ("positioned_body_steps_healed" if heal_shapes else "positioned_body_steps")
+    body_steps = _export_positioned_body_steps(source_step, bodies, directory, warnings, heal_shapes=heal_shapes)
     assignments: dict[str, list[int]] = {body.id: [] for body in bodies}
     if not body_steps:
         warnings.append("Positioned per-body STEP export failed; falling back to whole STEP import.")
@@ -353,7 +398,13 @@ def _import_positioned_body_steps(gmsh, bodies: list[Body], source_step: Path, w
     return assignments
 
 
-def _export_positioned_body_steps(source_step: Path, bodies: list[Body], output_dir: Path, warnings: list[str]) -> list[tuple[Body, Path]]:
+def _export_positioned_body_steps(
+    source_step: Path,
+    bodies: list[Body],
+    output_dir: Path,
+    warnings: list[str],
+    heal_shapes: bool = False,
+) -> list[tuple[Body, Path]]:
     try:
         from OCP.IFSelect import IFSelect_RetDone
         from OCP.STEPCAFControl import STEPCAFControl_Reader
@@ -420,15 +471,50 @@ def _export_positioned_body_steps(source_step: Path, bodies: list[Body], output_
             break
         solid = min(remaining, key=lambda candidate: _bbox_score(body.bbox_mm, _ocp_bounding_box(candidate)))
         remaining.remove(solid)
-        path = output_dir / f"body_{index:03d}_{_safe_filename(body.name)}.step"
+        shape_to_write = _heal_ocp_shape(solid, body.name, warnings) if heal_shapes else solid
+        suffix = "_healed" if heal_shapes else ""
+        path = output_dir / f"body_{index:03d}_{_safe_filename(body.name)}{suffix}.step"
         writer = STEPControl_Writer()
-        writer.Transfer(solid, STEPControl_AsIs)
+        writer.Transfer(shape_to_write, STEPControl_AsIs)
         if writer.Write(str(path)) != IFSelect_RetDone:
             warnings.append(f"OCP failed to write positioned STEP body for {body.name}.")
             continue
         exports.append((body, path))
-    warnings.append(f"Exported {len(exports)} positioned per-body STEP file(s) for Gmsh FEM meshing.")
+    mode = "healed " if heal_shapes else ""
+    warnings.append(f"Exported {len(exports)} {mode}positioned per-body STEP file(s) for Gmsh FEM meshing.")
     return exports
+
+
+def _heal_ocp_shape(shape, name: str, warnings: list[str]):
+    try:
+        from OCP.BRepCheck import BRepCheck_Analyzer
+        from OCP.ShapeFix import ShapeFix_Shape
+        from OCP.ShapeUpgrade import ShapeUpgrade_UnifySameDomain
+    except Exception as exc:
+        warnings.append(f"OCP healing unavailable for {name}: {exc}")
+        return shape
+
+    try:
+        before_valid = bool(BRepCheck_Analyzer(shape).IsValid())
+    except Exception:
+        before_valid = False
+    try:
+        fixer = ShapeFix_Shape(shape)
+        fixer.Perform()
+        fixed = fixer.Shape()
+        unify = ShapeUpgrade_UnifySameDomain(fixed, True, True, True)
+        unify.SetSafeInputMode(True)
+        unify.Build()
+        healed = unify.Shape()
+        try:
+            after_valid = bool(BRepCheck_Analyzer(healed).IsValid())
+        except Exception:
+            after_valid = False
+        warnings.append(f"OCP healing for {name}: valid_before={before_valid}, valid_after={after_valid}.")
+        return healed
+    except Exception as exc:
+        warnings.append(f"OCP healing failed for {name}; using raw positioned solid. {exc}")
+        return shape
 
 
 def _ocp_bounding_box(shape) -> tuple[float, float, float, float, float, float]:
