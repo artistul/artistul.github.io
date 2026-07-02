@@ -79,6 +79,11 @@ def run_elmer_transient(bodies: list[Body], config: SimulationConfig, output_roo
     except MeshPipelineError as exc:
         if "Gmsh Python module is not installed" in str(exc):
             raise ElmerUnavailable(str(exc)) from exc
+        if not config.allow_simplified_geometry_fallback:
+            raise ElmerRuntimeError(
+                "Exact CAD tetra meshing failed and simplified geometry fallback is disabled. "
+                f"Enable 'Allow simplified bbox fallback' only for non-validation preview runs. Exact mesh error: {exc}"
+            ) from exc
         exact_error = str(exc)
         simplified = []
         for body in bodies:
@@ -490,6 +495,7 @@ def _result_from_histories(
         "solver_mode": "ELMER_THERMAL_FEM",
         "numeric_result_source": "ELMER_VTU_POINT_TEMPERATURES",
         "elmer_status": "completed",
+        "validation_status": _validation_status(mesh),
         "final_max_plastic_c": float(max(final_plastic)),
         "final_avg_mold_c": float(np.mean(final_mold)) if final_mold else float("nan"),
         "peak_mold_c": float(max(max(histories[body_id]) for body_id in mold_ids)) if mold_ids else float("nan"),
@@ -516,8 +522,16 @@ def _result_from_histories(
             "No CFD is performed; water bodies define cooling boundaries with fixed temperature or convection.",
             "Repeated cycles use body-average thermal restart rather than full-field Elmer restart files.",
             "Plastic/mold and mold/mold contact conductance settings are recorded; conformal mesh conduction is used for shared interfaces in this version.",
+            f"Validation status: {_validation_status(mesh)}",
         ],
     )
+
+
+def _validation_status(mesh: MeshPipelineResult) -> str:
+    warnings = " ".join(mesh.warnings).lower()
+    if "bounding-box simplification" in warnings or "generated box volumes" in warnings:
+        return "NOT_VALIDATION_GRADE_SIMPLIFIED_GEOMETRY"
+    return "EXACT_GEOMETRY_MESHED_REQUIRES_CONVERGENCE_VALIDATION"
 
 
 def _replace_solver_mode(config: SimulationConfig, solver_mode: str) -> SimulationConfig:
@@ -538,4 +552,5 @@ def _replace_solver_mode(config: SimulationConfig, solver_mode: str) -> Simulati
         elmer_processes=config.elmer_processes,
         solver_timeout_s=config.solver_timeout_s,
         keep_solver_files=config.keep_solver_files,
+        allow_simplified_geometry_fallback=config.allow_simplified_geometry_fallback,
     )

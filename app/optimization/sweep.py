@@ -38,6 +38,7 @@ def make_cases(base: SimulationConfig, sweep: SweepConfig) -> list[SimulationCon
             elmer_processes=base.elmer_processes,
             solver_timeout_s=base.solver_timeout_s,
             keep_solver_files=base.keep_solver_files,
+            allow_simplified_geometry_fallback=base.allow_simplified_geometry_fallback,
         )
         for water_temp, convection, cycle_time in product(
             sweep.water_temperatures_c,

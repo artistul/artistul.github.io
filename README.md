@@ -135,7 +135,7 @@ The GUI includes `Fast Preview` and `Elmer FEM Accurate` solver choices.
 - Records mesh diagnostics, generated solver files, and assumptions in the exported report.
 - Does not perform CFD and does not claim GPU acceleration.
 
-If exact STEP tetrahedral meshing fails because the CAD contains duplicate/overlapping facets, the app runs a clearly labeled positioned bounding-box FEM fallback so Elmer remains usable while the CAD meshing issue is visible in the report. If `ElmerSolver` is not found, the app returns a clearly labeled `FAST_PREVIEW_FALLBACK` result instead of pretending FEM temperatures were produced.
+Exact STEP tetrahedral meshing is required for validation-grade results. If exact STEP meshing fails, the app now stops by default and reports the meshing error. A separate `Allow simplified bbox fallback` checkbox can be enabled for non-validation preview runs; those results are labeled `NOT_VALIDATION_GRADE_SIMPLIFIED_GEOMETRY`. If `ElmerSolver` is not found, the app returns a clearly labeled `FAST_PREVIEW_FALLBACK` result instead of pretending FEM temperatures were produced.
 
 Generated reports, CSVs, charts, logs, screenshots, and scaling benchmarks are written under `outputs\`.
 

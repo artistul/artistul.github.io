@@ -54,3 +54,9 @@
 - Replaced ElmerGrid conversion with direct Elmer native `mesh.*` writing to avoid ElmerGrid crashes on generated Gmsh meshes.
 - Added repeated-cycle support for Elmer using body-average thermal restart: plastic reheats while mold carries prior FEM body averages.
 - Added exact STEP mesh failure handling for the real CAD file; when Gmsh rejects duplicate/overlapping facets, Elmer runs a clearly labeled positioned bounding-box FEM fallback.
+
+## 0.4.2 - 2026-07-02
+
+- Added positioned per-body STEP export before Gmsh meshing so exact FEM preparation uses the same placed OCP solids as the viewer/import pipeline.
+- Changed simplified bounding-box FEM fallback from automatic to explicit opt-in through `Allow simplified bbox fallback`.
+- Added Elmer result validation status labels so reports distinguish exact-geometry FEM from non-validation simplified-geometry preview runs.

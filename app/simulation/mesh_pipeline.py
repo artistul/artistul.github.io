@@ -69,18 +69,18 @@ def build_gmsh_mesh(bodies: list[Body], config: SimulationConfig, workspace: Pat
         gmsh.option.setNumber("Geometry.OCCFixSmallFaces", 1)
         gmsh.option.setNumber("Mesh.MshFileVersion", 2.2)
         gmsh.option.setNumber("Mesh.Algorithm3D", 10)
-        gmsh.option.setNumber("Mesh.MeshSizeMax", max(0.1, float(config.mesh_size_mm)))
-        gmsh.option.setNumber("Mesh.MeshSizeMin", max(0.05, float(config.mesh_size_mm) * 0.25))
+        mesh_size = max(0.001, float(config.mesh_size_mm) * result.coordinate_scale_to_m)
+        gmsh.option.setNumber("Mesh.MeshSizeMax", mesh_size)
+        gmsh.option.setNumber("Mesh.MeshSizeMin", max(mesh_size * 0.1, mesh_size * 0.25))
         gmsh.model.add("influx_thermal_model")
 
         source_step = _shared_existing_step(active)
         if source_step:
             result.used_source_step = str(source_step)
-            dimtags = gmsh.model.occ.importShapes(str(source_step))
-            gmsh.model.occ.synchronize()
-            volume_tags = [tag for dim, tag in dimtags if dim == 3] or [tag for dim, tag in gmsh.model.getEntities(3)]
+            assignments = _import_positioned_body_steps(gmsh, active, source_step, workspace, result.warnings)
+            volume_tags = [tag for tags in assignments.values() for tag in tags]
             if not volume_tags:
-                raise MeshPipelineError(f"Gmsh imported {source_step} but found no 3D volume entities.")
+                raise MeshPipelineError(f"Gmsh imported {source_step} body exports but found no 3D volume entities.")
             volume_tags = _fragment_volumes(gmsh, volume_tags, result.warnings)
             assignments = _assign_gmsh_volumes_to_bodies(gmsh, volume_tags, active, result.warnings)
         else:
@@ -128,6 +128,120 @@ def _shared_existing_step(bodies: Iterable[Body]) -> Path | None:
     if path.exists() and path.suffix.lower() in {".step", ".stp"}:
         return path
     return None
+
+
+def _import_positioned_body_steps(gmsh, bodies: list[Body], source_step: Path, workspace: Path, warnings: list[str]) -> dict[str, list[int]]:
+    body_steps = _export_positioned_body_steps(source_step, bodies, workspace / "positioned_body_steps", warnings)
+    assignments: dict[str, list[int]] = {body.id: [] for body in bodies}
+    if not body_steps:
+        warnings.append("Positioned per-body STEP export failed; falling back to whole STEP import.")
+        dimtags = gmsh.model.occ.importShapes(str(source_step))
+        gmsh.model.occ.synchronize()
+        volume_tags = [tag for dim, tag in dimtags if dim == 3] or [tag for dim, tag in gmsh.model.getEntities(3)]
+        return _assign_gmsh_volumes_to_bodies(gmsh, volume_tags, bodies, warnings)
+    for body, step_path in body_steps:
+        before = {tag for dim, tag in gmsh.model.getEntities(3)}
+        gmsh.model.occ.importShapes(str(step_path))
+        gmsh.model.occ.synchronize()
+        after = {tag for dim, tag in gmsh.model.getEntities(3)}
+        new_tags = sorted(after - before)
+        if not new_tags:
+            warnings.append(f"Gmsh imported positioned body STEP for {body.name} but found no new volume.")
+        assignments[body.id].extend(new_tags)
+    return assignments
+
+
+def _export_positioned_body_steps(source_step: Path, bodies: list[Body], output_dir: Path, warnings: list[str]) -> list[tuple[Body, Path]]:
+    try:
+        from OCP.IFSelect import IFSelect_RetDone
+        from OCP.STEPCAFControl import STEPCAFControl_Reader
+        from OCP.STEPControl import STEPControl_AsIs, STEPControl_Writer
+        from OCP.TCollection import TCollection_ExtendedString
+        from OCP.TDF import TDF_Label, TDF_LabelSequence
+        from OCP.TDocStd import TDocStd_Document
+        from OCP.TopAbs import TopAbs_SOLID
+        from OCP.TopExp import TopExp_Explorer
+        from OCP.XCAFApp import XCAFApp_Application
+        from OCP.XCAFDoc import XCAFDoc_DocumentTool
+    except Exception as exc:
+        warnings.append(f"OCP positioned body export unavailable: {exc}")
+        return []
+
+    app = XCAFApp_Application.GetApplication_s()
+    doc = TDocStd_Document(TCollection_ExtendedString("influx-positioned-export"))
+    app.NewDocument(TCollection_ExtendedString("MDTV-XCAF"), doc)
+    reader = STEPCAFControl_Reader()
+    reader.SetNameMode(True)
+    status = reader.ReadFile(str(source_step))
+    if status != IFSelect_RetDone or not reader.Transfer(doc):
+        warnings.append(f"OCP could not re-read STEP for positioned body export: status {status}")
+        return []
+
+    shape_tool = XCAFDoc_DocumentTool.ShapeTool_s(doc.Main())
+    free = TDF_LabelSequence()
+    shape_tool.GetFreeShapes(free)
+    solids: list[object] = []
+
+    def target_label(label):
+        if shape_tool.IsReference_s(label):
+            referred = TDF_Label()
+            if shape_tool.GetReferredShape_s(label, referred):
+                return referred
+        return label
+
+    def collect(label) -> None:
+        target = target_label(label)
+        components = TDF_LabelSequence()
+        has_components = shape_tool.GetComponents_s(target, components, False)
+        if has_components and components.Length():
+            for index in range(1, components.Length() + 1):
+                collect(components.Value(index))
+            return
+        shape = shape_tool.GetShape_s(label)
+        if shape.IsNull():
+            shape = shape_tool.GetShape_s(target)
+        explorer = TopExp_Explorer(shape, TopAbs_SOLID)
+        while explorer.More():
+            solids.append(explorer.Current())
+            explorer.Next()
+
+    for index in range(1, free.Length() + 1):
+        collect(free.Value(index))
+
+    if len(solids) < len(bodies):
+        warnings.append(f"OCP positioned body export found only {len(solids)} solids for {len(bodies)} classified bodies.")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    exports: list[tuple[Body, Path]] = []
+    remaining = list(solids)
+    for index, body in enumerate(bodies, start=1):
+        if not remaining:
+            break
+        solid = min(remaining, key=lambda candidate: _bbox_score(body.bbox_mm, _ocp_bounding_box(candidate)))
+        remaining.remove(solid)
+        path = output_dir / f"body_{index:03d}_{_safe_filename(body.name)}.step"
+        writer = STEPControl_Writer()
+        writer.Transfer(solid, STEPControl_AsIs)
+        if writer.Write(str(path)) != IFSelect_RetDone:
+            warnings.append(f"OCP failed to write positioned STEP body for {body.name}.")
+            continue
+        exports.append((body, path))
+    warnings.append(f"Exported {len(exports)} positioned per-body STEP file(s) for Gmsh FEM meshing.")
+    return exports
+
+
+def _ocp_bounding_box(shape) -> tuple[float, float, float, float, float, float]:
+    from OCP.Bnd import Bnd_Box
+    from OCP.BRepBndLib import BRepBndLib
+
+    box = Bnd_Box()
+    BRepBndLib.Add_s(shape, box)
+    x0, y0, z0, x1, y1, z1 = box.Get()
+    return (float(x0), float(y0), float(z0), float(x1), float(y1), float(z1))
+
+
+def _safe_filename(text: str) -> str:
+    safe = "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in text)
+    return safe[:48] or "body"
 
 
 def _fragment_volumes(gmsh, volume_tags: list[int], warnings: list[str]) -> list[int]:
@@ -190,10 +304,9 @@ def _scale_volumes_to_meters(gmsh, volume_tags: list[int], scale: float) -> None
 
 def _generate_3d_mesh_with_fallbacks(gmsh, warnings: list[str]) -> None:
     errors: list[str] = []
-    for algorithm in (10, 1, 4):
+    for algorithm in (1, 4, 10):
         try:
             gmsh.option.setNumber("Mesh.Algorithm3D", algorithm)
-            gmsh.model.mesh.clear()
             gmsh.model.mesh.generate(3)
             node_tags, _, _ = gmsh.model.mesh.getNodes()
             element_count = _element_count(gmsh.model.mesh.getElements(3)[1])

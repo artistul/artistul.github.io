@@ -199,6 +199,7 @@ class MainWindow(QMainWindow):
         self.elmer_processes_spin = _spin(1, 64, 1)
         self.solver_timeout_spin = _spin(30, 86_400, 900)
         self.keep_solver_files_check = QCheckBox("Keep Elmer/Gmsh solver files")
+        self.allow_simplified_fallback_check = QCheckBox("Allow simplified bbox fallback")
         for label, widget in [
             ("Timestep (s)", self.dt_spin),
             ("Cycle time (s)", self.cycle_spin),
@@ -214,6 +215,7 @@ class MainWindow(QMainWindow):
             ("Elmer processes", self.elmer_processes_spin),
             ("Solver timeout s", self.solver_timeout_spin),
             ("Solver files", self.keep_solver_files_check),
+            ("Fallback geometry", self.allow_simplified_fallback_check),
         ]:
             sim_form.addRow(label, widget)
 
@@ -539,6 +541,7 @@ class MainWindow(QMainWindow):
             elmer_processes=self.elmer_processes_spin.value(),
             solver_timeout_s=self.solver_timeout_spin.value(),
             keep_solver_files=self.keep_solver_files_check.isChecked(),
+            allow_simplified_geometry_fallback=self.allow_simplified_fallback_check.isChecked(),
         )
 
     def _refresh_resource_defaults(self) -> None:

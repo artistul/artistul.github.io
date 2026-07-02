@@ -26,6 +26,7 @@ class SimulationConfig:
     elmer_processes: int = 1
     solver_timeout_s: int = 900
     keep_solver_files: bool = False
+    allow_simplified_geometry_fallback: bool = False
 
 
 @dataclass(slots=True)
