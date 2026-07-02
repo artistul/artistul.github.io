@@ -601,6 +601,8 @@ def _build_controlled_approx_conforming_grid_mesh(
     result.quality_summary["occupied_cells"] = int(np.sum(labels > 0))
     result.quality_summary["grid_dimensions"] = "x".join(str(value) for value in labels.shape)
     result.quality_summary["max_geometry_deviation_mm"] = float(cell_size_mm * (3.0 ** 0.5) * 0.5)
+    body_volumes = _grid_body_volumes(labels, bodies, cell_size_mm)
+    result.quality_summary["body_volumes_m3_json"] = json.dumps(body_volumes, sort_keys=True)
     result.warnings.extend(warnings)
     result.warnings.extend(surface_records)
     result.readiness_status = _mesh_readiness_status(result)
@@ -807,6 +809,16 @@ def _grid_interface_summary(labels, bodies: list[Body], cell_size_mm: float) -> 
     return output
 
 
+def _grid_body_volumes(labels, bodies: list[Body], cell_size_mm: float) -> dict[str, float]:
+    import numpy as np
+
+    cell_volume_m3 = (float(cell_size_mm) * 1e-3) ** 3
+    volumes: dict[str, float] = {}
+    for index, body in enumerate(bodies, start=1):
+        volumes[body.name] = float(np.sum(labels == index) * cell_volume_m3)
+    return volumes
+
+
 def _gmsh_surface_mesh_from_step(step_path: Path, mesh_size_mm: float):
     import gmsh  # type: ignore[import-not-found]
     import numpy as np
@@ -959,6 +971,7 @@ def _write_mesh_readiness_manifest(workspace: Path, result: MeshPipelineResult) 
         "body_domain_ids": result.body_domain_ids,
         "cooling_boundary_ids": result.cooling_boundary_ids,
         "quality_summary": result.quality_summary,
+        "body_volumes_m3": json.loads(str(result.quality_summary.get("body_volumes_m3_json", "{}"))),
         "interface_summary": result.interface_summary,
         "warnings": result.warnings,
     }

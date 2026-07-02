@@ -169,6 +169,8 @@ python -m app.main --mesh-validation-study "C:\Users\Stefan\Desktop\design matri
 
 This writes `mesh_validation_study.csv`, `mesh_validation_study.json`, and `mesh_validation_report.html`. The current 3 mm / 2 mm real-CAD study finishes successfully but reports `FEM_READY_CONFORMING_APPROX_REQUIRES_FINER_DEVIATION_STUDY`, not validation-grade completion.
 
+The finer real-CAD study at 1.0 mm / 0.75 mm reports `VALIDATION_GRADE_MESH_READY_PENDING_SOLVER_PHYSICS_VALIDATION`. The 0.75 mm mesh has 805,491 nodes, 4,552,074 tetrahedra, 137,198 interface/cooling triangles, all 5 body domains, 2 cooling groups, zero zero-volume tetrahedra, and a 0.65 mm maximum grid-deviation bound. The 1.0 mm to 0.75 mm convergence deltas are 4.88% max body-volume change and 10.67% max interface-area change.
+
 Generated reports, CSVs, charts, logs, screenshots, and scaling benchmarks are written under `outputs\`.
 
 ### Hybrid MAX - Ștefan Workstation

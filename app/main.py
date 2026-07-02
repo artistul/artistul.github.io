@@ -64,6 +64,7 @@ def main() -> int:
     parser.add_argument("--mesh-validation-study", default="", help="Run conforming-grid mesh validation study for a STEP file.")
     parser.add_argument("--mesh-study-sizes", default="3,2", help="Comma-separated conforming-grid cell sizes in mm.")
     parser.add_argument("--mesh-study-output", default="outputs/mesh_validation")
+    parser.add_argument("--mesh-study-max-elements", type=int, default=750_000)
     args = parser.parse_args()
 
     if args.import_step:
@@ -95,7 +96,7 @@ def main() -> int:
     if args.mesh_validation_study:
         bodies = import_step(Path(args.mesh_validation_study))
         sizes = [float(item.strip()) for item in args.mesh_study_sizes.split(",") if item.strip()]
-        study = run_mesh_validation_study(bodies, sizes, args.mesh_study_output)
+        study = run_mesh_validation_study(bodies, sizes, args.mesh_study_output, args.mesh_study_max_elements)
         decision = study["decision"]
         print(f"Mesh validation study: {decision['status']}")
         print(f"Output: {study['output_dir']}")

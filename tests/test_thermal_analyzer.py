@@ -203,8 +203,8 @@ def test_mesh_validation_decision_requires_fine_deviation():
     from app.simulation.mesh_validation import MeshValidationRow, _validation_decision
 
     rows = [
-        MeshValidationRow(3.0, "FEM_READY_CONFORMING_APPROX_REQUIRES_DEVIATION_AND_CONVERGENCE_VALIDATION", 1, 10, 2, 5, 2, 10, 2.6, 0, 0, 0, 1.8, 5, "a"),
-        MeshValidationRow(2.0, "FEM_READY_CONFORMING_APPROX_REQUIRES_DEVIATION_AND_CONVERGENCE_VALIDATION", 2, 20, 4, 5, 2, 20, 1.73, 0, 0, 0, 1.8, 5, "b"),
+        MeshValidationRow(3.0, "FEM_READY_CONFORMING_APPROX_REQUIRES_DEVIATION_AND_CONVERGENCE_VALIDATION", 1, 10, 2, 5, 2, 10, 2.6, 0, 0, 0, 1.8, 5, '{"mold": 1.0}', '{"mold::water": 1.0}', "a"),
+        MeshValidationRow(2.0, "FEM_READY_CONFORMING_APPROX_REQUIRES_DEVIATION_AND_CONVERGENCE_VALIDATION", 2, 20, 4, 5, 2, 20, 1.73, 0, 0, 0, 1.8, 5, '{"mold": 1.01}', '{"mold::water": 1.02}', "b"),
     ]
     decision = _validation_decision(rows, [])
     assert decision["status"] == "FEM_READY_CONFORMING_APPROX_REQUIRES_FINER_DEVIATION_STUDY"

@@ -83,3 +83,4 @@
 - Added `mesh_readiness.json` with tetra quality metrics, interface proximity evidence, cooling/contact summaries, and explicit FEM readiness status.
 - Added `CONTROLLED_APPROX_CONFORMING_GRID`, a shared-node grid tetra mesh strategy that captures all 5 current CAD bodies at 2 mm cell size and reports a geometry-deviation bound for convergence studies.
 - Added `--mesh-validation-study`, which builds conforming-grid meshes at multiple cell sizes and exports CSV, JSON, and HTML convergence/deviation evidence.
+- Updated mesh validation decisions to use physical body-volume and interface-area convergence, then verified the real CAD at 1.0 mm / 0.75 mm as `VALIDATION_GRADE_MESH_READY_PENDING_SOLVER_PHYSICS_VALIDATION`.
