@@ -82,3 +82,4 @@
 - Labeled repaired-surface fallback results as FEM setup-ready but not validation-grade because per-body interfaces are currently nonconformal.
 - Added `mesh_readiness.json` with tetra quality metrics, interface proximity evidence, cooling/contact summaries, and explicit FEM readiness status.
 - Added `CONTROLLED_APPROX_CONFORMING_GRID`, a shared-node grid tetra mesh strategy that captures all 5 current CAD bodies at 2 mm cell size and reports a geometry-deviation bound for convergence studies.
+- Added `--mesh-validation-study`, which builds conforming-grid meshes at multiple cell sizes and exports CSV, JSON, and HTML convergence/deviation evidence.

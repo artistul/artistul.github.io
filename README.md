@@ -161,6 +161,14 @@ Each FEM mesh workspace now writes `mesh_readiness.json` with the mesh strategy,
 
 The controlled conforming grid strategy has been verified on Stefan's current 5-body CAD at 2 mm cells: it produced 48,669 nodes, 252,168 tetrahedra, all 5 body domains, cooling interface triangles, zero zero-volume tetrahedra, and `FEM_READY_CONFORMING_APPROX_REQUIRES_DEVIATION_AND_CONVERGENCE_VALIDATION`. Its reported geometric deviation bound at 2 mm cells is about 1.73 mm, so it is a serious FEM setup path but still requires mesh-size convergence before validation-grade conclusions.
 
+Mesh convergence/deviation study:
+
+```powershell
+python -m app.main --mesh-validation-study "C:\Users\Stefan\Desktop\design matrita watercooled -sim.step" --mesh-study-sizes 3,2 --mesh-study-output outputs\mesh_validation_real_cad
+```
+
+This writes `mesh_validation_study.csv`, `mesh_validation_study.json`, and `mesh_validation_report.html`. The current 3 mm / 2 mm real-CAD study finishes successfully but reports `FEM_READY_CONFORMING_APPROX_REQUIRES_FINER_DEVIATION_STUDY`, not validation-grade completion.
+
 Generated reports, CSVs, charts, logs, screenshots, and scaling benchmarks are written under `outputs\`.
 
 ### Hybrid MAX - Ștefan Workstation

@@ -199,6 +199,17 @@ def test_conforming_grid_tetrahedralizer_preserves_domains_and_cooling_faces():
     assert interfaces[0]["relationship"] == "mold_water_cooling"
 
 
+def test_mesh_validation_decision_requires_fine_deviation():
+    from app.simulation.mesh_validation import MeshValidationRow, _validation_decision
+
+    rows = [
+        MeshValidationRow(3.0, "FEM_READY_CONFORMING_APPROX_REQUIRES_DEVIATION_AND_CONVERGENCE_VALIDATION", 1, 10, 2, 5, 2, 10, 2.6, 0, 0, 0, 1.8, 5, "a"),
+        MeshValidationRow(2.0, "FEM_READY_CONFORMING_APPROX_REQUIRES_DEVIATION_AND_CONVERGENCE_VALIDATION", 2, 20, 4, 5, 2, 20, 1.73, 0, 0, 0, 1.8, 5, "b"),
+    ]
+    decision = _validation_decision(rows, [])
+    assert decision["status"] == "FEM_READY_CONFORMING_APPROX_REQUIRES_FINER_DEVIATION_STUDY"
+
+
 def test_throttle_limits():
     limits = ResourceLimits(56.0, 60.0, 8.0, 4.0, 14.0, "outputs")
     assert evaluate_throttle(limits, free_ram_gb=7.5, app_ram_gb=2.0)[0] == "THROTTLE"

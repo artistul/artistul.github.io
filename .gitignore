@@ -17,6 +17,7 @@ outputs/thermal_run_*/
 outputs/elmer_runs/
 outputs/elmer_format_probe/
 outputs/mesh_diagnostics/
+outputs/mesh_validation*/
 outputs/*.png
 outputs/*.html
 outputs/*.log

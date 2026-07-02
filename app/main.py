@@ -11,6 +11,7 @@ from app.optimization.sweep import SweepConfig, run_sweep
 from app.reporting.exporter import create_session_dir, export_simulation, export_sweep
 from app.simulation.backends import BackendMode, run_simulation_backend
 from app.simulation.mesh_pipeline import write_mesh_diagnostics
+from app.simulation.mesh_validation import run_mesh_validation_study
 from app.simulation.solver import SimulationConfig, run_transient_simulation
 
 
@@ -60,6 +61,9 @@ def main() -> int:
     parser.add_argument("--inspect-step", default="", help="Inspect a STEP file and save diagnostics under outputs/step_diagnostics.")
     parser.add_argument("--mesh-diagnostics", default="", help="Probe exact per-body STEP meshing and save diagnostics under outputs/mesh_diagnostics.")
     parser.add_argument("--mesh-size-mm", type=float, default=8.0, help="Mesh size used by --mesh-diagnostics.")
+    parser.add_argument("--mesh-validation-study", default="", help="Run conforming-grid mesh validation study for a STEP file.")
+    parser.add_argument("--mesh-study-sizes", default="3,2", help="Comma-separated conforming-grid cell sizes in mm.")
+    parser.add_argument("--mesh-study-output", default="outputs/mesh_validation")
     args = parser.parse_args()
 
     if args.import_step:
@@ -87,6 +91,17 @@ def main() -> int:
         print("Diagnostics: outputs/mesh_diagnostics/mesh_diagnostics.txt, mesh_body_diagnostics.csv")
         for diagnostic in diagnostics:
             print(f"{diagnostic.body_id}: {diagnostic.name} [{diagnostic.variant}] -> {diagnostic.status}")
+        return 0
+    if args.mesh_validation_study:
+        bodies = import_step(Path(args.mesh_validation_study))
+        sizes = [float(item.strip()) for item in args.mesh_study_sizes.split(",") if item.strip()]
+        study = run_mesh_validation_study(bodies, sizes, args.mesh_study_output)
+        decision = study["decision"]
+        print(f"Mesh validation study: {decision['status']}")
+        print(f"Output: {study['output_dir']}")
+        print(f"Trends: {decision['trends']}")
+        for failure in decision["failures"]:
+            print(f"WARNING: {failure}")
         return 0
     if args.headless_smoke:
         return run_headless_smoke()
