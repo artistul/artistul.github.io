@@ -450,13 +450,44 @@
   }
 
   function parseMeltColor(value) {
-    const parts = String(value || "").match(/[\d.]+/g) || [244, 241, 237, 1];
+    const probe = document.createElement("canvas");
+    probe.width = 1;
+    probe.height = 1;
+    const context = probe.getContext("2d", { willReadFrequently: true });
+    context.clearRect(0, 0, 1, 1);
+    context.fillStyle = "#f4f1ed";
+    context.fillStyle = String(value || "#f4f1ed");
+    context.fillRect(0, 0, 1, 1);
+    const [r, g, b, alpha] = context.getImageData(0, 0, 1, 1).data;
     return {
-      r: Number(parts[0]),
-      g: Number(parts[1]),
-      b: Number(parts[2]),
-      a: parts[3] === undefined ? 1 : Number(parts[3])
+      r,
+      g,
+      b,
+      a: alpha / 255
     };
+  }
+
+  function transformedMeltText(text, style) {
+    const locale = document.documentElement.lang || undefined;
+    if (style.textTransform === "uppercase") return text.toLocaleUpperCase(locale);
+    if (style.textTransform === "lowercase") return text.toLocaleLowerCase(locale);
+    if (style.textTransform === "capitalize") {
+      return text.replace(/(^|[\s-])(\p{L})/gu, (match, prefix, letter) =>
+        `${prefix}${letter.toLocaleUpperCase(locale)}`
+      );
+    }
+    return text;
+  }
+
+  function effectiveMeltOpacity(element) {
+    let opacity = 1;
+    let current = element;
+    while (current && current !== document.documentElement) {
+      const value = Number.parseFloat(getComputedStyle(current).opacity);
+      if (Number.isFinite(value)) opacity *= value;
+      current = current.parentElement;
+    }
+    return Math.max(0, Math.min(1, opacity));
   }
 
   function measureSpacedText(context, text, letterSpacing) {
@@ -474,34 +505,13 @@
     }
   }
 
-  function wrapMeltLines(context, text, maxWidth, letterSpacing) {
-    const words = text.split(/\s+/);
-    const lines = [];
-    let line = "";
-    words.forEach((word) => {
-      const trial = line ? `${line} ${word}` : word;
-      if (line && measureSpacedText(context, trial, letterSpacing) > maxWidth) {
-        lines.push(line);
-        line = word;
-      } else {
-        line = trial;
-      }
-    });
-    if (line) lines.push(line);
-    return lines.length ? lines : [""];
-  }
-
   function sampleMeltText(element) {
-    const text = [...element.childNodes]
-      .filter((node) => node.nodeType === Node.TEXT_NODE)
-      .map((node) => node.nodeValue)
-      .join(" ")
-      .replace(/\s+/g, " ")
-      .trim();
-    if (!text) return [];
-
     const rect = element.getBoundingClientRect();
     const style = getComputedStyle(element);
+    const textNodes = [...element.childNodes].filter((node) =>
+      node.nodeType === Node.TEXT_NODE && normalize(node.nodeValue)
+    );
+    if (!textNodes.length) return [];
     const renderDpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const buffer = document.createElement("canvas");
     const context = buffer.getContext("2d", { willReadFrequently: true });
@@ -514,20 +524,39 @@
       : Number.parseFloat(style.lineHeight) || fontSize * 1.12;
     const letterSpacing = Number.parseFloat(style.letterSpacing) || 0;
     context.scale(renderDpr, renderDpr);
-    context.font = `${style.fontStyle || "normal"} ${style.fontWeight || 400} ${fontSize}px ${style.fontFamily || "sans-serif"}`;
+    context.font = `${style.fontStyle || "normal"} ${style.fontVariantCaps || "normal"} ${style.fontWeight || 400} ${fontSize}px ${style.fontFamily || "sans-serif"}`;
     context.textBaseline = "alphabetic";
     context.fillStyle = "#fff";
 
-    const lines = wrapMeltLines(context, text, rect.width, letterSpacing);
-    const totalHeight = lines.length * lineHeight;
-    let y = Math.max(fontSize, (rect.height - totalHeight) / 2 + fontSize);
-    lines.forEach((line) => {
-      const width = measureSpacedText(context, line, letterSpacing);
-      let x = 0;
-      if (style.textAlign === "center") x = (rect.width - width) / 2;
-      if (style.textAlign === "right" || style.textAlign === "end") x = rect.width - width;
-      fillSpacedText(context, line, x, y, letterSpacing);
-      y += lineHeight;
+    textNodes.forEach((node) => {
+      const text = transformedMeltText(normalize(node.nodeValue), style);
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const lineRects = [...range.getClientRects()].filter((lineRect) =>
+        lineRect.width > 1 && lineRect.height > 1
+      );
+      range.detach?.();
+
+      if (!lineRects.length) return;
+      const words = text.split(/\s+/);
+      let wordIndex = 0;
+      lineRects.forEach((lineRect) => {
+        let line = "";
+        while (wordIndex < words.length) {
+          const trial = line ? `${line} ${words[wordIndex]}` : words[wordIndex];
+          if (line && measureSpacedText(context, trial, letterSpacing) > lineRect.width + 1) break;
+          line = trial;
+          wordIndex += 1;
+        }
+        if (!line && wordIndex < words.length) {
+          line = words[wordIndex];
+          wordIndex += 1;
+        }
+        if (!line) return;
+        const x = lineRect.left - rect.left;
+        const y = lineRect.top - rect.top + (lineRect.height - fontSize) / 2 + fontSize;
+        fillSpacedText(context, line, x, y, letterSpacing);
+      });
     });
 
     const image = context.getImageData(0, 0, buffer.width, buffer.height);
@@ -557,7 +586,9 @@
       const fontSize = Number.parseFloat(style.fontSize) || 16;
       const budget = fontSize > 64 ? 2600 : fontSize > 28 ? 1500 : 700;
       const stride = Math.max(1, Math.ceil(points.length / budget));
-      const color = parseMeltColor(style.color);
+      const textFill = style.webkitTextFillColor;
+      const color = parseMeltColor(textFill && textFill !== "rgba(0, 0, 0, 0)" ? textFill : style.color);
+      const effectiveOpacity = effectiveMeltOpacity(element);
       for (let index = 0; index < points.length; index += stride) {
         const point = points[index];
         const yNorm = Math.max(0, Math.min(1, (point.y - rect.top) / Math.max(1, rect.height)));
@@ -569,7 +600,7 @@
           delay: (1 - yNorm) * .06 + Math.random() * .025,
           seed: Math.random() * Math.PI * 2,
           color,
-          alpha: (.82 + Math.random() * .18) * color.a
+          alpha: color.a * effectiveOpacity
         });
       }
     });
@@ -632,9 +663,7 @@
         Number.parseFloat(style.opacity || "1") > 0;
     });
 
-    return candidates.filter((element) =>
-      !candidates.some((parent) => parent !== element && parent.contains(element))
-    );
+    return candidates;
   }
 
   function triggerLanguagePop(elements) {
