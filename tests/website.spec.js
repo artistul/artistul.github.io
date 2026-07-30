@@ -22,19 +22,12 @@ test("English and Romanian toggle sitewide with persistent accessible state", as
   await expect(page.locator("html")).toHaveAttribute("lang", "ro");
   await expect(page.locator('[data-language="ro"]')).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("tab", { name: "Echipă" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Contact" })).toBeVisible();
-  await expect.poll(() => page.evaluate(() =>
-    document.fonts.check('900 64px "InFlux Romanian Display"', "Ă Î Ș Ț â î ș ț")
-  )).toBe(true);
+  await expect(page.getByRole("tab", { name: "Contactează-ne" })).toBeVisible();
   const romanianDisplaySpacing = await page.locator(".home-statement h2").evaluate((heading) => {
     const style = getComputedStyle(heading);
-    return {
-      fontSynthesis: style.fontSynthesis,
-      lineHeightRatio: Number.parseFloat(style.lineHeight) / Number.parseFloat(style.fontSize)
-    };
+    return Number.parseFloat(style.lineHeight) / Number.parseFloat(style.fontSize);
   });
-  expect(romanianDisplaySpacing.fontSynthesis).toBe("none");
-  expect(romanianDisplaySpacing.lineHeightRatio).toBeGreaterThanOrEqual(1.15);
+  expect(romanianDisplaySpacing).toBeGreaterThanOrEqual(1.15);
 
   await page.getByRole("tab", { name: "Echipă" }).click();
   await expect(page).toHaveTitle("Echipă | InFlux Origin");
@@ -42,9 +35,10 @@ test("English and Romanian toggle sitewide with persistent accessible state", as
 
   await page.goto("/contact/");
   await expect(page.locator("html")).toHaveAttribute("lang", "ro");
-  await expect(page).toHaveTitle("Contact | InFlux Origin");
+  await expect(page).toHaveTitle("Contactează-ne | InFlux Origin");
+  await expect(page.getByRole("heading", { name: "Contactează-ne" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ajută-ne să construim ce urmează." })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Aplică pentru a te alătura InFlux/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Aplică pentru a te alătura echipei InFlux/ })).toBeVisible();
   const romanianHeadingType = await page.locator(".contact-option h2").first().evaluate((heading) => {
     const style = getComputedStyle(heading);
     return {
@@ -52,7 +46,7 @@ test("English and Romanian toggle sitewide with persistent accessible state", as
       lineHeightRatio: Number.parseFloat(style.lineHeight) / Number.parseFloat(style.fontSize)
     };
   });
-  expect(romanianHeadingType.family).toContain("InFlux Romanian Display");
+  expect(romanianHeadingType.family).toContain("Impact");
   expect(romanianHeadingType.lineHeightRatio).toBeGreaterThanOrEqual(1.15);
 
   await page.goto("/technical.html");
@@ -71,6 +65,7 @@ test("English and Romanian toggle sitewide with persistent accessible state", as
 test("language control remains touch-friendly and clear of mobile navigation", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("/index.html");
+  await page.locator('[data-language="ro"]').click();
 
   const layout = await page.evaluate(() => {
     const english = document.querySelector('[data-language="en"]').getBoundingClientRect();
@@ -92,6 +87,74 @@ test("language control remains touch-friendly and clear of mobile navigation", a
   expect(layout.romanianTarget.width).toBeGreaterThanOrEqual(38);
   expect(layout.clearOfMenu).toBe(true);
   expect(layout.documentFitsWidth).toBe(true);
+});
+
+test("English and Romanian use identical font families, weights, styles, and tracking", async ({ page }) => {
+  const routes = [
+    "/index.html",
+    "/index.html?tab=versions",
+    "/index.html?tab=projects",
+    "/index.html?tab=team",
+    "/index.html?tab=contact",
+    "/index.html?tab=sponsorship",
+    "/index.html?tab=proof",
+    "/index.html?tab=downloads",
+    "/index.html?tab=links",
+    "/technical.html"
+  ];
+  const sizes = [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 }
+  ];
+
+  for (const size of sizes) {
+    await page.setViewportSize(size);
+    for (const route of routes) {
+      await page.goto(route);
+      const differences = await page.evaluate(async () => {
+        const settle = () => new Promise((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve))
+        );
+        const signature = (element) => {
+          const style = getComputedStyle(element);
+          return {
+            family: style.fontFamily,
+            weight: style.fontWeight,
+            style: style.fontStyle,
+            tracking: style.letterSpacing
+          };
+        };
+
+        window.InFluxI18n.setLanguage("en");
+        await document.fonts.ready;
+        await settle();
+        const elements = [...document.body.querySelectorAll("*")].filter((element) =>
+          [...element.childNodes].some((node) =>
+            node.nodeType === Node.TEXT_NODE && node.nodeValue.trim()
+          )
+        );
+        const english = new Map(elements.map((element) => [element, signature(element)]));
+
+        window.InFluxI18n.setLanguage("ro");
+        await document.fonts.ready;
+        await settle();
+
+        return elements.flatMap((element) => {
+          const before = english.get(element);
+          const after = signature(element);
+          return JSON.stringify(before) === JSON.stringify(after)
+            ? []
+            : [{
+                element: element.id || element.className || element.tagName,
+                before,
+                after
+              }];
+        });
+      });
+
+      expect(differences, `${route} at ${size.width}px`).toEqual([]);
+    }
+  }
 });
 
 for (const viewport of viewports) {

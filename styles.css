@@ -1346,7 +1346,11 @@ footer p { margin: 0; color: var(--muted); font-size: 11px; letter-spacing: .08e
   transform: translateX(-50%);
 }
 .contact-hero h1 { margin-bottom: 22px; }
-.contact-hero h1 span { color: var(--red); }
+.contact-hero h1 span {
+  color: var(--red);
+  margin-left: .22em;
+}
+html[lang="ro"] .contact-hero h1 span { margin-left: 0; }
 .contact-hero p {
   max-width: 700px;
   margin-inline: auto;
