@@ -114,6 +114,20 @@ test("hidden beta preview selects either saved transition from the URL", async (
   await expect(continuousFrame.locator(".language-melt-canvas")).toHaveClass(/is-active/);
   await page.waitForTimeout(120);
   const waveState = await continuousFrame.locator("body").evaluate(() => {
+    const eligible = [...document.body.querySelectorAll("*")].filter((element) => {
+      if (element.closest("[data-no-i18n], script, style, svg, canvas, code, pre")) return false;
+      if (element.classList.contains("visually-hidden")) return false;
+      if (![...element.childNodes].some((node) =>
+        node.nodeType === Node.TEXT_NODE && String(node.nodeValue || "").trim()
+      )) return false;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return rect.width > 2 && rect.height > 2 &&
+        rect.bottom > 0 && rect.top < window.innerHeight &&
+        rect.right > 0 && rect.left < window.innerWidth &&
+        style.visibility !== "hidden" && style.display !== "none" &&
+        Number.parseFloat(style.opacity || "1") > 0;
+    });
     const elements = [...document.querySelectorAll(".language-melt-text")]
       .map((element) => ({
         left: element.getBoundingClientRect().left,
@@ -122,10 +136,15 @@ test("hidden beta preview selects either saved transition from the URL", async (
       .sort((a, b) => a.left - b.left);
     return {
       leftClip: elements[0]?.clip || 0,
-      rightClip: elements.at(-1)?.clip || 0
+      rightClip: elements.at(-1)?.clip || 0,
+      eligibleCount: eligible.length,
+      coveredCount: eligible.filter((element) =>
+        element.classList.contains("language-melt-text")
+      ).length
     };
   });
   expect(waveState.leftClip).toBeGreaterThan(waveState.rightClip);
+  expect(waveState.coveredCount).toBe(waveState.eligibleCount);
 });
 
 test("English and Romanian use identical font families, weights, styles, and tracking", async ({ page }) => {

@@ -784,9 +784,9 @@
   }
 
   async function runContinuousMeltTransition(language, elements) {
-    const animatedElements = elements.filter((element) =>
-      !elements.some((child) => child !== element && element.contains(child))
-    );
+    // Each collected element owns only its direct text nodes, so retaining mixed
+    // parent/child candidates covers every visible text run without duplicating it.
+    const animatedElements = elements;
     resizeMeltCanvas();
     const rasters = captureContinuousMeltText(animatedElements);
     if (!rasters.length) {
