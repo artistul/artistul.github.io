@@ -19,6 +19,11 @@ test("English and Romanian toggle sitewide with persistent accessible state", as
   await expect(page.locator('[data-language="ro"]')).toHaveAttribute("aria-pressed", "false");
 
   await page.locator('[data-language="ro"]').click();
+  await expect(page.locator("html")).toHaveClass(/is-language-melting/);
+  await expect(page.locator(
+    ".language-melt-canvas:not(.language-melt-canvas--header):not(.language-melt-canvas--project-index)"
+  )).toHaveClass(/is-active/);
+  await expect(page.locator("#home-title .language-melt-text")).toHaveCount(3);
   await expect(page.locator("html")).toHaveAttribute("lang", "ro");
   await expect(page.locator('[data-language="ro"]')).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("tab", { name: "Echipă" })).toBeVisible();
@@ -56,6 +61,11 @@ test("English and Romanian toggle sitewide with persistent accessible state", as
   await expect(page.getByRole("heading", { name: "InFlux Origin MK1" })).toBeVisible();
 
   await page.locator('[data-language="en"]').click();
+  await expect(page.locator(".header-action")).toHaveClass(/language-melt-contact/);
+  await expect(page.locator(".header-action")).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)"
+  );
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await page.goto("/index.html");
   await expect(page.getByRole("tab", { name: "Team" })).toBeVisible();
@@ -89,6 +99,277 @@ test("language control remains touch-friendly and clear of mobile navigation", a
   expect(layout.documentFitsWidth).toBe(true);
 });
 
+test("melt transition affects text without hiding structural elements", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/index.html");
+  await page.evaluate(() => localStorage.removeItem("influx-language"));
+  await page.reload();
+
+  const inspectStructure = () => page.evaluate(() => {
+    const inspect = (selector) => {
+      const element = document.querySelector(selector);
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        width: Math.round(rect.width * 10) / 10,
+        height: Math.round(rect.height * 10) / 10,
+        display: style.display,
+        visibility: style.visibility,
+        opacity: style.opacity,
+        backgroundColor: style.backgroundColor,
+        borderColor: style.borderColor,
+        clipPath: style.clipPath
+      };
+    };
+    return {
+      logo: inspect(".brand img"),
+      artifact: inspect(".hero-artifact"),
+      machine: inspect('.hero-artifact img[alt*="CAD render"]'),
+      contact: inspect("#tab-contact"),
+      action: inspect(".action-primary"),
+      activeUnderlineOpacity: getComputedStyle(
+        document.querySelector(".primary-nav button.is-active:not(#tab-contact)"),
+        "::after"
+      ).opacity
+    };
+  });
+
+  const before = await inspectStructure();
+  await page.locator('[data-language="ro"]').click();
+  await expect(page.locator("html")).toHaveClass(/is-language-melting/);
+  await page.waitForTimeout(360);
+  const during = await inspectStructure();
+  const meltLayerOrder = await page.evaluate(() => ({
+    content: Number.parseInt(getComputedStyle(
+      document.querySelector(".language-melt-canvas:not(.language-melt-canvas--header):not(.language-melt-canvas--project-index)")
+    ).zIndex, 10),
+    header: Number.parseInt(getComputedStyle(document.querySelector(".site-header")).zIndex, 10),
+    headerMelt: Number.parseInt(getComputedStyle(
+      document.querySelector(".language-melt-canvas--header")
+    ).zIndex, 10)
+  }));
+
+  expect(meltLayerOrder.content).toBeLessThan(meltLayerOrder.header);
+  expect(meltLayerOrder.headerMelt).toBeGreaterThan(meltLayerOrder.header);
+  expect(during.logo).toEqual(before.logo);
+  expect(during.artifact).toEqual(before.artifact);
+  expect(during.machine).toEqual(before.machine);
+  expect(during.action).toEqual(before.action);
+  expect(during.contact.width).toBe(before.contact.width);
+  expect(during.contact.height).toBe(before.contact.height);
+  expect(during.contact.display).toBe(before.contact.display);
+  expect(during.contact.visibility).toBe(before.contact.visibility);
+  expect(during.contact.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+  expect(during.activeUnderlineOpacity).toBe("0");
+  await expect(page.locator("#tab-contact.language-melt-contact")).toHaveCount(1);
+  await expect(page.locator(".primary-nav button.language-melt-underline")).toHaveCount(1);
+  await expect(page.locator(".language-melt-text:not(.language-melt-run)")).toHaveCount(0);
+  await expect(page.locator(".language-melt-source:not(.language-melt-run)")).toHaveCount(0);
+  await expect(page.locator("html")).toHaveAttribute("lang", "ro");
+  await expect(page.locator(".language-melt-run.language-melt-text")).toHaveCount(0);
+  await expect(page.locator(".language-melt-run[style*='clip-path']")).toHaveCount(0);
+  await expect(page.locator(".language-melt-run[style*='visibility']")).toHaveCount(0);
+  await expect(page.locator(".language-melt-contact, .language-melt-underline")).toHaveCount(0);
+  await expect(page.locator("html")).toHaveClass(/is-language-popping/);
+  await expect(page.locator(".language-pop-host").first()).not.toHaveCSS("transform", "none");
+  const runCount = await page.locator(".language-melt-run").count();
+  await expect(page.locator(".language-melt-run .language-melt-run")).toHaveCount(0);
+
+  await page.locator('[data-language="en"]').click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator("html")).not.toHaveClass(/is-language-popping/);
+  await expect(page.locator(".language-melt-run")).toHaveCount(runCount);
+  await expect(page.locator(".language-melt-run .language-melt-run")).toHaveCount(0);
+  expect(await inspectStructure()).toEqual(before);
+});
+
+test("ecosystem index stays protected, translated, and linked during the melt", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/index.html?tab=projects");
+
+  const index = page.locator(".project-index");
+  const links = index.locator("a");
+  expect(await links.evaluateAll((anchors) =>
+    anchors.map((anchor) => anchor.getAttribute("href"))
+  )).toEqual([
+    "/?tab=projects#project-operator",
+    "/?tab=projects#project-motherboard",
+    "/?tab=projects#project-thermal"
+  ]);
+
+  await page.locator('[data-language="ro"]').click();
+  await expect(page.locator("html")).toHaveClass(/is-language-melting/);
+  await page.waitForTimeout(360);
+  await expect(index.locator(".language-melt-text")).toHaveCount(9);
+  await expect(index.locator(".language-pop-host")).toHaveCount(0);
+  await expect(links.locator("strong")).toHaveText([
+    "Operator",
+    "Motherboard",
+    "Thermal Lab"
+  ]);
+
+  const layerOrder = await page.evaluate(() => ({
+    melt: Number.parseInt(getComputedStyle(
+      document.querySelector(".language-melt-canvas:not(.language-melt-canvas--header):not(.language-melt-canvas--project-index)")
+    ).zIndex, 10),
+    index: Number.parseInt(getComputedStyle(document.querySelector(".project-index")).zIndex, 10),
+    indexMelt: Number.parseInt(getComputedStyle(
+      document.querySelector(".language-melt-canvas--project-index")
+    ).zIndex, 10)
+  }));
+  expect(layerOrder.melt).toBeLessThan(layerOrder.index);
+  expect(layerOrder.indexMelt).toBeGreaterThan(layerOrder.index);
+  await expect(page.locator(".language-melt-canvas--project-index")).toHaveClass(/is-active/);
+  await expect(page.locator(".language-melt-canvas--project-index")).toHaveCSS("clip-path", "none");
+  await expect(page.locator(".language-melt-canvas--header")).toHaveCSS("clip-path", "none");
+  const meltTypographyDifferences = await index.locator(".language-melt-run").evaluateAll((runs) =>
+    runs.flatMap((run) => {
+      const runStyle = getComputedStyle(run);
+      const parentStyle = getComputedStyle(run.parentElement);
+      const matches = runStyle.fontFamily === parentStyle.fontFamily &&
+        runStyle.fontSize === parentStyle.fontSize &&
+        runStyle.fontWeight === parentStyle.fontWeight;
+      return matches ? [] : [{
+        text: run.textContent,
+        run: {
+          fontFamily: runStyle.fontFamily,
+          fontSize: runStyle.fontSize,
+          fontWeight: runStyle.fontWeight
+        },
+        parent: {
+          fontFamily: parentStyle.fontFamily,
+          fontSize: parentStyle.fontSize,
+          fontWeight: parentStyle.fontWeight
+        }
+      }];
+    })
+  );
+  expect(meltTypographyDifferences).toEqual([]);
+
+  await expect(page.locator("html")).toHaveAttribute("lang", "ro");
+  await expect(index.locator(".language-melt-run")).toHaveCount(0);
+  await expect(index.locator(".language-pop-text, .language-pop-host")).toHaveCount(0);
+  await expect(links.locator("strong")).toHaveText([
+    "Operator",
+    "Placă de bază",
+    "Laborator termic"
+  ]);
+  await expect(links.locator("small")).toHaveText([
+    "Interfață de control",
+    "Electronică de control",
+    "Rezultate de validare"
+  ]);
+  await expect(links.locator("strong").first()).toHaveCSS("text-transform", "uppercase");
+  await expect(links.locator("small").first()).toHaveCSS("text-transform", "uppercase");
+  await expect(links.locator("strong").first()).toHaveCSS("transform", "none");
+  await expect(links.locator("strong").first()).toHaveCSS("opacity", "1");
+  await expect(links.locator("strong").first()).toHaveCSS("filter", "none");
+
+  await links.nth(1).click();
+  await expect(page).toHaveURL(/\\?tab=projects#project-motherboard$/);
+  await expect.poll(() => page.evaluate(() => {
+    const target = document.querySelector("#project-motherboard").getBoundingClientRect();
+    const header = document.querySelector(".site-header").getBoundingClientRect();
+    return target.top >= header.bottom && target.top < header.bottom + 180;
+  })).toBe(true);
+});
+
+test("wrapped Romanian headline and changing header accents remain in the melt canvas", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/index.html");
+  await page.evaluate(() => window.InFluxI18n.setLanguage("ro"));
+  await page.evaluate(() => new Promise((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(resolve))
+  ));
+
+  const targets = await page.evaluate(() => {
+    const headlineRun = [...document.querySelectorAll("#home-title span")]
+      .find((element) => /format/i.test(element.textContent));
+    const node = [...headlineRun.childNodes]
+      .find((candidate) => candidate.nodeType === Node.TEXT_NODE);
+    const start = node.nodeValue.toLocaleLowerCase().indexOf("format");
+    const range = document.createRange();
+    range.setStart(node, start);
+    range.setEnd(node, start + "format".length);
+    const format = range.getBoundingClientRect();
+    const contact = document.querySelector("#tab-contact").getBoundingClientRect();
+    const active = document.querySelector(
+      ".primary-nav button.is-active:not(#tab-contact)"
+    );
+    const activeRect = active.getBoundingClientRect();
+    const underlineStyle = getComputedStyle(active, "::after");
+    const underlineLeft = Number.parseFloat(underlineStyle.left) || 0;
+    const underlineRight = Number.parseFloat(underlineStyle.right) || 0;
+    const underlineBottom = Number.parseFloat(underlineStyle.bottom) || 0;
+    const underlineHeight = Number.parseFloat(underlineStyle.height) || 0;
+    return {
+      format: {
+        left: format.left,
+        top: format.top,
+        width: format.width,
+        height: format.height
+      },
+      contact: {
+        x: contact.left + 4,
+        y: contact.top + 4
+      },
+      underline: {
+        x: activeRect.left + underlineLeft +
+          (activeRect.width - underlineLeft - underlineRight) / 2,
+        y: activeRect.bottom - underlineBottom - underlineHeight / 2
+      }
+    };
+  });
+
+  await page.locator('[data-language="en"]').click();
+  await page.waitForTimeout(60);
+
+  const canvasState = await page.evaluate((rects) => {
+    const canvas = document.querySelector(".language-melt-canvas");
+    const context = canvas.getContext("2d");
+    const headerCanvas = document.querySelector(".language-melt-canvas--header");
+    const headerContext = headerCanvas.getContext("2d");
+    const scaleX = canvas.width / innerWidth;
+    const scaleY = canvas.height / innerHeight;
+    const pixel = (sourceContext, x, y) => {
+      const data = sourceContext.getImageData(
+        Math.max(0, Math.floor(x * scaleX)),
+        Math.max(0, Math.floor(y * scaleY)),
+        1,
+        1
+      ).data;
+      return [...data];
+    };
+    const padding = 8;
+    const x = Math.max(0, Math.floor((rects.format.left - padding) * scaleX));
+    const y = Math.max(0, Math.floor((rects.format.top - padding) * scaleY));
+    const width = Math.min(
+      canvas.width - x,
+      Math.ceil((rects.format.width + padding * 2) * scaleX)
+    );
+    const height = Math.min(
+      canvas.height - y,
+      Math.ceil((rects.format.height + padding * 3) * scaleY)
+    );
+    const formatData = context.getImageData(x, y, width, height).data;
+    let formatAlphaPixels = 0;
+    for (let index = 3; index < formatData.length; index += 4) {
+      if (formatData[index] > 20) formatAlphaPixels += 1;
+    }
+    return {
+      formatAlphaPixels,
+      contactPixel: pixel(headerContext, rects.contact.x, rects.contact.y),
+      underlinePixel: pixel(headerContext, rects.underline.x, rects.underline.y)
+    };
+  }, targets);
+
+  expect(canvasState.formatAlphaPixels).toBeGreaterThan(100);
+  expect(canvasState.contactPixel[0]).toBeGreaterThan(180);
+  expect(canvasState.contactPixel[3]).toBeGreaterThan(200);
+  expect(canvasState.underlinePixel[0]).toBeGreaterThan(180);
+  expect(canvasState.underlinePixel[3]).toBeGreaterThan(200);
+});
+
 test("hidden beta preview selects either saved transition from the URL", async ({ page, request }) => {
   await page.goto("/index.html");
   await expect(page.locator('a[href*="beta-language-transition"]')).toHaveCount(0);
@@ -101,8 +382,11 @@ test("hidden beta preview selects either saved transition from the URL", async (
   await expect(particleFrame.locator("html")).toHaveAttribute("lang", /en|ro/);
   await particleFrame.locator('[data-language="en"]').click();
   await particleFrame.locator('[data-language="ro"]').click();
-  await expect(particleFrame.locator(".language-melt-canvas")).toHaveClass(/is-active/);
+  await expect(particleFrame.locator(
+    ".language-melt-canvas:not(.language-melt-canvas--header):not(.language-melt-canvas--project-index)"
+  )).toHaveClass(/is-active/);
   await expect(particleFrame.locator(".language-melt-source").first()).toBeVisible();
+  await expect(particleFrame.locator("#home-title .language-melt-source")).toHaveCount(3);
 
   await page.goto("/beta-language-transition/?animation=continuous-melt");
   const continuousFrame = page.frameLocator("iframe");
@@ -111,7 +395,13 @@ test("hidden beta preview selects either saved transition from the URL", async (
   await continuousFrame.locator('[data-language="ro"]').click();
   await expect(continuousFrame.locator("html")).toHaveClass(/is-language-melting/);
   await expect(continuousFrame.locator(".language-melt-text").first()).toBeVisible();
-  await expect(continuousFrame.locator(".language-melt-canvas")).toHaveClass(/is-active/);
+  await expect(continuousFrame.locator("#home-title .language-melt-text")).toHaveCount(3);
+  await expect(continuousFrame.locator(
+    ".language-melt-canvas:not(.language-melt-canvas--header):not(.language-melt-canvas--project-index)"
+  )).toHaveClass(/is-active/);
+  await expect(continuousFrame.locator(
+    ".language-melt-canvas--header"
+  )).toHaveClass(/is-active/);
   await page.waitForTimeout(120);
   const waveState = await continuousFrame.locator("body").evaluate(() => {
     const eligible = [...document.body.querySelectorAll("*")].filter((element) => {
@@ -128,23 +418,22 @@ test("hidden beta preview selects either saved transition from the URL", async (
         style.visibility !== "hidden" && style.display !== "none" &&
         Number.parseFloat(style.opacity || "1") > 0;
     });
-    const elements = [...document.querySelectorAll(".language-melt-text")]
-      .map((element) => ({
-        left: element.getBoundingClientRect().left,
-        clip: Number.parseFloat(element.style.clipPath.split(" ").at(-1) || "0")
-      }))
-      .sort((a, b) => a.left - b.left);
     return {
-      leftClip: elements[0]?.clip || 0,
-      rightClip: elements.at(-1)?.clip || 0,
       eligibleCount: eligible.length,
       coveredCount: eligible.filter((element) =>
         element.classList.contains("language-melt-text")
+      ).length,
+      clippedElements: [...document.body.querySelectorAll("*")].filter((element) =>
+        element.style.clipPath
+      ).length,
+      nonTextTargets: [...document.querySelectorAll(".language-melt-text")].filter((element) =>
+        !element.classList.contains("language-melt-run")
       ).length
     };
   });
-  expect(waveState.leftClip).toBeGreaterThan(waveState.rightClip);
   expect(waveState.coveredCount).toBe(waveState.eligibleCount);
+  expect(waveState.clippedElements).toBe(0);
+  expect(waveState.nonTextTargets).toBe(0);
 });
 
 test("English and Romanian use identical font families, weights, styles, and tracking", async ({ page }) => {

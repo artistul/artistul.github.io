@@ -260,6 +260,36 @@ document.querySelectorAll("[data-nav-link]").forEach((link) => {
     activateTab(link.dataset.navLink);
   });
 });
+
+const projectIndexLinks = [...document.querySelectorAll(".project-index a")];
+
+function scrollToProjectIndexTarget(link, { updateHistory = true, behavior } = {}) {
+  const destination = new URL(link.href, window.location.href);
+  const targetId = decodeURIComponent(destination.hash.slice(1));
+  const target = targetId ? document.getElementById(targetId) : null;
+  if (!target) return false;
+
+  if (updateHistory) {
+    window.history.pushState(
+      { tab: "projects", project: targetId },
+      "",
+      `${destination.pathname}${destination.search}${destination.hash}`
+    );
+  }
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView({
+    block: "start",
+    behavior: behavior || (reducedMotion ? "auto" : "smooth")
+  });
+  return true;
+}
+
+projectIndexLinks.forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    scrollToProjectIndexTarget(link);
+  });
+});
 tabs.forEach((tab) => {
   tab.addEventListener("keydown", (event) => {
     const current = tabs.indexOf(tab);
@@ -275,7 +305,21 @@ tabs.forEach((tab) => {
   });
 });
 
-window.addEventListener("popstate", () => activateTab(currentTabFromUrl(), { fromHistory: true, instant: true }));
+window.addEventListener("popstate", () => {
+  activateTab(currentTabFromUrl(), {
+    fromHistory: true,
+    instant: true,
+    keepScroll: Boolean(window.location.hash)
+  });
+  if (window.location.hash) {
+    requestAnimationFrame(() => {
+      const link = projectIndexLinks.find((candidate) =>
+        new URL(candidate.href, window.location.href).hash === window.location.hash
+      );
+      if (link) scrollToProjectIndexTarget(link, { updateHistory: false, behavior: "auto" });
+    });
+  }
+});
 
 menu?.addEventListener("click", () => {
   const open = !nav.classList.contains("is-open");
@@ -399,6 +443,14 @@ document.querySelectorAll('a[href^="assets/"], a[href="technical.html"]').forEac
 
 renderDownloads();
 activateTab(currentTabFromUrl(), { fromHistory: true, instant: true, keepScroll: true });
+if (window.location.hash) {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const link = projectIndexLinks.find((candidate) =>
+      new URL(candidate.href, window.location.href).hash === window.location.hash
+    );
+    if (link) scrollToProjectIndexTarget(link, { updateHistory: false, behavior: "auto" });
+  }));
+}
 
 function initFluidProgressMeters() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

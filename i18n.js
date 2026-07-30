@@ -405,14 +405,18 @@
   let languageTransitionActive = false;
   let meltCanvas;
   let meltContext;
+  let meltHeaderCanvas;
+  let meltHeaderContext;
+  let meltProjectIndexCanvas;
+  let meltProjectIndexContext;
   let meltDpr = 1;
   const CONTINUOUS_MELT_DURATION = 1320;
   const CONTINUOUS_MELT_WAVE_DURATION = 360;
 
-  function usesContinuousMeltPreview() {
+  function usesParticleMeltPreview() {
     const parameters = new URLSearchParams(window.location.search);
     return parameters.get("beta-preview") === "1" &&
-      parameters.get("beta-transition") === "continuous-melt";
+      parameters.get("beta-transition") === "particle-wipe";
   }
 
   function normalize(value) {
@@ -438,23 +442,42 @@
   }
 
   function ensureMeltCanvas() {
-    if (meltCanvas) return meltCanvas;
-    meltCanvas = document.createElement("canvas");
-    meltCanvas.className = "language-melt-canvas";
-    meltCanvas.setAttribute("aria-hidden", "true");
-    document.body.appendChild(meltCanvas);
-    meltContext = meltCanvas.getContext("2d");
+    if (!meltCanvas) {
+      meltCanvas = document.createElement("canvas");
+      meltCanvas.className = "language-melt-canvas";
+      meltCanvas.setAttribute("aria-hidden", "true");
+      (document.querySelector("main") || document.body).appendChild(meltCanvas);
+      meltContext = meltCanvas.getContext("2d");
+    }
+    if (!meltHeaderCanvas) {
+      meltHeaderCanvas = document.createElement("canvas");
+      meltHeaderCanvas.className = "language-melt-canvas language-melt-canvas--header";
+      meltHeaderCanvas.setAttribute("aria-hidden", "true");
+      document.body.appendChild(meltHeaderCanvas);
+      meltHeaderContext = meltHeaderCanvas.getContext("2d");
+    }
+    if (!meltProjectIndexCanvas) {
+      meltProjectIndexCanvas = document.createElement("canvas");
+      meltProjectIndexCanvas.className = "language-melt-canvas language-melt-canvas--project-index";
+      meltProjectIndexCanvas.setAttribute("aria-hidden", "true");
+      (document.querySelector("main") || document.body).appendChild(meltProjectIndexCanvas);
+      meltProjectIndexContext = meltProjectIndexCanvas.getContext("2d");
+    }
     return meltCanvas;
   }
 
   function resizeMeltCanvas() {
     ensureMeltCanvas();
     meltDpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    meltCanvas.width = Math.round(window.innerWidth * meltDpr);
-    meltCanvas.height = Math.round(window.innerHeight * meltDpr);
-    meltCanvas.style.width = `${window.innerWidth}px`;
-    meltCanvas.style.height = `${window.innerHeight}px`;
+    [meltCanvas, meltHeaderCanvas, meltProjectIndexCanvas].forEach((canvas) => {
+      canvas.width = Math.round(window.innerWidth * meltDpr);
+      canvas.height = Math.round(window.innerHeight * meltDpr);
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+    });
     meltContext.setTransform(meltDpr, 0, 0, meltDpr, 0, 0);
+    meltHeaderContext.setTransform(meltDpr, 0, 0, meltDpr, 0, 0);
+    meltProjectIndexContext.setTransform(meltDpr, 0, 0, meltDpr, 0, 0);
   }
 
   function parseMeltColor(value) {
@@ -541,9 +564,17 @@
     context.globalAlpha = preserveColor ? effectiveMeltOpacity(element) : 1;
 
     textNodes.forEach((node) => {
-      const text = transformedMeltText(normalize(node.nodeValue), style);
+      const rawText = String(node.nodeValue || "");
+      const firstCharacter = rawText.search(/\S/);
+      const lastCharacter = rawText.search(/\s*$/);
+      if (firstCharacter < 0 || lastCharacter <= firstCharacter) return;
+      const text = transformedMeltText(
+        normalize(rawText.slice(firstCharacter, lastCharacter)),
+        style
+      );
       const range = document.createRange();
-      range.selectNodeContents(node);
+      range.setStart(node, firstCharacter);
+      range.setEnd(node, lastCharacter);
       const lineRects = [...range.getClientRects()].filter((lineRect) =>
         lineRect.width > 1 && lineRect.height > 1
       );
@@ -572,6 +603,109 @@
     });
 
     return { buffer, rect, renderDpr, fontSize };
+  }
+
+  function configureMeltTextContext(context, style, preserveColor, element, renderDpr) {
+    const fontSize = Number.parseFloat(style.fontSize) || 16;
+    context.scale(renderDpr, renderDpr);
+    context.font = `${style.fontStyle || "normal"} ${style.fontVariantCaps || "normal"} ${style.fontWeight || 400} ${fontSize}px ${style.fontFamily || "sans-serif"}`;
+    context.textBaseline = "alphabetic";
+    const textFill = style.webkitTextFillColor;
+    context.fillStyle = preserveColor && textFill && textFill !== "rgba(0, 0, 0, 0)"
+      ? textFill
+      : preserveColor ? style.color : "#fff";
+    context.globalAlpha = preserveColor ? effectiveMeltOpacity(element) : 1;
+    return fontSize;
+  }
+
+  function renderContinuousMeltTextLines(element) {
+    const style = getComputedStyle(element);
+    const renderDpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const textNodes = [...element.childNodes].filter((node) =>
+      node.nodeType === Node.TEXT_NODE && normalize(node.nodeValue)
+    );
+    const rasters = [];
+
+    textNodes.forEach((node) => {
+      const rawText = String(node.nodeValue || "");
+      const firstCharacter = rawText.search(/\S/);
+      const lastCharacter = rawText.search(/\s*$/);
+      if (firstCharacter < 0 || lastCharacter <= firstCharacter) return;
+
+      const renderedText = transformedMeltText(
+        rawText.slice(firstCharacter, lastCharacter),
+        style
+      );
+      const range = document.createRange();
+      const lines = [];
+
+      for (let offset = firstCharacter; offset < lastCharacter; offset += 1) {
+        const sourceCharacter = rawText[offset];
+        if (/\s/.test(sourceCharacter)) continue;
+        range.setStart(node, offset);
+        range.setEnd(node, offset + 1);
+        const characterRect = [...range.getClientRects()].find((rect) =>
+          rect.width > .1 && rect.height > 1
+        );
+        if (!characterRect) continue;
+
+        let line = lines.find((candidate) =>
+          Math.abs(candidate.top - characterRect.top) < 2
+        );
+        if (!line) {
+          line = {
+            top: characterRect.top,
+            left: characterRect.left,
+            right: characterRect.right,
+            bottom: characterRect.bottom,
+            characters: []
+          };
+          lines.push(line);
+        }
+        line.left = Math.min(line.left, characterRect.left);
+        line.right = Math.max(line.right, characterRect.right);
+        line.top = Math.min(line.top, characterRect.top);
+        line.bottom = Math.max(line.bottom, characterRect.bottom);
+        line.characters.push({
+          value: renderedText[offset - firstCharacter] || sourceCharacter,
+          rect: characterRect
+        });
+      }
+      range.detach?.();
+
+      lines.forEach((line) => {
+        const padding = 1;
+        const rect = {
+          left: line.left - padding,
+          top: line.top - padding,
+          right: line.right + padding,
+          bottom: line.bottom + padding,
+          width: line.right - line.left + padding * 2,
+          height: line.bottom - line.top + padding * 2
+        };
+        const buffer = document.createElement("canvas");
+        buffer.width = Math.max(1, Math.ceil(rect.width * renderDpr));
+        buffer.height = Math.max(1, Math.ceil(rect.height * renderDpr));
+        const context = buffer.getContext("2d", { willReadFrequently: true });
+        const fontSize = configureMeltTextContext(
+          context,
+          style,
+          true,
+          element,
+          renderDpr
+        );
+
+        line.characters.forEach((character) => {
+          const x = character.rect.left - rect.left;
+          const y = character.rect.top - rect.top +
+            (character.rect.height - fontSize) / 2 + fontSize;
+          context.fillText(character.value, x, y);
+        });
+        rasters.push({ buffer, rect, renderDpr, fontSize });
+      });
+    });
+
+    return rasters;
   }
 
   function sampleMeltText(element) {
@@ -632,6 +766,11 @@
       const rect = element.getBoundingClientRect();
       const hiddenWidth = Math.max(0, Math.min(rect.width, wipeX - rect.left));
       element.style.clipPath = `inset(0 0 0 ${hiddenWidth}px)`;
+      if (wipeX >= rect.right - .5) {
+        element.style.visibility = "hidden";
+      } else {
+        element.style.removeProperty("visibility");
+      }
     });
   }
 
@@ -663,29 +802,233 @@
   }
 
   function captureContinuousMeltText(elements) {
-    return elements.map((element, index) => {
-      const rendered = renderMeltTextBuffer(element, true);
-      return rendered ? {
+    return elements.flatMap((element, elementIndex) =>
+      renderContinuousMeltTextLines(element).map((rendered, lineIndex) => ({
         element,
         ...rendered,
-        seed: index * 1.618 + rendered.rect.left * .013
+        seed: elementIndex * 1.618 + lineIndex * .73 + rendered.rect.left * .013
+      }))
+    );
+  }
+
+  function isVisibleMeltTarget(element) {
+    if (!element) return false;
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return rect.width > 2 && rect.height > 2 &&
+      rect.bottom > 0 && rect.top < window.innerHeight &&
+      rect.right > 0 && rect.left < window.innerWidth &&
+      style.display !== "none" && style.visibility !== "hidden" &&
+      Number.parseFloat(style.opacity || "1") > 0;
+  }
+
+  function createMeltBuffer(rect) {
+    const renderDpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const buffer = document.createElement("canvas");
+    buffer.width = Math.max(1, Math.ceil(rect.width * renderDpr));
+    buffer.height = Math.max(1, Math.ceil(rect.height * renderDpr));
+    const context = buffer.getContext("2d", { willReadFrequently: true });
+    context.scale(renderDpr, renderDpr);
+    return { buffer, context, renderDpr };
+  }
+
+  function roundedMeltRectangle(context, x, y, width, height, radius) {
+    const r = Math.max(0, Math.min(radius, width / 2, height / 2));
+    context.beginPath();
+    context.moveTo(x + r, y);
+    context.lineTo(x + width - r, y);
+    context.quadraticCurveTo(x + width, y, x + width, y + r);
+    context.lineTo(x + width, y + height - r);
+    context.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+    context.lineTo(x + r, y + height);
+    context.quadraticCurveTo(x, y + height, x, y + height - r);
+    context.lineTo(x, y + r);
+    context.quadraticCurveTo(x, y, x + r, y);
+    context.closePath();
+  }
+
+  function captureContactMeltDecoration(element) {
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    const before = getComputedStyle(element, "::before");
+    const after = getComputedStyle(element, "::after");
+    const { buffer, context, renderDpr } = createMeltBuffer(rect);
+    const radius = Number.parseFloat(style.borderRadius) || 0;
+
+    context.globalAlpha = effectiveMeltOpacity(element);
+    context.fillStyle = style.backgroundColor;
+    roundedMeltRectangle(context, 0, 0, rect.width, rect.height, radius);
+    context.fill();
+
+    if (element.id === "tab-contact") {
+      const envelopeWidth = Number.parseFloat(before.width) || 19;
+      const envelopeHeight = Number.parseFloat(before.height) || 15;
+      const envelopeX = Number.parseFloat(style.paddingLeft) || 0;
+      const envelopeY = (rect.height - envelopeHeight) / 2;
+      context.strokeStyle = before.color || style.color;
+      context.lineWidth = 2;
+      context.lineCap = "round";
+      context.lineJoin = "round";
+      roundedMeltRectangle(
+        context,
+        envelopeX + envelopeWidth * .068,
+        envelopeY + envelopeHeight * .094,
+        envelopeWidth * .864,
+        envelopeHeight * .812,
+        1
+      );
+      context.stroke();
+      context.beginPath();
+      context.moveTo(envelopeX + envelopeWidth * .09, envelopeY + envelopeHeight * .19);
+      context.lineTo(envelopeX + envelopeWidth * .5, envelopeY + envelopeHeight * .59);
+      context.lineTo(envelopeX + envelopeWidth * .91, envelopeY + envelopeHeight * .19);
+      context.stroke();
+
+      const arrowWidth = Number.parseFloat(after.width) || 14;
+      const arrowHeight = Number.parseFloat(after.height) || 18;
+      const arrowRight = Number.parseFloat(after.right) || 13;
+      const arrowX = rect.width - arrowRight - arrowWidth;
+      const arrowY = (rect.height - arrowHeight) / 2;
+      context.strokeStyle = after.color || style.color;
+      context.lineWidth = 3;
+      context.lineCap = "square";
+      context.lineJoin = "miter";
+      context.beginPath();
+      context.moveTo(arrowX + arrowWidth * .214, arrowY + arrowHeight * .111);
+      context.lineTo(arrowX + arrowWidth * .714, arrowY + arrowHeight * .5);
+      context.lineTo(arrowX + arrowWidth * .214, arrowY + arrowHeight * .889);
+      context.stroke();
+    }
+
+    return {
+      buffer,
+      rect,
+      renderDpr,
+      fontSize: 40,
+      fadeStart: .70,
+      fadeLength: .25
+    };
+  }
+
+  function captureUnderlineMeltDecoration(element) {
+    const elementRect = element.getBoundingClientRect();
+    const pseudo = getComputedStyle(element, "::after");
+    const left = Number.parseFloat(pseudo.left) || 0;
+    const right = Number.parseFloat(pseudo.right) || 0;
+    const bottom = Number.parseFloat(pseudo.bottom) || 0;
+    const height = Number.parseFloat(pseudo.height) || 0;
+    const width = Math.max(0, elementRect.width - left - right);
+    if (width <= 1 || height <= 0) return null;
+    const rect = {
+      left: elementRect.left + left,
+      top: elementRect.bottom - bottom - height,
+      right: elementRect.left + left + width,
+      bottom: elementRect.bottom - bottom,
+      width,
+      height
+    };
+    const { buffer, context, renderDpr } = createMeltBuffer(rect);
+    context.globalAlpha = effectiveMeltOpacity(element) *
+      Math.max(0, Math.min(1, Number.parseFloat(pseudo.opacity || "1")));
+    context.fillStyle = pseudo.backgroundColor;
+    context.fillRect(0, 0, width, height);
+    return {
+      buffer,
+      rect,
+      renderDpr,
+      fontSize: 16,
+      fadeStart: .58,
+      fadeLength: .30
+    };
+  }
+
+  function collectContinuousMeltDecorations() {
+    const decorations = [];
+    document.querySelectorAll("#tab-contact, .technical-page .header-action")
+      .forEach((element) => {
+        if (isVisibleMeltTarget(element)) {
+          decorations.push({ element, type: "contact" });
+        }
+      });
+    document.querySelectorAll(".primary-nav button.is-active:not(#tab-contact)")
+      .forEach((element) => {
+        if (isVisibleMeltTarget(element)) {
+          decorations.push({ element, type: "underline" });
+        }
+      });
+    return decorations;
+  }
+
+  function captureContinuousMeltDecorations(decorations) {
+    return decorations.map((decoration, index) => {
+      const rendered = decoration.type === "contact"
+        ? captureContactMeltDecoration(decoration.element)
+        : captureUnderlineMeltDecoration(decoration.element);
+      return rendered ? {
+        ...rendered,
+        element: decoration.element,
+        seed: 1000 + index * 1.618 + rendered.rect.left * .013
       } : null;
     }).filter(Boolean);
   }
 
-  function drawContinuousMeltFrame(rasters, elapsed) {
+  function setMeltDecorationsHidden(decorations, hidden) {
+    decorations.forEach(({ element, type }) => {
+      element.classList.toggle(
+        type === "contact" ? "language-melt-contact" : "language-melt-underline",
+        hidden
+      );
+    });
+  }
+
+  function drawContinuousMeltLayer(context, rasters, elapsed) {
     const width = window.innerWidth;
     const height = window.innerHeight;
     const sliceWidth = 5;
-    meltContext.setTransform(meltDpr, 0, 0, meltDpr, 0, 0);
-    meltContext.clearRect(0, 0, width, height);
+    context.setTransform(meltDpr, 0, 0, meltDpr, 0, 0);
+    context.clearRect(0, 0, width, height);
 
-    rasters.forEach(({ buffer, rect, renderDpr, seed }) => {
+    rasters.forEach(({
+      buffer,
+      rect,
+      renderDpr,
+      fontSize,
+      seed,
+      fadeStart: rasterFadeStart,
+      fadeLength: rasterFadeLength
+    }) => {
+      const localWaveDuration = Math.min(90, CONTINUOUS_MELT_WAVE_DURATION * .25);
+      const elementWaveDuration = CONTINUOUS_MELT_WAVE_DURATION - localWaveDuration;
+      const elementActivation = Math.max(
+        0,
+        Math.min(1, rect.left / Math.max(1, width))
+      ) * elementWaveDuration;
+
       for (let sliceX = 0; sliceX < rect.width; sliceX += sliceWidth) {
         const absoluteX = rect.left + sliceX;
-        const activation = Math.max(0, Math.min(1, absoluteX / Math.max(1, width))) *
-          CONTINUOUS_MELT_WAVE_DURATION;
-        if (elapsed < activation) continue;
+        const activation = elementActivation +
+          Math.max(0, Math.min(1, sliceX / Math.max(1, rect.width))) * localWaveDuration;
+        if (elapsed < activation) {
+          const sourceX = Math.round(sliceX * renderDpr);
+          const sourceWidth = Math.min(
+            buffer.width - sourceX,
+            Math.ceil(sliceWidth * renderDpr)
+          );
+          if (sourceWidth <= 0) continue;
+          context.globalAlpha = 1;
+          context.drawImage(
+            buffer,
+            sourceX,
+            0,
+            sourceWidth,
+            buffer.height,
+            rect.left + sliceX,
+            rect.top,
+            sourceWidth / renderDpr + .65,
+            rect.height
+          );
+          continue;
+        }
 
         const local = Math.max(0, Math.min(
           1,
@@ -697,7 +1040,13 @@
         const stretch = 1 + accelerated * (6.2 + ripple * .45);
         const drift = Math.sin(absoluteX * .025 + seed + local * 3) *
           2.4 * local * local;
-        const fadeProgress = Math.max(0, Math.min(1, (local - .76) / .24));
+        const fadeStart = Number.isFinite(rasterFadeStart)
+          ? rasterFadeStart
+          : fontSize < 18 ? .54 : fontSize < 32 ? .64 : .76;
+        const fadeLength = Number.isFinite(rasterFadeLength)
+          ? rasterFadeLength
+          : fontSize < 18 ? .28 : fontSize < 32 ? .30 : .24;
+        const fadeProgress = Math.max(0, Math.min(1, (local - fadeStart) / fadeLength));
         const fade = 1 - fadeProgress * fadeProgress * (3 - 2 * fadeProgress);
         const sourceX = Math.round(sliceX * renderDpr);
         const sourceWidth = Math.min(
@@ -706,8 +1055,8 @@
         );
         if (sourceWidth <= 0 || fade <= 0) continue;
 
-        meltContext.globalAlpha = fade;
-        meltContext.drawImage(
+        context.globalAlpha = fade;
+        context.drawImage(
           buffer,
           sourceX,
           0,
@@ -720,48 +1069,119 @@
         );
       }
     });
-    meltContext.globalAlpha = 1;
+    context.globalAlpha = 1;
   }
 
-  function collectMeltElements() {
-    const candidates = [...document.body.querySelectorAll("*")].filter((element) => {
-      if (element.closest("[data-no-i18n], script, style, svg, canvas, code, pre")) return false;
-      if (element.classList.contains("visually-hidden")) return false;
-      if (![...element.childNodes].some((node) =>
-        node.nodeType === Node.TEXT_NODE && normalize(node.nodeValue)
-      )) return false;
+  function drawContinuousMeltFrame(rasters, elapsed) {
+    const headerRasters = rasters.filter(({ element }) =>
+      element.closest(".site-header")
+    );
+    const projectIndexRasters = rasters.filter(({ element }) =>
+      element.closest(".project-index")
+    );
+    const contentRasters = rasters.filter(({ element }) =>
+      !element.closest(".site-header, .project-index")
+    );
+    drawContinuousMeltLayer(meltContext, contentRasters, elapsed);
+    drawContinuousMeltLayer(meltHeaderContext, headerRasters, elapsed);
+    drawContinuousMeltLayer(meltProjectIndexContext, projectIndexRasters, elapsed);
+  }
 
-      const rect = element.getBoundingClientRect();
-      const style = getComputedStyle(element);
-      return rect.width > 2 &&
-        rect.height > 2 &&
-        rect.bottom > 0 &&
-        rect.top < window.innerHeight &&
-        rect.right > 0 &&
-        rect.left < window.innerWidth &&
-        style.visibility !== "hidden" &&
-        style.display !== "none" &&
-        Number.parseFloat(style.opacity || "1") > 0;
+  function collectMeltElements({ includeProjectIndex = true } = {}) {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    let node = walker.nextNode();
+    while (node) {
+      const parent = node.parentElement;
+      if (normalize(node.nodeValue) &&
+        parent &&
+        !parent.closest("[data-no-i18n], script, style, svg, canvas, code, pre, textarea, option, .visually-hidden") &&
+        (includeProjectIndex || !parent.closest(".project-index"))) {
+        const style = getComputedStyle(parent);
+        const rawText = String(node.nodeValue || "");
+        const firstCharacter = rawText.search(/\S/);
+        const lastCharacter = rawText.search(/\s*$/);
+        if (firstCharacter >= 0 && lastCharacter > firstCharacter &&
+          style.visibility !== "hidden" &&
+          style.display !== "none" &&
+          Number.parseFloat(style.opacity || "1") > 0) {
+          const range = document.createRange();
+          range.setStart(node, firstCharacter);
+          range.setEnd(node, lastCharacter);
+          const visible = [...range.getClientRects()].some((rect) =>
+            rect.width > 2 &&
+            rect.height > 2 &&
+            rect.bottom > 0 &&
+            rect.top < window.innerHeight &&
+            rect.right > 0 &&
+            rect.left < window.innerWidth
+          );
+          range.detach?.();
+          if (visible) textNodes.push(node);
+        }
+      }
+      node = walker.nextNode();
+    }
+
+    return textNodes.map((textNode) => {
+      const parent = textNode.parentElement;
+      if (parent?.classList.contains("language-melt-run")) return parent;
+      const run = document.createElement("language-melt-run");
+      run.className = "language-melt-run";
+      run.dataset.languageMeltRun = "";
+      textNode.parentNode.insertBefore(run, textNode);
+      run.appendChild(textNode);
+      return run;
     });
-
-    return candidates;
   }
 
-  function triggerLanguagePop(elements) {
+  function unwrapProjectIndexMeltRuns(elements) {
+    elements.forEach((element) => {
+      if (!element.isConnected ||
+        !element.classList.contains("language-melt-run") ||
+        !element.closest(".project-index")) return;
+      element.replaceWith(...element.childNodes);
+    });
+  }
+
+  function triggerLanguagePop(elements, decorations = []) {
     const visible = elements.filter((element) => {
       const rect = element.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
+      return element.isConnected &&
+        !element.closest(".project-index") &&
+        rect.width > 0 && rect.height > 0;
     });
     if (!visible.length) return;
 
     const minimumX = Math.min(...visible.map((element) => element.getBoundingClientRect().left));
     const maximumX = Math.max(...visible.map((element) => element.getBoundingClientRect().right));
     const span = Math.max(1, maximumX - minimumX);
+    const popHosts = [...new Set(visible.map((element) => {
+      let host = element.parentElement;
+      while (host && host !== document.body) {
+        const display = getComputedStyle(host).display;
+        if (display !== "inline" && display !== "contents") return host;
+        host = host.parentElement;
+      }
+      return element;
+    }))];
 
     visible.forEach((element) => {
       const factor = (element.getBoundingClientRect().left - minimumX) / span;
       element.style.setProperty("--language-pop-delay", `${Math.round(factor * 230)}ms`);
       element.classList.add("language-pop-text");
+    });
+    popHosts.forEach((element) => {
+      const factor = (element.getBoundingClientRect().left - minimumX) / span;
+      element.style.setProperty("--language-host-pop-delay", `${Math.round(factor * 230)}ms`);
+      element.classList.add("language-pop-host");
+    });
+    decorations.forEach(({ element, type }) => {
+      const factor = (element.getBoundingClientRect().left - minimumX) / span;
+      element.style.setProperty("--language-decoration-pop-delay", `${Math.round(factor * 230)}ms`);
+      element.classList.add(
+        type === "contact" ? "language-pop-contact" : "language-pop-underline"
+      );
     });
     document.documentElement.classList.add("is-language-popping");
 
@@ -770,6 +1190,14 @@
       visible.forEach((element) => {
         element.classList.remove("language-pop-text");
         element.style.removeProperty("--language-pop-delay");
+      });
+      popHosts.forEach((element) => {
+        element.classList.remove("language-pop-host");
+        element.style.removeProperty("--language-host-pop-delay");
+      });
+      decorations.forEach(({ element }) => {
+        element.classList.remove("language-pop-contact", "language-pop-underline");
+        element.style.removeProperty("--language-decoration-pop-delay");
       });
     }, 920);
   }
@@ -784,11 +1212,13 @@
   }
 
   async function runContinuousMeltTransition(language, elements) {
-    // Each collected element owns only its direct text nodes, so retaining mixed
-    // parent/child candidates covers every visible text run without duplicating it.
     const animatedElements = elements;
     resizeMeltCanvas();
-    const rasters = captureContinuousMeltText(animatedElements);
+    const decorations = collectContinuousMeltDecorations();
+    const rasters = [
+      ...captureContinuousMeltDecorations(decorations),
+      ...captureContinuousMeltText(animatedElements)
+    ];
     if (!rasters.length) {
       applyLanguage(language);
       return;
@@ -796,8 +1226,12 @@
 
     languageTransitionActive = true;
     document.documentElement.classList.add("is-language-transitioning", "is-language-melting");
-    animatedElements.forEach((element) => element.classList.add("language-melt-text"));
+    drawContinuousMeltFrame(rasters, 0);
     meltCanvas.classList.add("is-active");
+    meltHeaderCanvas.classList.add("is-active");
+    meltProjectIndexCanvas.classList.add("is-active");
+    animatedElements.forEach((element) => element.classList.add("language-melt-text"));
+    setMeltDecorationsHidden(decorations, true);
     document.querySelectorAll(".language-toggle").forEach((toggle) => toggle.setAttribute("aria-disabled", "true"));
 
     try {
@@ -805,11 +1239,6 @@
       await new Promise((resolve) => {
         const frame = (now) => {
           const elapsed = now - start;
-          const wipeProgress = Math.max(
-            0,
-            Math.min(1, elapsed / CONTINUOUS_MELT_WAVE_DURATION)
-          );
-          updateMeltWipe(animatedElements, window.innerWidth * wipeProgress);
           drawContinuousMeltFrame(rasters, elapsed);
           if (elapsed < CONTINUOUS_MELT_DURATION + CONTINUOUS_MELT_WAVE_DURATION) {
             requestAnimationFrame(frame);
@@ -824,17 +1253,31 @@
       animatedElements.forEach((element) => {
         element.classList.remove("language-melt-text");
         element.style.removeProperty("clip-path");
+        element.style.removeProperty("visibility");
       });
+      setMeltDecorationsHidden(decorations, false);
+      unwrapProjectIndexMeltRuns(animatedElements);
       meltContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      meltHeaderContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      meltProjectIndexContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
       meltCanvas.classList.remove("is-active");
-      triggerLanguagePop(animatedElements);
+      meltHeaderCanvas.classList.remove("is-active");
+      meltProjectIndexCanvas.classList.remove("is-active");
+      triggerLanguagePop(animatedElements.filter((element) => element.isConnected), decorations);
     } finally {
       animatedElements.forEach((element) => {
         element.classList.remove("language-melt-text");
         element.style.removeProperty("clip-path");
+        element.style.removeProperty("visibility");
       });
+      setMeltDecorationsHidden(decorations, false);
+      unwrapProjectIndexMeltRuns(animatedElements);
       meltContext?.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      meltHeaderContext?.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      meltProjectIndexContext?.clearRect(0, 0, window.innerWidth, window.innerHeight);
       meltCanvas?.classList.remove("is-active");
+      meltHeaderCanvas?.classList.remove("is-active");
+      meltProjectIndexCanvas?.classList.remove("is-active");
       document.documentElement.classList.remove("is-language-melting", "is-language-transitioning");
       document.querySelectorAll(".language-toggle").forEach((toggle) => toggle.removeAttribute("aria-disabled"));
       languageTransitionActive = false;
@@ -850,8 +1293,9 @@
       return;
     }
 
-    const elements = collectMeltElements();
-    if (usesContinuousMeltPreview()) {
+    const particlePreview = usesParticleMeltPreview();
+    const elements = collectMeltElements({ includeProjectIndex: !particlePreview });
+    if (!particlePreview) {
       await runContinuousMeltTransition(language, elements);
       return;
     }
@@ -891,6 +1335,7 @@
       elements.forEach((element) => {
         element.classList.remove("language-melt-source");
         element.style.removeProperty("clip-path");
+        element.style.removeProperty("visibility");
       });
       meltContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
       meltCanvas.classList.remove("is-active");
@@ -899,6 +1344,7 @@
       elements.forEach((element) => {
         element.classList.remove("language-melt-source");
         element.style.removeProperty("clip-path");
+        element.style.removeProperty("visibility");
       });
       meltContext?.clearRect(0, 0, window.innerWidth, window.innerHeight);
       meltCanvas?.classList.remove("is-active");

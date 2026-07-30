@@ -242,7 +242,7 @@ h1, h2 {
   font-size: clamp(60px, 8.4vw, 150px);
   line-height: .82;
 }
-.home-hero h1 span { color: var(--red); }
+.home-hero h1 .hero-title-accent { color: var(--red); }
 .hero-lede, .panel-hero > p:last-child, .proof-hero-copy > p:last-child {
   max-width: 650px;
   color: var(--muted);
@@ -1958,7 +1958,7 @@ html[lang="ro"] .contact-hero h1 span { margin-left: 0; }
 }
 .project-index a:last-child { border-right: 0; }
 .project-index a:hover, .project-index a:focus-visible { background: rgba(236,23,44,.12); }
-.project-index span {
+.project-index a > span {
   grid-row: 1 / span 2;
   align-self: center;
   color: var(--red);
