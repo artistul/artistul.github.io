@@ -89,6 +89,31 @@ test("language control remains touch-friendly and clear of mobile navigation", a
   expect(layout.documentFitsWidth).toBe(true);
 });
 
+test("hidden beta preview selects either saved transition from the URL", async ({ page, request }) => {
+  await page.goto("/index.html");
+  await expect(page.locator('a[href*="beta-language-transition"]')).toHaveCount(0);
+  const sitemap = await request.get("/sitemap.xml");
+  expect(await sitemap.text()).not.toContain("beta-language-transition");
+
+  await page.goto("/beta-language-transition/?animation=particle-wipe");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  const particleFrame = page.frameLocator("iframe");
+  await expect(particleFrame.locator("html")).toHaveAttribute("lang", /en|ro/);
+  await particleFrame.locator('[data-language="en"]').click();
+  await particleFrame.locator('[data-language="ro"]').click();
+  await expect(particleFrame.locator(".language-melt-canvas")).toHaveClass(/is-active/);
+  await expect(particleFrame.locator(".language-melt-source").first()).toBeVisible();
+
+  await page.goto("/beta-language-transition/?animation=continuous-melt");
+  const continuousFrame = page.frameLocator("iframe");
+  await expect(continuousFrame.locator("html")).toHaveAttribute("lang", /en|ro/);
+  await continuousFrame.locator('[data-language="en"]').click();
+  await continuousFrame.locator('[data-language="ro"]').click();
+  await expect(continuousFrame.locator("html")).toHaveClass(/is-language-melting/);
+  await expect(continuousFrame.locator(".language-melt-text").first()).toBeVisible();
+  await expect(continuousFrame.locator(".language-melt-canvas.is-active")).toHaveCount(0);
+});
+
 test("English and Romanian use identical font families, weights, styles, and tracking", async ({ page }) => {
   const routes = [
     "/index.html",

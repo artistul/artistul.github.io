@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet" />
+  <title>InFlux Language Transition Beta</title>
+  <style>
+    html,
+    body,
+    iframe {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      border: 0;
+      background: #050505;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    iframe {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <iframe title="InFlux language transition beta preview"></iframe>
+  <script>
+    (() => {
+      const requested = new URLSearchParams(window.location.search)
+        .get("animation")
+        ?.toLowerCase();
+      const aliases = {
+        "particle": "particle-wipe",
+        "particle-wipe": "particle-wipe",
+        "continuous": "continuous-melt",
+        "continuous-melt": "continuous-melt"
+      };
+      const mode = aliases[requested] || "particle-wipe";
+      const previewUrl = new URL("../", window.location.href);
+      previewUrl.searchParams.set("beta-preview", "1");
+      previewUrl.searchParams.set("beta-transition", mode);
+      document.querySelector("iframe").src = previewUrl.href;
+      document.title = `InFlux Beta - ${mode}`;
+    })();
+  </script>
+</body>
+</html>

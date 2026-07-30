@@ -52,8 +52,70 @@ html.is-language-melting .language-melt-source {
   will-change: clip-path;
 }
 
+html.is-language-melting .language-melt-text {
+  transform-origin: top center;
+  filter: url("#influx-language-melt-filter");
+  animation:
+    language-glyph-flow 1080ms linear both,
+    language-glyph-fade 1080ms linear both;
+  will-change: transform, opacity, filter;
+}
+
+html.is-language-melting .language-melt-fade {
+  transform-origin: top center;
+  animation: language-control-melt 1080ms linear both;
+  will-change: transform, opacity;
+}
+
 html.is-language-transitioning .language-toggle {
   pointer-events: none;
+}
+
+@keyframes language-glyph-flow {
+  0%, 9.25% {
+    transform: translateY(0) scaleY(1);
+  }
+  9.25% {
+    animation-timing-function: cubic-bezier(.3, .05, .55, .65);
+  }
+  52% {
+    transform: translateY(8vh) scaleY(1.24);
+    animation-timing-function: cubic-bezier(.7, 0, .95, .25);
+  }
+  94%, 100% {
+    transform: translateY(120vh) scaleY(2.3);
+  }
+}
+
+@keyframes language-glyph-fade {
+  0%, 52% {
+    opacity: 1;
+  }
+  52% {
+    animation-timing-function: cubic-bezier(.7, 0, .95, .25);
+  }
+  94%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes language-control-melt {
+  0%, 9.25% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+  9.25% {
+    animation-timing-function: cubic-bezier(.3, .05, .55, .65);
+  }
+  52% {
+    opacity: 1;
+    transform: translateY(8vh) scaleY(1.06);
+    animation-timing-function: cubic-bezier(.7, 0, .95, .25);
+  }
+  94%, 100% {
+    opacity: 0;
+    transform: translateY(120vh) scaleY(1.35);
+  }
 }
 
 html.is-language-popping .language-pop-text {
@@ -291,6 +353,8 @@ html[lang="ro"] :is(h1, h2) {
 @media (prefers-reduced-motion: reduce) {
   .language-toggle__slider,
   .language-toggle__ring,
+  html.is-language-melting .language-melt-text,
+  html.is-language-melting .language-melt-fade,
   html.is-language-popping .language-pop-text {
     transition: none;
     animation: none;

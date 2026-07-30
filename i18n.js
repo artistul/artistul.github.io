@@ -407,6 +407,12 @@
   let meltContext;
   let meltDpr = 1;
 
+  function usesContinuousMeltPreview() {
+    const parameters = new URLSearchParams(window.location.search);
+    return parameters.get("beta-preview") === "1" &&
+      parameters.get("beta-transition") === "continuous-melt";
+  }
+
   function normalize(value) {
     return String(value || "").replace(/\s+/g, " ").trim();
   }
@@ -503,6 +509,45 @@
       context.fillText(character, x, y);
       x += context.measureText(character).width + letterSpacing;
     }
+  }
+
+  function ensureContinuousMeltFilter() {
+    let svg = document.getElementById("influx-language-melt-definitions");
+    if (svg) return svg;
+
+    svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.id = "influx-language-melt-definitions";
+    svg.setAttribute("width", "0");
+    svg.setAttribute("height", "0");
+    svg.setAttribute("aria-hidden", "true");
+    svg.style.position = "absolute";
+    svg.style.pointerEvents = "none";
+    svg.innerHTML = `
+      <filter id="influx-language-melt-filter" x="-35%" y="-20%" width="170%" height="260%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency=".021 .0035" numOctaves="1" seed="11" result="melt-noise"/>
+        <feColorMatrix in="melt-noise" type="matrix"
+          values="0 0 0 0 .5
+                  0 1 0 0 0
+                  0 0 0 0 0
+                  0 0 0 1 0" result="vertical-melt-noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="vertical-melt-noise" scale="0" xChannelSelector="R" yChannelSelector="G" result="warped-text">
+          <animate data-language-melt-animation attributeName="scale" begin="indefinite" dur="1080ms"
+            values="0;0;36;82;82" keyTimes="0;.0925;.52;.94;1" calcMode="spline"
+            keySplines="0 0 1 1;.3 .05 .55 .65;.7 0 .95 .25;0 0 1 1" fill="freeze"/>
+        </feDisplacementMap>
+        <feGaussianBlur in="warped-text" stdDeviation=".18 .34" result="softened-text"/>
+        <feComponentTransfer in="softened-text">
+          <feFuncA type="linear" slope="1.5" intercept="-.22"/>
+        </feComponentTransfer>
+      </filter>`;
+    document.body.appendChild(svg);
+    return svg;
+  }
+
+  function restartContinuousMeltFilter() {
+    ensureContinuousMeltFilter()
+      .querySelectorAll("[data-language-melt-animation]")
+      .forEach((animation) => animation.beginElement?.());
   }
 
   function sampleMeltText(element) {
@@ -702,6 +747,34 @@
     });
   }
 
+  async function runContinuousMeltTransition(language, elements) {
+    const animatedElements = elements.filter((element) =>
+      !elements.some((parent) => parent !== element && parent.contains(element))
+    );
+    languageTransitionActive = true;
+    document.documentElement.classList.add("is-language-transitioning", "is-language-melting");
+    animatedElements.forEach((element) => {
+      const interactive = element.closest("button, a, [role='button'], [role='tab']");
+      element.classList.add(interactive ? "language-melt-fade" : "language-melt-text");
+    });
+    restartContinuousMeltFilter();
+    document.querySelectorAll(".language-toggle").forEach((toggle) => toggle.setAttribute("aria-disabled", "true"));
+
+    try {
+      await new Promise((resolve) => window.setTimeout(resolve, 1080));
+      applyLanguage(language);
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      triggerLanguagePop(animatedElements);
+    } finally {
+      animatedElements.forEach((element) => {
+        element.classList.remove("language-melt-text", "language-melt-fade");
+      });
+      document.documentElement.classList.remove("is-language-melting", "is-language-transitioning");
+      document.querySelectorAll(".language-toggle").forEach((toggle) => toggle.removeAttribute("aria-disabled"));
+      languageTransitionActive = false;
+    }
+  }
+
   async function requestLanguage(language) {
     if (!SUPPORTED_LANGUAGES.has(language) || language === currentLanguage || languageTransitionActive) return;
     previewLanguageToggle(language);
@@ -712,6 +785,11 @@
     }
 
     const elements = collectMeltElements();
+    if (usesContinuousMeltPreview()) {
+      await runContinuousMeltTransition(language, elements);
+      return;
+    }
+
     resizeMeltCanvas();
     const particles = captureMeltParticles(elements);
     if (!elements.length || !particles.length) {
