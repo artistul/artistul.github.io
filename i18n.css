@@ -1,0 +1,217 @@
+@font-face {
+  font-family: "InFlux Romanian Display";
+  src: url("assets/fonts/roboto-condensed-latin-900-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "InFlux Romanian Display";
+  src: url("assets/fonts/roboto-condensed-latin-ext-900-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+.i18n-ro-pending body {
+  visibility: hidden;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.header-identity {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.6vw, 22px);
+}
+
+.header-identity > .brand {
+  flex: 0 0 auto;
+}
+
+.language-toggle {
+  flex: 0 0 auto;
+  min-width: 96px;
+  display: grid;
+  grid-template-columns: 44px 8px 44px;
+  align-items: center;
+  padding-left: clamp(10px, 1.2vw, 18px);
+  border-left: 1px solid rgba(255, 255, 255, .16);
+}
+
+.language-toggle button {
+  position: relative;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(244, 241, 237, .52);
+  font: 800 11px/1 Consolas, monospace;
+  letter-spacing: .14em;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.language-toggle button::after {
+  content: "";
+  position: absolute;
+  right: 9px;
+  bottom: 8px;
+  left: 7px;
+  height: 2px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 160ms ease;
+}
+
+.language-toggle button:hover,
+.language-toggle button[aria-pressed="true"] {
+  color: var(--white, #f4f1ed);
+}
+
+.language-toggle button[aria-pressed="true"]::after {
+  transform: scaleX(1);
+}
+
+.language-toggle > span {
+  color: rgba(244, 241, 237, .24);
+  font: 10px/1 Consolas, monospace;
+  text-align: center;
+}
+
+.language-toggle button:focus-visible {
+  outline: 2px solid var(--white, #f4f1ed);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 2px var(--red);
+}
+
+.technical-page .header-identity {
+  gap: clamp(10px, 1.5vw, 18px);
+}
+
+.technical-page .language-toggle {
+  min-width: 90px;
+  grid-template-columns: 41px 8px 41px;
+  padding-left: clamp(8px, 1vw, 14px);
+}
+
+.technical-page .language-toggle button {
+  min-width: 41px;
+  color: var(--muted);
+}
+
+.technical-page .language-toggle button:hover,
+.technical-page .language-toggle button[aria-pressed="true"] {
+  color: var(--text);
+}
+
+html[lang="ro"] :is(
+  h1,
+  h2,
+  .team-principle blockquote,
+  .recruitment-mark strong,
+  .recruitment-apply > strong
+) {
+  font-family: "InFlux Romanian Display", "Arial Narrow", sans-serif;
+  font-synthesis: none;
+  font-weight: 900;
+  letter-spacing: -.025em;
+  line-height: 1.16;
+  text-rendering: geometricPrecision;
+}
+
+html[lang="ro"] :is(h1, h2) {
+  padding-block: .08em;
+}
+
+@media (min-width: 1181px) {
+  body:not(.technical-page) .site-header {
+    grid-template-columns: 218px minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  body:not(.technical-page) .site-header {
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  .header-identity {
+    gap: 8px;
+  }
+
+  .language-toggle {
+    min-width: 92px;
+    grid-template-columns: 42px 8px 42px;
+    padding-left: 8px;
+  }
+
+  .language-toggle button {
+    min-width: 42px;
+    min-height: 48px;
+  }
+
+  .language-toggle button::after {
+    bottom: 9px;
+  }
+}
+
+@media (max-width: 640px) {
+  .technical-page .site-header {
+    gap: 8px;
+  }
+
+  .technical-page .brand-copy {
+    display: none;
+  }
+
+  .technical-page .header-action {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 380px) {
+  .header-identity {
+    gap: 4px;
+  }
+
+  .site-header .brand img {
+    width: 62px;
+    height: 62px;
+  }
+
+  .language-toggle {
+    min-width: 84px;
+    grid-template-columns: 38px 8px 38px;
+    padding-left: 5px;
+  }
+
+  .language-toggle button {
+    min-width: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .language-toggle button,
+  .language-toggle button::after {
+    transition: none;
+  }
+}

@@ -31,6 +31,16 @@
   <title>Contact Us | InFlux Origin</title>
   <link rel="icon" href="assets/influx-logo-white.png" />
   <link rel="stylesheet" href="styles.css?v=2026-06-26-home-machine-scale" />
+  <link rel="stylesheet" href="i18n.css?v=2026-07-30-ro-display-v2" />
+  <script>
+    try {
+      if (localStorage.getItem("influx-language") === "ro") {
+        document.documentElement.lang = "ro";
+        document.documentElement.classList.add("i18n-ro-pending");
+      }
+    } catch {}
+  </script>
+  <script src="i18n.js?v=2026-07-30-sitewide-ro" defer></script>
   <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -557,6 +567,32 @@
           </a>
         </article>
       </div>
+
+      <section class="recruitment-band reveal" aria-labelledby="recruitment-title">
+        <div class="recruitment-mark" aria-hidden="true">
+          <strong>Join</strong>
+        </div>
+        <div class="recruitment-copy">
+          <p class="section-index">Recruitment</p>
+          <h2 id="recruitment-title">Help build what comes next.</h2>
+          <p>
+            We are looking for driven people ready to turn ambitious engineering into working hardware,
+            software, and proof.
+          </p>
+          <a class="recruitment-email"
+            href="mailto:david.pintilei9@gmail.com?subject=InFlux%20recruitment%20inquiry">
+            <span>Questions? Email David</span>
+            <strong>david.pintilei9@gmail.com</strong>
+          </a>
+        </div>
+        <a class="recruitment-apply"
+          href="https://docs.google.com/forms/d/e/REPLACE_WITH_RECRUITMENT_FORM_ID/viewform"
+          target="_blank" rel="noopener noreferrer"
+          aria-label="Apply to join InFlux using Google Forms (opens in a new tab)">
+          <span>Apply through Google Forms</span>
+          <strong><span>Apply<br />now</span><b aria-hidden="true">&nearr;</b></strong>
+        </a>
+      </section>
     </section>
 
     <section class="tab-panel" id="sponsorship" data-panel="sponsorship" role="tabpanel"

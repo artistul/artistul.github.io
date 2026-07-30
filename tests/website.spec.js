@@ -8,6 +8,92 @@ const viewports = [
   { name: "desktop", width: 1440, height: 900 }
 ];
 
+test("English and Romanian toggle sitewide with persistent accessible state", async ({ page }) => {
+  await page.goto("/index.html");
+  await page.evaluate(() => localStorage.removeItem("influx-language"));
+  await page.reload();
+
+  const languageControl = page.getByRole("group", { name: "Language / Limbă" });
+  await expect(languageControl).toBeVisible();
+  await expect(page.locator('[data-language="en"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator('[data-language="ro"]')).toHaveAttribute("aria-pressed", "false");
+
+  await page.locator('[data-language="ro"]').click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "ro");
+  await expect(page.locator('[data-language="ro"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("tab", { name: "Echipă" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Contact" })).toBeVisible();
+  await expect.poll(() => page.evaluate(() =>
+    document.fonts.check('900 64px "InFlux Romanian Display"', "Ă Î Ș Ț â î ș ț")
+  )).toBe(true);
+  const romanianDisplaySpacing = await page.locator(".home-statement h2").evaluate((heading) => {
+    const style = getComputedStyle(heading);
+    return {
+      fontSynthesis: style.fontSynthesis,
+      lineHeightRatio: Number.parseFloat(style.lineHeight) / Number.parseFloat(style.fontSize)
+    };
+  });
+  expect(romanianDisplaySpacing.fontSynthesis).toBe("none");
+  expect(romanianDisplaySpacing.lineHeightRatio).toBeGreaterThanOrEqual(1.15);
+
+  await page.getByRole("tab", { name: "Echipă" }).click();
+  await expect(page).toHaveTitle("Echipă | InFlux Origin");
+  await expect(page.getByText("Patru discipline.")).toBeVisible();
+
+  await page.goto("/contact/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "ro");
+  await expect(page).toHaveTitle("Contact | InFlux Origin");
+  await expect(page.getByRole("heading", { name: "Ajută-ne să construim ce urmează." })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Aplică pentru a te alătura InFlux/ })).toBeVisible();
+  const romanianHeadingType = await page.locator(".contact-option h2").first().evaluate((heading) => {
+    const style = getComputedStyle(heading);
+    return {
+      family: style.fontFamily,
+      lineHeightRatio: Number.parseFloat(style.lineHeight) / Number.parseFloat(style.fontSize)
+    };
+  });
+  expect(romanianHeadingType.family).toContain("InFlux Romanian Display");
+  expect(romanianHeadingType.lineHeightRatio).toBeGreaterThanOrEqual(1.15);
+
+  await page.goto("/technical.html");
+  await expect(page.locator("html")).toHaveAttribute("lang", "ro");
+  await expect(page).toHaveTitle("Dosar tehnic | InFlux Origin MK1");
+  await expect(page.getByText("Dosar tehnic public", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "InFlux Origin MK1" })).toBeVisible();
+
+  await page.locator('[data-language="en"]').click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await page.goto("/index.html");
+  await expect(page.getByRole("tab", { name: "Team" })).toBeVisible();
+  await expect(page.locator('[data-language="en"]')).toHaveAttribute("aria-pressed", "true");
+});
+
+test("language control remains touch-friendly and clear of mobile navigation", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("/index.html");
+
+  const layout = await page.evaluate(() => {
+    const english = document.querySelector('[data-language="en"]').getBoundingClientRect();
+    const romanian = document.querySelector('[data-language="ro"]').getBoundingClientRect();
+    const menu = document.querySelector("[data-menu]").getBoundingClientRect();
+    const overlaps = (a, b) =>
+      a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+    return {
+      englishTarget: { width: english.width, height: english.height },
+      romanianTarget: { width: romanian.width, height: romanian.height },
+      clearOfMenu: !overlaps(english, menu) && !overlaps(romanian, menu),
+      documentFitsWidth: document.documentElement.scrollWidth === document.documentElement.clientWidth
+    };
+  });
+
+  expect(layout.englishTarget.height).toBeGreaterThanOrEqual(44);
+  expect(layout.romanianTarget.height).toBeGreaterThanOrEqual(44);
+  expect(layout.englishTarget.width).toBeGreaterThanOrEqual(38);
+  expect(layout.romanianTarget.width).toBeGreaterThanOrEqual(38);
+  expect(layout.clearOfMenu).toBe(true);
+  expect(layout.documentFitsWidth).toBe(true);
+});
+
 for (const viewport of viewports) {
   test(`home responsive regression / ${viewport.name}`, async ({ page }) => {
     await page.setViewportSize(viewport);
@@ -247,10 +333,19 @@ test("contact tab exposes the direct email paths", async ({ page }) => {
   await expect(page.locator(".contact-identity")).toHaveCount(0);
   await expect(page.locator(".contact-option .action")).toHaveCount(0);
   await expect(page.getByRole("link", { name: /tonegari\.stefan@gmail\.com/ })).toHaveAttribute("href", /mailto:tonegari\.stefan@gmail\.com/);
-  await expect(page.getByRole("link", { name: /david\.pintilei9@gmail\.com/ })).toHaveAttribute("href", /mailto:david\.pintilei9@gmail\.com/);
+  await expect(page.locator(".contact-option").nth(1).getByRole("link", { name: /david\.pintilei9@gmail\.com/ })).toHaveAttribute("href", /mailto:david\.pintilei9@gmail\.com/);
+  await expect(page.getByRole("heading", { name: "Help build what comes next." })).toBeVisible();
+  await expect(page.locator(".recruitment-band")).toBeVisible();
+  await expect(page.getByRole("link", { name: /Questions\? Email David/ })).toHaveAttribute("href", /mailto:david\.pintilei9@gmail\.com/);
+  await expect(page.getByRole("link", { name: /Apply to join InFlux using Google Forms/ })).toHaveAttribute(
+    "href",
+    "https://docs.google.com/forms/d/e/REPLACE_WITH_RECRUITMENT_FORM_ID/viewform"
+  );
+  await expect(page.getByRole("link", { name: /Apply to join InFlux using Google Forms/ })).toHaveAttribute("target", "_blank");
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/index.html?tab=contact");
+  await expect(page.locator(".recruitment-band")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
