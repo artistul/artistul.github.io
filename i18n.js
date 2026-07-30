@@ -576,13 +576,27 @@
     return particles;
   }
 
-  function drawMeltFrame(particles, progress) {
+  function updateMeltWipe(elements, wipeX) {
+    elements.forEach((element) => {
+      const rect = element.getBoundingClientRect();
+      const hiddenWidth = Math.max(0, Math.min(rect.width, wipeX - rect.left));
+      element.style.clipPath = `inset(0 0 0 ${hiddenWidth}px)`;
+    });
+  }
+
+  function drawMeltFrame(particles, elapsed) {
     const width = window.innerWidth;
     const height = window.innerHeight;
+    const wipeDuration = 360;
     meltContext.setTransform(meltDpr, 0, 0, meltDpr, 0, 0);
     meltContext.clearRect(0, 0, width, height);
     particles.forEach((particle) => {
-      const local = Math.max(0, Math.min(1, (progress - particle.delay) / Math.max(.001, 1 - particle.delay)));
+      const activation = Math.max(0, Math.min(1, particle.x / Math.max(1, width))) * wipeDuration;
+      if (elapsed < activation) return;
+      const fallStart = activation + 100;
+      const fallDuration = Math.max(1, 1080 - fallStart);
+      const delayedElapsed = elapsed - fallStart - particle.delay * fallDuration;
+      const local = Math.max(0, Math.min(1, delayedElapsed / Math.max(1, fallDuration * (1 - particle.delay))));
       const fall = local ** 4;
       const x = particle.x + particle.drift * fall + Math.sin(particle.seed + fall * 8) * 1.2;
       const y = particle.y + height * 1.28 * fall;
@@ -687,21 +701,32 @@
       await new Promise((resolve) => {
         const frame = (now) => {
           const elapsed = now - start;
-          const progress = Math.max(0, Math.min(1, (elapsed - 100) / 980));
-          drawMeltFrame(particles, progress);
+          const wipeProgress = Math.max(0, Math.min(1, elapsed / 360));
+          const easedWipe = wipeProgress * wipeProgress * (3 - 2 * wipeProgress);
+          updateMeltWipe(elements, window.innerWidth * easedWipe);
+          drawMeltFrame(particles, elapsed);
           if (elapsed < 1080) requestAnimationFrame(frame);
           else resolve();
         };
         requestAnimationFrame(frame);
       });
+      elements.forEach((element) => {
+        element.style.clipPath = "inset(0 0 0 100%)";
+      });
       applyLanguage(language);
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      elements.forEach((element) => element.classList.remove("language-melt-source"));
+      elements.forEach((element) => {
+        element.classList.remove("language-melt-source");
+        element.style.removeProperty("clip-path");
+      });
       meltContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
       meltCanvas.classList.remove("is-active");
       triggerLanguagePop(elements);
     } finally {
-      elements.forEach((element) => element.classList.remove("language-melt-source"));
+      elements.forEach((element) => {
+        element.classList.remove("language-melt-source");
+        element.style.removeProperty("clip-path");
+      });
       meltContext?.clearRect(0, 0, window.innerWidth, window.innerHeight);
       meltCanvas?.classList.remove("is-active");
       document.documentElement.classList.remove("is-language-melting", "is-language-transitioning");

@@ -49,7 +49,7 @@
 }
 
 html.is-language-melting .language-melt-source {
-  opacity: 0 !important;
+  will-change: clip-path;
 }
 
 html.is-language-transitioning .language-toggle {
