@@ -531,7 +531,8 @@
     });
 
     const image = context.getImageData(0, 0, buffer.width, buffer.height);
-    const gap = Math.max(6, Math.round(Math.min(18, Math.max(7, fontSize / 5)) * renderDpr));
+    const gapCss = Math.min(7.6, Math.max(3.2, fontSize / 8.2));
+    const gap = Math.max(3, Math.round(gapCss * renderDpr));
     const points = [];
     for (let py = 0; py < image.height; py += gap) {
       for (let px = 0; px < image.width; px += gap) {
@@ -554,7 +555,7 @@
       const style = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
       const fontSize = Number.parseFloat(style.fontSize) || 16;
-      const budget = fontSize > 64 ? 160 : fontSize > 28 ? 100 : 36;
+      const budget = fontSize > 64 ? 2600 : fontSize > 28 ? 1500 : 700;
       const stride = Math.max(1, Math.ceil(points.length / budget));
       const color = parseMeltColor(style.color);
       for (let index = 0; index < points.length; index += stride) {
@@ -563,8 +564,8 @@
         particles.push({
           x: point.x,
           y: point.y,
-          radius: Math.min(10, Math.max(4.5, fontSize * .065)) * (.78 + Math.random() * .44),
-          drift: (Math.random() - .5) * 32,
+          radius: 1.05 + Math.random() * 1.45,
+          drift: (Math.random() - .5) * 28,
           delay: (1 - yNorm) * .06 + Math.random() * .025,
           seed: Math.random() * Math.PI * 2,
           color,
@@ -585,7 +586,7 @@
       const fall = local ** 4;
       const x = particle.x + particle.drift * fall + Math.sin(particle.seed + fall * 8) * 1.2;
       const y = particle.y + height * 1.28 * fall;
-      const stretch = 1 + fall * 4.5;
+      const stretch = 1 + fall * 6;
       const rx = particle.radius / Math.sqrt(stretch);
       const ry = particle.radius * stretch;
       const fade = local > .9 ? 1 - (local - .9) / .1 : 1;
