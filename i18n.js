@@ -406,6 +406,8 @@
   let meltCanvas;
   let meltContext;
   let meltDpr = 1;
+  const CONTINUOUS_MELT_DURATION = 1320;
+  const CONTINUOUS_MELT_WAVE_DURATION = 360;
 
   function usesContinuousMeltPreview() {
     const parameters = new URLSearchParams(window.location.search);
@@ -511,52 +513,13 @@
     }
   }
 
-  function ensureContinuousMeltFilter() {
-    let svg = document.getElementById("influx-language-melt-definitions");
-    if (svg) return svg;
-
-    svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.id = "influx-language-melt-definitions";
-    svg.setAttribute("width", "0");
-    svg.setAttribute("height", "0");
-    svg.setAttribute("aria-hidden", "true");
-    svg.style.position = "absolute";
-    svg.style.pointerEvents = "none";
-    svg.innerHTML = `
-      <filter id="influx-language-melt-filter" x="-35%" y="-20%" width="170%" height="260%" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency=".021 .0035" numOctaves="1" seed="11" result="melt-noise"/>
-        <feColorMatrix in="melt-noise" type="matrix"
-          values="0 0 0 0 .5
-                  0 1 0 0 0
-                  0 0 0 0 0
-                  0 0 0 1 0" result="vertical-melt-noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="vertical-melt-noise" scale="0" xChannelSelector="R" yChannelSelector="G" result="warped-text">
-          <animate data-language-melt-animation attributeName="scale" begin="indefinite" dur="1080ms"
-            values="0;0;36;82;82" keyTimes="0;.0925;.52;.94;1" calcMode="spline"
-            keySplines="0 0 1 1;.3 .05 .55 .65;.7 0 .95 .25;0 0 1 1" fill="freeze"/>
-        </feDisplacementMap>
-        <feGaussianBlur in="warped-text" stdDeviation=".18 .34" result="softened-text"/>
-        <feComponentTransfer in="softened-text">
-          <feFuncA type="linear" slope="1.5" intercept="-.22"/>
-        </feComponentTransfer>
-      </filter>`;
-    document.body.appendChild(svg);
-    return svg;
-  }
-
-  function restartContinuousMeltFilter() {
-    ensureContinuousMeltFilter()
-      .querySelectorAll("[data-language-melt-animation]")
-      .forEach((animation) => animation.beginElement?.());
-  }
-
-  function sampleMeltText(element) {
+  function renderMeltTextBuffer(element, preserveColor = false) {
     const rect = element.getBoundingClientRect();
     const style = getComputedStyle(element);
     const textNodes = [...element.childNodes].filter((node) =>
       node.nodeType === Node.TEXT_NODE && normalize(node.nodeValue)
     );
-    if (!textNodes.length) return [];
+    if (!textNodes.length) return null;
     const renderDpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const buffer = document.createElement("canvas");
     const context = buffer.getContext("2d", { willReadFrequently: true });
@@ -571,7 +534,11 @@
     context.scale(renderDpr, renderDpr);
     context.font = `${style.fontStyle || "normal"} ${style.fontVariantCaps || "normal"} ${style.fontWeight || 400} ${fontSize}px ${style.fontFamily || "sans-serif"}`;
     context.textBaseline = "alphabetic";
-    context.fillStyle = "#fff";
+    const textFill = style.webkitTextFillColor;
+    context.fillStyle = preserveColor && textFill && textFill !== "rgba(0, 0, 0, 0)"
+      ? textFill
+      : preserveColor ? style.color : "#fff";
+    context.globalAlpha = preserveColor ? effectiveMeltOpacity(element) : 1;
 
     textNodes.forEach((node) => {
       const text = transformedMeltText(normalize(node.nodeValue), style);
@@ -604,6 +571,14 @@
       });
     });
 
+    return { buffer, rect, renderDpr, fontSize };
+  }
+
+  function sampleMeltText(element) {
+    const rendered = renderMeltTextBuffer(element);
+    if (!rendered) return [];
+    const { buffer, rect, renderDpr, fontSize } = rendered;
+    const context = buffer.getContext("2d", { willReadFrequently: true });
     const image = context.getImageData(0, 0, buffer.width, buffer.height);
     const gapCss = Math.min(7.6, Math.max(3.2, fontSize / 8.2));
     const gap = Math.max(3, Math.round(gapCss * renderDpr));
@@ -687,6 +662,67 @@
     });
   }
 
+  function captureContinuousMeltText(elements) {
+    return elements.map((element, index) => {
+      const rendered = renderMeltTextBuffer(element, true);
+      return rendered ? {
+        element,
+        ...rendered,
+        seed: index * 1.618 + rendered.rect.left * .013
+      } : null;
+    }).filter(Boolean);
+  }
+
+  function drawContinuousMeltFrame(rasters, elapsed) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const sliceWidth = 5;
+    meltContext.setTransform(meltDpr, 0, 0, meltDpr, 0, 0);
+    meltContext.clearRect(0, 0, width, height);
+
+    rasters.forEach(({ buffer, rect, renderDpr, seed }) => {
+      for (let sliceX = 0; sliceX < rect.width; sliceX += sliceWidth) {
+        const absoluteX = rect.left + sliceX;
+        const activation = Math.max(0, Math.min(1, absoluteX / Math.max(1, width))) *
+          CONTINUOUS_MELT_WAVE_DURATION;
+        if (elapsed < activation) continue;
+
+        const local = Math.max(0, Math.min(
+          1,
+          (elapsed - activation) / CONTINUOUS_MELT_DURATION
+        ));
+        const accelerated = local * local * (.58 + .42 * local);
+        const ripple = Math.sin(absoluteX * .045 + seed);
+        const drop = height * 1.28 * accelerated * (.97 + ripple * .03);
+        const stretch = 1 + accelerated * (6.2 + ripple * .45);
+        const drift = Math.sin(absoluteX * .025 + seed + local * 3) *
+          2.4 * local * local;
+        const fadeProgress = Math.max(0, Math.min(1, (local - .76) / .24));
+        const fade = 1 - fadeProgress * fadeProgress * (3 - 2 * fadeProgress);
+        const sourceX = Math.round(sliceX * renderDpr);
+        const sourceWidth = Math.min(
+          buffer.width - sourceX,
+          Math.ceil(sliceWidth * renderDpr)
+        );
+        if (sourceWidth <= 0 || fade <= 0) continue;
+
+        meltContext.globalAlpha = fade;
+        meltContext.drawImage(
+          buffer,
+          sourceX,
+          0,
+          sourceWidth,
+          buffer.height,
+          rect.left + sliceX + drift,
+          rect.top + drop,
+          sourceWidth / renderDpr + .65,
+          rect.height * stretch
+        );
+      }
+    });
+    meltContext.globalAlpha = 1;
+  }
+
   function collectMeltElements() {
     const candidates = [...document.body.querySelectorAll("*")].filter((element) => {
       if (element.closest("[data-no-i18n], script, style, svg, canvas, code, pre")) return false;
@@ -749,26 +785,56 @@
 
   async function runContinuousMeltTransition(language, elements) {
     const animatedElements = elements.filter((element) =>
-      !elements.some((parent) => parent !== element && parent.contains(element))
+      !elements.some((child) => child !== element && element.contains(child))
     );
+    resizeMeltCanvas();
+    const rasters = captureContinuousMeltText(animatedElements);
+    if (!rasters.length) {
+      applyLanguage(language);
+      return;
+    }
+
     languageTransitionActive = true;
     document.documentElement.classList.add("is-language-transitioning", "is-language-melting");
-    animatedElements.forEach((element) => {
-      const interactive = element.closest("button, a, [role='button'], [role='tab']");
-      element.classList.add(interactive ? "language-melt-fade" : "language-melt-text");
-    });
-    restartContinuousMeltFilter();
+    animatedElements.forEach((element) => element.classList.add("language-melt-text"));
+    meltCanvas.classList.add("is-active");
     document.querySelectorAll(".language-toggle").forEach((toggle) => toggle.setAttribute("aria-disabled", "true"));
 
     try {
-      await new Promise((resolve) => window.setTimeout(resolve, 1080));
+      const start = performance.now();
+      await new Promise((resolve) => {
+        const frame = (now) => {
+          const elapsed = now - start;
+          const wipeProgress = Math.max(
+            0,
+            Math.min(1, elapsed / CONTINUOUS_MELT_WAVE_DURATION)
+          );
+          updateMeltWipe(animatedElements, window.innerWidth * wipeProgress);
+          drawContinuousMeltFrame(rasters, elapsed);
+          if (elapsed < CONTINUOUS_MELT_DURATION + CONTINUOUS_MELT_WAVE_DURATION) {
+            requestAnimationFrame(frame);
+          } else {
+            resolve();
+          }
+        };
+        requestAnimationFrame(frame);
+      });
       applyLanguage(language);
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      animatedElements.forEach((element) => {
+        element.classList.remove("language-melt-text");
+        element.style.removeProperty("clip-path");
+      });
+      meltContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      meltCanvas.classList.remove("is-active");
       triggerLanguagePop(animatedElements);
     } finally {
       animatedElements.forEach((element) => {
-        element.classList.remove("language-melt-text", "language-melt-fade");
+        element.classList.remove("language-melt-text");
+        element.style.removeProperty("clip-path");
       });
+      meltContext?.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      meltCanvas?.classList.remove("is-active");
       document.documentElement.classList.remove("is-language-melting", "is-language-transitioning");
       document.querySelectorAll(".language-toggle").forEach((toggle) => toggle.removeAttribute("aria-disabled"));
       languageTransitionActive = false;

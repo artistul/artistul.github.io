@@ -111,7 +111,21 @@ test("hidden beta preview selects either saved transition from the URL", async (
   await continuousFrame.locator('[data-language="ro"]').click();
   await expect(continuousFrame.locator("html")).toHaveClass(/is-language-melting/);
   await expect(continuousFrame.locator(".language-melt-text").first()).toBeVisible();
-  await expect(continuousFrame.locator(".language-melt-canvas.is-active")).toHaveCount(0);
+  await expect(continuousFrame.locator(".language-melt-canvas")).toHaveClass(/is-active/);
+  await page.waitForTimeout(120);
+  const waveState = await continuousFrame.locator("body").evaluate(() => {
+    const elements = [...document.querySelectorAll(".language-melt-text")]
+      .map((element) => ({
+        left: element.getBoundingClientRect().left,
+        clip: Number.parseFloat(element.style.clipPath.split(" ").at(-1) || "0")
+      }))
+      .sort((a, b) => a.left - b.left);
+    return {
+      leftClip: elements[0]?.clip || 0,
+      rightClip: elements.at(-1)?.clip || 0
+    };
+  });
+  expect(waveState.leftClip).toBeGreaterThan(waveState.rightClip);
 });
 
 test("English and Romanian use identical font families, weights, styles, and tracking", async ({ page }) => {
