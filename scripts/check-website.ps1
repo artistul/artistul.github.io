@@ -12,6 +12,7 @@ $technical = [IO.File]::ReadAllText((Join-Path $root "technical.html"))
 $styles = [IO.File]::ReadAllText((Join-Path $root "styles.css"))
 $technicalStyles = [IO.File]::ReadAllText((Join-Path $root "technical.css"))
 $script = [IO.File]::ReadAllText((Join-Path $root "script.js"))
+$i18nScript = [IO.File]::ReadAllText((Join-Path $root "i18n.js"))
 $robots = [IO.File]::ReadAllText((Join-Path $root "robots.txt"))
 $sitemap = [IO.File]::ReadAllText((Join-Path $root "sitemap.xml"))
 $sponsorshipRoute = [IO.File]::ReadAllText((Join-Path $root "sponsorship\index.html"))
@@ -31,6 +32,7 @@ Assert-Website ($index -notmatch '<script[^>]+model-viewer\.min\.js') "model-vie
 Assert-Website ($index -notmatch '<model-viewer') "3D model must be created only after user action"
 Assert-Website ($index -match 'data-load-model') "3D load action is missing"
 Assert-Website ($script -match 'loadModelViewerRuntime') "conditional model-viewer loader is missing"
+Assert-Website ($i18nScript -match 'const FR = Object\.freeze' -and $i18nScript -match 'FRENCH_READY' -and $i18nScript -match 'French / Français') "French language scaffold is incomplete"
 Assert-Website ($script -match 'machine-assembly-optimized\.glb') "optimized 3D model is not used"
 Assert-Website ($index -match 'role="tabpanel"') "tabpanel semantics are missing"
 Assert-Website ($index -match 'aria-controls="versions"') "tab-to-panel relationship is missing"
@@ -55,7 +57,7 @@ Assert-Website ("$index`n$technical`n$sponsorshipRoute`n$contactRoute" -notmatch
 Assert-Website ($index -match 'rel="canonical"' -and $technical -match 'rel="canonical"') "canonical metadata is missing"
 Assert-Website (Test-Path (Join-Path $root "CNAME")) "GitHub Pages custom-domain file is missing"
 Assert-Website ($index -match 'https://influxorigin\.ro/' -and $technical -match 'https://influxorigin\.ro/technical\.html') "custom-domain canonical metadata is missing"
-Assert-Website ($index -match '2026-07-30-original-text-styles' -and $technical -match '2026-06-25-contact-red-identity') "explicit cache version is missing"
+Assert-Website ($index -match '2026-07-31-french' -and $technical -match '2026-06-25-contact-red-identity') "explicit cache version is missing"
 Assert-Website ($script -match 'dataset\.fluidPhysics' -and $script -match 'stiffness' -and $script -match 'pressurePulse') "independent fluid physics are missing"
 Assert-Website ($index -notmatch 'fluid-body-shine|data-fluid-sheen|stop-color="#ffffff"' -and $styles -notmatch 'fluid-sheen') "white fluid sheen layer is still published"
 Assert-Website ($index -match 'Ciprian Ursu' -and $technical -match 'Ciprian Ursu') "Ciprian Ursu team patch is missing"

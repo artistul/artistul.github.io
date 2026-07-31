@@ -1448,6 +1448,21 @@ html[lang="ro"] .contact-hero h1 span { margin-left: 0; }
   text-align: center;
   text-transform: uppercase;
 }
+html[lang="fr"] .recruitment-mark {
+  min-height: 455px;
+  padding-block: 0;
+}
+html[lang="fr"] .recruitment-mark strong {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-size: clamp(42px, 3.6vw, 57px);
+  line-height: .8;
+  letter-spacing: -.14em;
+}
+html[lang="ro"] .recruitment-mark strong {
+  position: relative;
+  left: -20px;
+}
 .recruitment-copy {
   display: grid;
   align-content: center;
@@ -1528,6 +1543,10 @@ html[lang="ro"] .contact-hero h1 span { margin-left: 0; }
   line-height: .86;
   text-align: center;
   text-transform: uppercase;
+}
+.recruitment-apply-label {
+  display: block;
+  width: min-content;
 }
 .recruitment-apply b {
   position: absolute;
@@ -1769,6 +1788,12 @@ html[lang="ro"] .contact-hero h1 span { margin-left: 0; }
   }
   .recruitment-mark strong {
     font-size: clamp(76px, 26vw, 108px);
+  }
+  html[lang="fr"] .recruitment-mark {
+    min-height: 340px;
+  }
+  html[lang="fr"] .recruitment-mark strong {
+    font-size: 42px;
   }
   .recruitment-copy { padding: 48px 0; }
   .recruitment-copy h2 { font-size: var(--type-section); }

@@ -8,15 +8,19 @@ const viewports = [
   { name: "desktop", width: 1440, height: 900 }
 ];
 
-test("English and Romanian toggle sitewide with persistent accessible state", async ({ page }) => {
+test("English, Romanian, and French toggle sitewide with persistent accessible state", async ({ page }) => {
   await page.goto("/index.html");
   await page.evaluate(() => localStorage.removeItem("influx-language"));
   await page.reload();
 
-  const languageControl = page.getByRole("group", { name: "Language / Limbă" });
+  const languageControl = page.getByRole("group", { name: "Language / Limbă / Langue" });
   await expect(languageControl).toBeVisible();
+  expect(await page.evaluate(() => window.InFluxI18n.getAvailableLanguages())).toEqual(["en", "ro", "fr"]);
+  expect(await page.evaluate(() => window.InFluxI18n.isFrenchReady())).toBe(true);
+  await expect(page.locator('[data-language="fr"]')).toHaveCount(1);
   await expect(page.locator('[data-language="en"]')).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator('[data-language="ro"]')).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator('[data-language="fr"]')).toHaveAttribute("aria-pressed", "false");
 
   await page.locator('[data-language="ro"]').click();
   await expect(page.locator("html")).toHaveClass(/is-language-melting/);
@@ -60,6 +64,59 @@ test("English and Romanian toggle sitewide with persistent accessible state", as
   await expect(page.getByText("Dosar tehnic public", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "InFlux Origin MK1" })).toBeVisible();
 
+  await page.locator('[data-language="fr"]').click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  await expect(page).toHaveTitle("Dossier technique | InFlux Origin MK1");
+  await expect(page.getByText("Dossier technique public", { exact: true })).toBeVisible();
+
+  await page.goto("/contact/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  await expect(page).toHaveTitle("Contactez-nous | InFlux Origin");
+  await expect(page.getByRole("heading", { name: "Contactez-nous" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Aidez-nous à construire la suite." })).toBeVisible();
+  await expect(page.locator(".recruitment-mark strong")).toHaveText("REJOIGNEZ");
+  await expect(page.locator(".recruitment-mark strong")).toHaveCSS("writing-mode", "vertical-rl");
+  expect(await page.locator(".recruitment-mark").evaluate((mark) => {
+    const container = mark.getBoundingClientRect();
+    const label = mark.querySelector("strong").getBoundingClientRect();
+    return label.top >= container.top && label.right <= container.right &&
+      label.bottom <= container.bottom && label.left >= container.left;
+  })).toBe(true);
+  await expect(page.locator(".recruitment-apply-label")).toHaveText("Postuler");
+  await expect(page.locator(".recruitment-apply")).not.toContainText("maintenant");
+  await expect(page.getByRole("link", { name: /Postuler pour rejoindre InFlux/ })).toBeVisible();
+  await page.locator(".recruitment-mark").scrollIntoViewIfNeeded();
+  await page.locator('[data-language="en"]').click();
+  await expect(page.locator("html")).not.toHaveClass(/is-language-melting/);
+  await page.locator(".recruitment-apply b").scrollIntoViewIfNeeded();
+  await page.evaluate(() => {
+    const arrow = document.querySelector(".recruitment-apply b");
+    window.__recruitmentArrowPop = { hostMoved: false, glyphPopped: false };
+    const capture = () => {
+      window.__recruitmentArrowPop.hostMoved ||= arrow.classList.contains("language-pop-host");
+      window.__recruitmentArrowPop.glyphPopped ||=
+        Boolean(arrow.querySelector(".language-pop-text"));
+    };
+    window.__recruitmentArrowObserver = new MutationObserver(capture);
+    window.__recruitmentArrowObserver.observe(arrow, {
+      attributes: true,
+      attributeFilter: ["class"],
+      subtree: true
+    });
+    capture();
+  });
+  await page.locator('[data-language="fr"]').click();
+  await expect(page.locator("html")).toHaveClass(/is-language-melting/);
+  expect(await page.locator(".recruitment-mark .language-melt-text").count()).toBeGreaterThan(0);
+  await expect(page.locator("html")).not.toHaveClass(/is-language-melting/);
+  await expect.poll(() => page.evaluate(() => window.__recruitmentArrowPop)).toEqual({
+    hostMoved: false,
+    glyphPopped: false
+  });
+  await expect(page.locator(".recruitment-apply b .language-melt-run")).toHaveCount(0);
+  await page.evaluate(() => window.__recruitmentArrowObserver.disconnect());
+
+  await page.goto("/technical.html");
   await page.locator('[data-language="en"]').click();
   await expect(page.locator(".header-action")).toHaveClass(/language-melt-contact/);
   await expect(page.locator(".header-action")).toHaveCSS(
@@ -72,6 +129,18 @@ test("English and Romanian toggle sitewide with persistent accessible state", as
   await expect(page.locator('[data-language="en"]')).toHaveAttribute("aria-pressed", "true");
 });
 
+test("the complete French dictionary enables direct restoration", async ({ page }) => {
+  await page.goto("/index.html");
+  await page.evaluate(() => localStorage.setItem("influx-language", "fr"));
+  await page.reload();
+
+  await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  await expect(page.locator("html")).not.toHaveClass(/i18n-language-pending/);
+  await expect(page.locator('[data-language="fr"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("heading", { name: /Production réelle\./ })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem("influx-language"))).toBe("fr");
+});
+
 test("language control remains touch-friendly and clear of mobile navigation", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("/index.html");
@@ -80,21 +149,25 @@ test("language control remains touch-friendly and clear of mobile navigation", a
   const layout = await page.evaluate(() => {
     const english = document.querySelector('[data-language="en"]').getBoundingClientRect();
     const romanian = document.querySelector('[data-language="ro"]').getBoundingClientRect();
+    const french = document.querySelector('[data-language="fr"]').getBoundingClientRect();
     const menu = document.querySelector("[data-menu]").getBoundingClientRect();
     const overlaps = (a, b) =>
       a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
     return {
       englishTarget: { width: english.width, height: english.height },
       romanianTarget: { width: romanian.width, height: romanian.height },
-      clearOfMenu: !overlaps(english, menu) && !overlaps(romanian, menu),
+      frenchTarget: { width: french.width, height: french.height },
+      clearOfMenu: !overlaps(english, menu) && !overlaps(romanian, menu) && !overlaps(french, menu),
       documentFitsWidth: document.documentElement.scrollWidth === document.documentElement.clientWidth
     };
   });
 
   expect(layout.englishTarget.height).toBeGreaterThanOrEqual(44);
   expect(layout.romanianTarget.height).toBeGreaterThanOrEqual(44);
+  expect(layout.frenchTarget.height).toBeGreaterThanOrEqual(44);
   expect(layout.englishTarget.width).toBeGreaterThanOrEqual(38);
   expect(layout.romanianTarget.width).toBeGreaterThanOrEqual(38);
+  expect(layout.frenchTarget.width).toBeGreaterThanOrEqual(38);
   expect(layout.clearOfMenu).toBe(true);
   expect(layout.documentFitsWidth).toBe(true);
 });
@@ -436,7 +509,7 @@ test("hidden beta preview selects either saved transition from the URL", async (
   expect(waveState.nonTextTargets).toBe(0);
 });
 
-test("English and Romanian use identical font families, weights, styles, and tracking", async ({ page }) => {
+test("English, Romanian, and French content uses identical font families, weights, styles, and tracking", async ({ page }) => {
   const routes = [
     "/index.html",
     "/index.html?tab=versions",
@@ -476,27 +549,33 @@ test("English and Romanian use identical font families, weights, styles, and tra
         await document.fonts.ready;
         await settle();
         const elements = [...document.body.querySelectorAll("*")].filter((element) =>
+          !element.closest(".recruitment-mark") &&
           [...element.childNodes].some((node) =>
             node.nodeType === Node.TEXT_NODE && node.nodeValue.trim()
           )
         );
         const english = new Map(elements.map((element) => [element, signature(element)]));
 
-        window.InFluxI18n.setLanguage("ro");
-        await document.fonts.ready;
-        await settle();
+        const differences = [];
+        for (const language of ["ro", "fr"]) {
+          window.InFluxI18n.setLanguage(language);
+          await document.fonts.ready;
+          await settle();
 
-        return elements.flatMap((element) => {
-          const before = english.get(element);
-          const after = signature(element);
-          return JSON.stringify(before) === JSON.stringify(after)
-            ? []
-            : [{
+          elements.forEach((element) => {
+            const before = english.get(element);
+            const after = signature(element);
+            if (JSON.stringify(before) !== JSON.stringify(after)) {
+              differences.push({
+                language,
                 element: element.id || element.className || element.tagName,
                 before,
                 after
-              }];
-        });
+              });
+            }
+          });
+        }
+        return differences;
       });
 
       expect(differences, `${route} at ${size.width}px`).toEqual([]);

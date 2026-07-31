@@ -16,7 +16,7 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-.i18n-ro-pending body {
+:is(.i18n-language-pending, .i18n-ro-pending) body {
   visibility: hidden;
 }
 
@@ -73,6 +73,11 @@ html.is-language-melting .language-melt-text {
   -webkit-text-fill-color: transparent !important;
   text-decoration-color: transparent !important;
   text-shadow: none !important;
+}
+
+/* Keep the vertical recruitment label's original inline geometry while its text is wrapped for melt. */
+.recruitment-mark .language-melt-run {
+  display: contents;
 }
 
 html.is-language-melting .language-melt-contact {
@@ -215,7 +220,7 @@ html.is-language-popping .primary-nav button.language-pop-underline::after {
   position: relative;
   flex: 0 0 auto;
   display: grid;
-  grid-template-columns: repeat(2, var(--language-cell));
+  grid-template-columns: repeat(var(--language-count, 2), var(--language-cell));
   align-items: center;
   padding: var(--language-padding);
   border: 1px solid rgba(255, 255, 255, .14);
@@ -334,7 +339,7 @@ html.is-language-popping .primary-nav button.language-pop-underline::after {
   --language-cell: 41px;
 }
 
-html[lang="ro"] :is(h1, h2) {
+html:is([lang="ro"], [lang="fr"]) :is(h1, h2) {
   line-height: 1.16;
   padding-block: .08em;
 }

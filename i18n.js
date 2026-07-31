@@ -2,7 +2,6 @@
   "use strict";
 
   const STORAGE_KEY = "influx-language";
-  const SUPPORTED_LANGUAGES = new Set(["en", "ro"]);
 
   const RO = Object.freeze({
     "Desktop Injection Molding Machine | InFlux Origin": "Mașină desktop pentru injecția maselor plastice | InFlux Origin",
@@ -396,6 +395,400 @@
     "Interactive 3D assembly of InFlux Origin MK1": "Ansamblu 3D interactiv al InFlux Origin MK1"
   });
 
+  // Add the supplied French copy here using the same English keys as RO.
+  // French becomes available automatically only when every key is translated.
+  const FR = Object.freeze({
+    "Desktop Injection Molding Machine | InFlux Origin": "Presse à injecter de bureau | InFlux Origin",
+    "Machine Versions | InFlux Origin": "Versions de la machine | InFlux Origin",
+    "Team | InFlux Origin": "Équipe | InFlux Origin",
+    "Sponsors | InFlux Origin": "Sponsors | InFlux Origin",
+    "Contact Us | InFlux Origin": "Contactez-nous | InFlux Origin",
+    "Proof | InFlux Origin": "Validation | InFlux Origin",
+    "Download Hub | InFlux Origin": "Centre de téléchargements | InFlux Origin",
+    "External Links | InFlux Origin": "Liens externes | InFlux Origin",
+    "Technical Dossier | InFlux Origin MK1": "Dossier technique | InFlux Origin MK1",
+    "Menu": "Menu",
+    "Close": "Fermer",
+    "Home": "Accueil",
+    "Machine Development": "Développement de la machine",
+    "Machine Versions": "Versions de la machine",
+    "InFlux Ecosystem": "Écosystème InFlux",
+    "Team": "Équipe",
+    "Proof": "Validation",
+    "Contact Us": "Contactez-nous",
+    "Sponsors": "Sponsors",
+    "Downloads": "Téléchargements",
+    "Back to top ↑": "Retour en haut ↑",
+    "Open navigation menu": "Ouvrir le menu de navigation",
+    "Close navigation menu": "Fermer le menu de navigation",
+    "Real": "Production",
+    "manufacturing.": "réelle.",
+    "Desktop scale.": "Format de bureau.",
+    "InFlux Origin bridges the gap between a 3D printed prototype and industrial manufacturing with real thermoplastic shots, resin 3D printed molds, and an easy-to-use operator app!": "InFlux Origin comble le fossé entre un prototype imprimé en 3D et la production industrielle : de véritables thermoplastiques sont injectés dans des moules en résine imprimés en 3D, le tout piloté par une application opérateur simple à utiliser !",
+    "See the evidence": "Voir les résultats",
+    "Explore the machine": "Découvrir la machine",
+    "Why InFlux?": "Pourquoi InFlux ?",
+    "The middle ground should not be empty.": "Il ne devrait pas y avoir de vide entre le prototype et l’industrie.",
+    "You can print a model in hours or dump tens of thousands of euros into industrial manufacturing. Why not something in between? Faster than 3D printing. Semi-industrial quantities.": "Vous pouvez imprimer un modèle en quelques heures ou investir des dizaines de milliers d’euros dans la production industrielle. Pourquoi ne pas choisir une solution intermédiaire ? Plus rapide que l’impression 3D. Des volumes semi-industriels.",
+    "Influx is the answer.": "InFlux est la réponse.",
+    "Evidence route": "Parcours de validation",
+    "From an ambitious idea to a working machine.": "D’une idée ambitieuse à une machine fonctionnelle.",
+    "Thermal tested": "Testée thermiquement",
+    "6,331 samples in the longest captured campaign.": "6 331 mesures lors de la plus longue campagne enregistrée.",
+    "Control stack built": "Système de commande intégré",
+    "Firmware, Wi-Fi bridge, operator app, and servicing functions.": "Micrologiciel, passerelle Wi-Fi, application opérateur et fonctions de maintenance.",
+    "Part injected": "Pièce injectée",
+    "We don't try to convince. We prove.": "Nous ne cherchons pas à convaincre. Nous démontrons.",
+    "Public resources": "Ressources publiques",
+    "Built to be inspected, questioned, and improved.": "Conçu pour être examiné, remis en question et amélioré.",
+    "Meet the team": "Découvrir l’équipe",
+    "From an idea": "D’une idée",
+    "to a": "à une",
+    "working machine.": "machine fonctionnelle.",
+    "We didn't build it all in one day. We took it step by step, making sure to improve along the way.": "Nous ne l’avons pas construite en un jour. Nous avons avancé étape par étape, en l’améliorant au fil du projet.",
+    "An idea appears": "Une idée prend forme",
+    "Sketches": "Croquis",
+    "My 3D printer is too slow and we can't afford industrial machinery. But what is in between?": "Mon imprimante 3D est trop lente et nous n’avons pas les moyens d’acheter des machines industrielles. Quelle solution existe entre les deux ?",
+    "Thus, we started sketching a machine that can manufacture high quantities for cheap.": "Nous avons donc commencé à imaginer une machine capable de produire des volumes plus élevés à moindre coût.",
+    "Research the injection process": "Étudier le procédé d’injection",
+    "Separate the machine into sub-systems": "Diviser la machine en sous-systèmes",
+    "Separate the sub-systems into individual components": "Décomposer les sous-systèmes en composants individuels",
+    "Physical experiments": "Expériences physiques",
+    "The beginning of InFlux": "Les débuts d’InFlux",
+    "The idea proved possible, so we defined a brand identity. We don't sell a generic injection molding machine.": "L’idée s’est révélée réalisable, nous avons donc défini une identité de marque. Nous ne proposons pas une presse à injecter générique.",
+    "We sell Influx.": "Nous construisons InFlux.",
+    "Design a brand name and logo.": "Créer un nom de marque et un logo.",
+    "Define our goals.": "Définir nos objectifs.",
+    "Study the market": "Étudier le marché",
+    "Machine Prototyping": "Prototypage de la machine",
+    "Plan for MK1": "Plan du MK1",
+    "Branding and general architecture in place, it was time for engineering.": "Une fois l’identité et l’architecture générale définies, il était temps de passer à l’ingénierie.",
+    "CAD, programming, simulations, test, repeat. There is no going back now.": "CAO, programmation, simulations, essais, puis on recommence. Plus question de revenir en arrière.",
+    "Selecting and ordering components.": "Sélection et commande des composants.",
+    "Mechanical and electrical design.": "Conception mécanique et électrique.",
+    "Making the first sub-systems work together.": "Faire fonctionner les premiers sous-systèmes ensemble.",
+    "First working prototype": "Premier prototype fonctionnel",
+    "Our first complete machine capable of producing real injected parts. Although the automations aren't perfect, it gets the job done, and it certainly does it cheaper than industrial solutions.": "Notre première machine complète, capable de produire de véritables pièces injectées. Les automatismes ne sont pas encore parfaits, mais elle remplit sa mission, à un coût bien inférieur aux solutions industrielles.",
+    "Desktop sized": "Format de bureau",
+    "Water-cooled resin and metal mold compatibility": "Compatible avec les moules en résine et en métal refroidis par eau",
+    "Fully compatible with the Influx Operator app": "Entièrement compatible avec l’application InFlux Operator",
+    "Future product direction": "Prochaine orientation du produit",
+    "Next up": "À venir",
+    "The next version will focus on a fully automated and monitored process, with water, molten plastic, and mold pressure monitoring. Designed for continuous thrustworthy operation.": "La prochaine version se concentrera sur un procédé entièrement automatisé et surveillé, avec suivi de l’eau, du plastique fondu et de la pression dans le moule. Elle sera conçue pour un fonctionnement continu et fiable.",
+    "Full machine enclosure": "Carénage complet de la machine",
+    "Pressure sensing and temperature balancing": "Mesure de la pression et équilibrage de la température",
+    "Printed molds lifetime improvements": "Amélioration de la durée de vie des moules imprimés",
+    "Interactive assembly": "Assemblage interactif",
+    "Inspect the machine, not just the pitch.": "Examinez la machine, pas seulement le discours.",
+    "No need to take our word for it, convince yourself. Take a look at the InFlux Origin Mk. 1.": "Ne nous croyez pas sur parole : faites-vous votre propre avis. Découvrez InFlux Origin MK1.",
+    "Loads a 0.31 MB optimized model and the viewer runtime.": "Charge un modèle optimisé de 0,31 Mo et le moteur de visualisation.",
+    "Load interactive 3D": "Charger le modèle 3D interactif",
+    "Loading viewer": "Chargement de la visionneuse",
+    "Loading optimized assembly": "Chargement de l’assemblage optimisé",
+    "Retry interactive 3D": "Réessayer le modèle 3D interactif",
+    "Three systems. One machine.": "Trois systèmes. Une seule machine.",
+    "Operator": "Opérateur",
+    "Control surface": "Interface de contrôle",
+    "Motherboard": "Carte mère",
+    "Control electronics": "Électronique de commande",
+    "Thermal Lab": "Laboratoire thermique",
+    "Validation evidence": "Résultats de validation",
+    "Operator interface": "Interface opérateur",
+    "Everything the operator needs, in one place.": "Tout ce dont l’opérateur a besoin, au même endroit.",
+    "A dedicated interface with internet connectivity. It includes complete machine monitoring, control and servicing functions.": "Une interface dédiée avec connexion réseau. Elle permet de surveiller et de contrôler toute la machine, ainsi que d’accéder aux fonctions de diagnostic et de maintenance.",
+    "This is where the machine starts thinking.": "C’est ici que la machine commence à penser.",
+    "A custom PCB that serves as the central hub for every part of the machine. Offers the possibility for easy expansion and component replacement.": "Une carte de circuit imprimé (PCB) sur mesure qui centralise et coordonne tous les éléments de la machine. Elle facilite aussi les extensions et le remplacement des composants.",
+    "Thermal testing": "Essais thermiques",
+    "We measure instead of guessing.": "Nous mesurons au lieu de deviner.",
+    "We measured heating and cooling time, temperature stability, sensor precision and heat spread to improve the next version of the machine.": "Nous avons mesuré les temps de chauffe et de refroidissement, la stabilité de la température, la précision des capteurs et la répartition de la chaleur afin d’améliorer la prochaine version de la machine.",
+    "Team Volta Circuits": "Équipe Volta Circuits",
+    "Four disciplines.": "Quatre disciplines.",
+    "One physical result.": "Un résultat concret.",
+    "InFlux is built at the intersection of engineering, analysis and business. Nothing is left out.": "InFlux réunit l’ingénierie, l’analyse et la stratégie commerciale. Aucun aspect n’est laissé de côté.",
+    "Engineering lead": "Responsable ingénierie",
+    "Mechanical engineering, manufacturing, CAD design, electrical integration, microcontrollers, and product development.": "Ingénierie mécanique, fabrication, conception CAO, intégration électrique, microcontrôleurs et développement produit.",
+    "Build the machine.": "Construire la machine.",
+    "Simulation + analysis lead": "Responsable simulations et analyses",
+    "Math, SimScale, Unreal Engine simulations, Python models, machine learning, and data analysis.": "Mathématiques, simulations SimScale et Unreal Engine, modèles Python, apprentissage automatique et analyse de données.",
+    "Prove the decisions.": "Justifier les décisions.",
+    "Business lead": "Responsable développement commercial",
+    "Marketing, sponsorships, economics, logistics, and pitching.": "Marketing, sponsoring, économie, logistique et présentation.",
+    "Sell the idea.": "Vendre l’idée.",
+    "Embedded programming": "Programmation embarquée",
+    "Arduino, C++, C, backend development, automations, and system integration.": "Arduino, C++, C, développement back-end, automatisations et intégration système.",
+    "Make it think.": "La faire réfléchir.",
+    "Working principle": "Principe de fonctionnement",
+    "Plan. Build. Measure. Explain. As simple as that.": "Planifier. Construire. Mesurer. Expliquer. C’est aussi simple que cela.",
+    "Public collaboration path": "Comment collaborer",
+    "Review the work.": "Examinez notre travail.",
+    "Challenge us.": "Mettez-nous au défi.",
+    "Start with the public dossier, inspect the current artifacts, or follow the active repository.": "Commencez par le dossier public, consultez les ressources disponibles ou suivez le dépôt actif.",
+    "Read technical dossier": "Lire le dossier technique",
+    "Open public artifacts": "Ouvrir les ressources publiques",
+    "View repository": "Voir le dépôt",
+    "Contact": "Contactez-",
+    "Us": "nous",
+    "For sponsorships, collaboration, media or general interest in our project, use the addresses below.": "Pour toute demande de sponsoring, de collaboration, de presse ou pour en savoir plus sur notre projet, utilisez les adresses ci-dessous.",
+    "We're here to": "Nous sommes là pour",
+    "connect.": "échanger.",
+    "Sponsorship": "Sponsoring",
+    "Interested in becoming a sponsor? We have multiple ways of promoting your brand, all tailored to your needs.": "Vous souhaitez devenir sponsor ? Nous proposons plusieurs façons de mettre votre marque en valeur, adaptées à vos besoins.",
+    "Send sponsorship email": "Envoyer une demande de sponsoring",
+    "General Inquiry": "Demandes générales",
+    "Questions, collaborations, event invites, media requests or ideas you'd like to discuss with the team. We are open to anything!": "Questions, collaborations, invitations à des événements, demandes médias ou idées à discuter avec l’équipe : nous sommes ouverts à toutes les propositions !",
+    "Send general email": "Envoyer un e-mail",
+    "Join": "REJOIGNEZ",
+    "Recruitment": "Recrutement",
+    "Help build what comes next.": "Aidez-nous à construire la suite.",
+    "We are looking for driven people ready to turn ambitious engineering into working hardware, software, and proof.": "Nous recherchons des personnes motivées, prêtes à transformer des projets d’ingénierie ambitieux en solutions matérielles et logicielles fonctionnelles, appuyées par des résultats concrets.",
+    "Questions? Email David": "Des questions ? Écrivez à David",
+    "Apply through Google Forms": "Postuler via Google Forms",
+    "Apply": "Postuler",
+    "now": "\u200B",
+    "Apply now": "Postuler",
+    "Current Sponsors": "Sponsors actuels",
+    "Thank you to our": "Merci à nos",
+    "sponsors!": "sponsors !",
+    "Interested in becoming a sponsor? Contact us!": "Vous souhaitez devenir sponsor ? Contactez-nous !",
+    "Sponsor visibility": "Visibilité des sponsors",
+    "Your brand can travel with the team.": "Votre marque accompagne l’équipe partout où elle va.",
+    "Sponsorship packages can include visible placement on our uniforms and public presentation materials.": "Les formules de sponsoring peuvent inclure une présence visible sur nos tenues et nos supports de présentation publics.",
+    "Proof of the prototype": "Validation du prototype",
+    "Not perfect.": "Pas parfait.",
+    "But it proves the concept.": "Mais cela valide le concept.",
+    "A bad-looking first part doesn't prove the machine is poorly made. It proves the machine can control heat, melt plastic, control injection amount, flow cooling water, clamp molds and eject parts.": "Une première pièce imparfaite ne signifie pas que la machine est mal conçue. Elle prouve que la machine peut maîtriser la température, faire fondre le plastique, doser la quantité injectée, faire circuler l’eau de refroidissement, fermer les moules et éjecter les pièces.",
+    "samples in the longest captured thermal campaign, recorded April 16, 2026": "mesures lors de la plus longue campagne thermique enregistrée, le 16 avril 2026",
+    "measured heat-up, stabilization, and cooldown period": "période mesurée de chauffe, de stabilisation et de refroidissement",
+    "reported thermal model agreement with SimScale simulations": "concordance annoncée du modèle thermique avec les simulations SimScale",
+    "operator app, machine, and safety all in one system": "application opérateur, commande de la machine et fonctions de sécurité réunies dans un seul système",
+    "Thermal tests": "Essais thermiques",
+    "Measurements defined the variables.": "Les mesures ont défini les paramètres.",
+    "Thermal camera images and logged sensor data exposed heat loss, hot spots, and control behavior before those weaknesses became hidden inside an enclosure.": "Les images de la caméra thermique et les données enregistrées par les capteurs ont révélé les pertes de chaleur, les points chauds et le comportement du système de commande avant que ces faiblesses ne soient dissimulées par le carénage.",
+    "Centralised control": "Contrôle centralisé",
+    "Every action answers to the same hub.": "Toutes les actions passent par le même centre de contrôle.",
+    "The connectivity board communicates with the user, so the motherboard can focus on safety and precise control. All settings, sensors and outputs are controlled by the motherboard, running an STM32.": "La carte de connectivité échange avec l’utilisateur afin que la carte mère puisse se concentrer sur la sécurité et la précision de la commande. Tous les réglages, les données des capteurs et les sorties sont gérés par la carte mère équipée d’un STM32.",
+    "Repeatability": "Répétabilité",
+    "56 parts.": "56 pièces.",
+    "One mold.": "Un seul moule.",
+    "A single 3D printed resin mold was able to produce 56 individual parts before failure. Analysis revealed failure points and proposed quality-of-life improvements. The next version WILL be better.": "Un seul moule en résine imprimé en 3D a permis de produire 56 pièces avant de céder. L’analyse a mis en évidence les points de défaillance et proposé des améliorations pratiques. La prochaine version SERA meilleure.",
+    "Prototype status": "État du prototype",
+    "What is not proven.": "Ce qui n’est pas encore démontré.",
+    ". . .yet": "… pour l’instant",
+    "Mold life": "Durée de vie du moule",
+    "Resin mold durability across continuous, repeated cycles.": "Durabilité des moules en résine lors de cycles continus et répétés.",
+    "Continuous running": "Fonctionnement continu",
+    "Stable output quality across longer, controlled runs.": "Qualité de production stable sur des séries contrôlées plus longues.",
+    "Price reduction": "Réduction du prix",
+    "Reducing the profitable selling cost as much as possible.": "Réduire le prix de vente autant que possible tout en préservant la rentabilité.",
+    "Max water temperature": "Température maximale de l’eau",
+    "Maximum temperature the mold cooling water reaches during normal operation.": "Température maximale atteinte par l’eau de refroidissement du moule en fonctionnement normal.",
+    "Milestones": "Étapes clés",
+    "Download Hub": "Centre de téléchargements",
+    "Public files.": "Fichiers publics.",
+    "Clearly labeled.": "Clairement identifiés.",
+    "Welcome to the download hub! Check out the app, technical notebook or the branding materials.": "Bienvenue dans le centre de téléchargements ! Découvrez l’application, le cahier technique ou les ressources de la marque.",
+    "JavaScript is disabled. Direct files:": "JavaScript est désactivé. Fichiers directs :",
+    "Operator APK": "APK opérateur",
+    "technical notebook": "cahier technique",
+    "logo SVG": "logo SVG",
+    "Prototype notice:": "Avertissement concernant le prototype :",
+    "The public Influx Operator APK is still in development. Do not use it as a general-purpose machine controller. Constant machine supervision is required.": "L’APK public InFlux Operator est encore en développement. Ne l’utilisez pas comme système de commande généraliste. Une surveillance constante de la machine est indispensable.",
+    "Integrity:": "Intégrité :",
+    "SHA-256 checksums are published in": "Les sommes de contrôle SHA-256 sont publiées dans",
+    ". If the checksums don't check out, your file is NOT from Influx! Be careful of modified installations!": ". Si les sommes de contrôle ne correspondent pas, le fichier ne provient PAS d’InFlux ! Méfiez-vous des versions modifiées !",
+    "InFlux Operator APK": "APK InFlux Operator",
+    "Prototype operator artifact": "Version prototype de l’application opérateur",
+    "Latest version of the Influx Origin control app.": "Dernière version de l’application de contrôle InFlux Origin.",
+    "Android APK / 19.79 MB / June 2026": "APK Android / 19,79 Mo / juin 2026",
+    "ONCS operator artifact": "Version opérateur ONCS",
+    "Auto Connect app build used for the ONCS presentation path.": "Version de l’application Auto Connect utilisée pour la présentation ONCS.",
+    "Android APK / 19.79 MB / May 2026": "APK Android / 19,79 Mo / mai 2026",
+    "Technical Notebook": "Cahier technique",
+    "Public documentation / PDF": "Documentation publique / PDF",
+    "Ten-page public notebook covering the project, system, testing, and direction.": "Cahier public de dix pages présentant le projet, le système, les essais et son orientation future.",
+    "PDF / 645 KB / June 2026": "PDF / 645 Ko / juin 2026",
+    "Extended Technical Dossier": "Dossier technique détaillé",
+    "Public documentation / web": "Documentation publique / en ligne",
+    "Long-form documentation covering mechanics, control, validation, limits, and next steps.": "Documentation complète sur la mécanique, le contrôle, la validation, les limites et les prochaines étapes.",
+    "Web technical notebook": "Cahier technique en ligne",
+    "InFlux Origin Logo": "Logo InFlux Origin",
+    "Public brand asset / SVG": "Ressource publique de la marque / SVG",
+    "Scalable monochrome logo for project references and approved public coverage.": "Logo monochrome vectoriel pour les références au projet et les publications publiques autorisées.",
+    "External Links + References": "Liens externes et références",
+    "Follow the work.": "Suivez le projet.",
+    "Check the sources.": "Consultez les sources.",
+    "Public project destinations and technical references that informed the platform.": "Pages publiques du projet et références techniques ayant contribué au développement de la plateforme.",
+    "Project destinations": "Pages du projet",
+    "Technical documentation": "Documentation technique",
+    "Read the extended project dossier": "Lire le dossier détaillé du projet",
+    "Download hub": "Centre de téléchargements",
+    "APK, notebook, and public brand files": "APK, cahier technique et ressources publiques de la marque",
+    "Evidence overview": "Présentation des résultats",
+    "Results, measurements, and current limits": "Résultats, mesures et limites actuelles",
+    "Public repository": "Dépôt public",
+    "Inspect the active software and firmware record": "Consulter les versions en cours de développement du logiciel et du micrologiciel",
+    "Technical references": "Références techniques",
+    "Low-volume injection molding with 3D printed molds": "Moulage par injection en petite série avec des moules imprimés en 3D",
+    "Plastic injection molding design guidelines": "Règles de conception pour le moulage par injection plastique",
+    "NUCLEO-H753ZI product documentation": "Documentation produit du NUCLEO-H753ZI",
+    "Thermocouple fundamentals": "Principes de base des thermocouples",
+    "Public technical dossier": "Dossier technique public",
+    "A desktop injection molding platform integrating mechanics, thermal control, machine firmware, operator software, safety logic, and experimental tooling.": "Une plateforme de moulage par injection de bureau réunissant mécanique, commande thermique, micrologiciel de la machine, logiciel opérateur, logique de sécurité et outillage expérimental.",
+    "Download notebook": "Télécharger le cahier",
+    "Back to project hub": "Retour au portail du projet",
+    "Current state": "État actuel",
+    "Integrated prototype in active calibration": "Prototype intégré en cours de mise au point",
+    "Primary objective": "Objectif principal",
+    "Repeatable small-part thermoplastic injection": "Injection reproductible de petites pièces thermoplastiques",
+    "Tooling direction": "Orientation de l’outillage",
+    "Rapid resin molds with controlled cooling": "Moules en résine à fabrication rapide avec refroidissement contrôlé",
+    "Control path": "Chaîne de contrôle",
+    "Android operator → ESP bridge → Nucleo firmware": "Application Android → passerelle ESP → micrologiciel Nucleo",
+    "Volta Circuits": "Volta Circuits",
+    "Contents": "Sommaire",
+    "1. Project definition": "1. Définition du projet",
+    "2. System architecture": "2. Architecture du système",
+    "3. Mechanical system": "3. Système mécanique",
+    "4. Thermal system": "4. Système thermique",
+    "5. Electronics and controls": "5. Électronique et contrôle",
+    "6. Firmware and operator stack": "6. Micrologiciel et interface opérateur",
+    "7. Safety position": "7. Sécurité",
+    "8. Validation evidence": "8. Résultats de validation",
+    "9. Current limits": "9. Limites actuelles",
+    "10. Product direction": "10. Orientation du produit",
+    "11. Team": "11. Équipe",
+    "01 / Project definition": "01 / Définition du projet",
+    "Manufacturing evidence before industrial tooling.": "Validation de la fabrication avant d’investir dans l’outillage industriel.",
+    "InFlux Origin MK1 is a desktop-scale injection molding prototype built to help teams learn from real thermoplastic parts before committing to conventional production tooling. It is intended for process learning, functional validation, education, and future short-run experimentation.": "InFlux Origin MK1 est un prototype compact de moulage par injection, conçu pour aider les équipes à tester le procédé sur de véritables pièces thermoplastiques avant d’investir dans un outillage de production conventionnel. Il est destiné à l’apprentissage du procédé, à la validation fonctionnelle, à l’enseignement et à de futurs essais en petite série.",
+    "The project does not claim to replace an industrial injection molding machine. Its purpose is to reduce the distance between a 3D printed model and a professionally tooled production part by making the molding process more accessible, measurable, and iterative.": "Le projet ne prétend pas remplacer une machine industrielle de moulage par injection. Son objectif est de réduire l’écart entre un modèle imprimé en 3D et une pièce de production réalisée avec un outillage professionnel, en rendant le procédé plus accessible, mesurable et itératif.",
+    "02 / System architecture": "02 / Architecture du système",
+    "A complete machine, not an isolated mechanism.": "Une machine complète, pas un mécanisme isolé.",
+    "The platform is organized into six connected layers:": "La plateforme est organisée en six ensembles interconnectés :",
+    "Structural frame and aligned movement system.": "Châssis structurel et système de guidage aligné.",
+    "Heated barrel, nozzle, and piston-driven injection path.": "Fourreau chauffé, buse et mécanisme d’injection à piston.",
+    "Mold support, closing movement, and rapid tooling package.": "Support de moule, mécanisme de fermeture et solution d’outillage rapide.",
+    "Power distribution, sensors, motion drivers, and emergency inputs.": "Distribution électrique, capteurs, pilotes de moteurs et entrées d’arrêt d’urgence.",
+    "Nucleo machine firmware and ESP32-C6 communication bridge.": "Micrologiciel de la machine sur Nucleo et passerelle de communication ESP32-C6.",
+    "Android operator interface and diagnostic support tools.": "Interface opérateur Android et outils d’aide au diagnostic.",
+    "The Nucleo controller owns machine state, heating, motion, safety checks, and cycle behavior. The ESP bridge translates same-network operator requests into the machine command protocol. The Android application presents status and sends supported commands.": "Le contrôleur Nucleo gère l’état de la machine, le chauffage, les mouvements, les contrôles de sécurité et le déroulement des cycles. La passerelle ESP traduit les requêtes de l’opérateur sur le même réseau en commandes comprises par la machine. L’application Android affiche l’état et envoie les commandes prises en charge.",
+    "Confirmed platform summary": "Résumé vérifié de la plateforme",
+    "Machine controller": "Contrôleur de la machine",
+    "Communication bridge": "Passerelle de communication",
+    "ESP32-C6 / local HTTP to acknowledged UART commands": "ESP32-C6 / HTTP local converti en commandes UART avec accusé de réception",
+    "Android application for status and supported commands": "Application Android pour afficher l’état et envoyer les commandes prises en charge",
+    "Thermal sensing": "Mesure de la température",
+    "Multiple K-type thermocouples across the heated barrel": "Plusieurs thermocouples de type K répartis sur le fourreau chauffé",
+    "3D-printed photopolymer resin molds with controlled water cooling": "Moules en résine photopolymère imprimés en 3D avec refroidissement par eau contrôlé",
+    "Current status": "État actuel",
+    "Supervised integrated prototype in active calibration": "Prototype intégré supervisé en cours de mise au point",
+    "03 / Mechanical system": "03 / Système mécanique",
+    "Alignment and load paths decide whether the process is repeatable.": "L’alignement et la transmission des efforts déterminent la répétabilité du procédé.",
+    "The current structure uses aluminum extrusion, interface plates, linear guidance, lead-screw movement, and a servo-driven injection axis. The architecture remains adjustable because the prototype is still being calibrated around real component behavior and mold geometry.": "La structure actuelle utilise des profilés en aluminium, des plaques d’interface, des guidages linéaires, des vis d’entraînement et un axe d’injection entraîné par servomoteur. L’architecture reste réglable, car le prototype est encore mis au point en fonction du comportement réel des composants et de la géométrie des moules.",
+    "Mechanical priorities": "Priorités mécaniques",
+    "Keep the nozzle, mold entry, and moving plates aligned across repeated cycles.": "Maintenir l’alignement entre la buse, l’entrée du moule et les plateaux mobiles au fil des cycles.",
+    "Carry injection and clamping forces through structure rather than fragile tooling.": "Transmettre les efforts d’injection et de fermeture au châssis plutôt qu’à un outillage fragile.",
+    "Make critical supports and service areas accessible during calibration.": "Garder les supports critiques et les zones de maintenance accessibles pendant la mise au point.",
+    "Measure and reduce backlash, frame twist, and platen racking.": "Mesurer et réduire le jeu, la torsion du châssis et le désalignement des plateaux.",
+    "04 / Thermal system": "04 / Système thermique",
+    "Temperature is a process variable, not a visual effect.": "La température est un paramètre du procédé, pas un effet visuel.",
+    "The barrel is heated in multiple zones and measured with K-type thermocouples. Logged tests and thermal-camera passes are used to inspect heat-up, stabilization, cooldown, sensor behavior, heat loss, and local hot spots.": "Le fourreau est chauffé en plusieurs zones et surveillé par des thermocouples de type K. Les données enregistrées et les relevés à la caméra thermique permettent d’étudier la montée en température, la stabilisation, le refroidissement, le comportement des capteurs, les pertes de chaleur et les points chauds locaux.",
+    "The longest captured campaign contains 6,331 samples across approximately 108.6 minutes. Thermal modeling was compared with SimScale, with reported agreement around ±8% for the compared cases. These results guide insulation, sensor placement, nozzle design, cooling, and safe timing decisions.": "La plus longue campagne enregistrée comprend 6 331 mesures sur environ 108,6 minutes. Le modèle thermique a été comparé à SimScale, avec une concordance annoncée d’environ ±8 % pour les cas étudiés. Ces résultats orientent les choix d’isolation, de placement des capteurs, de conception de la buse, de refroidissement et de définition de temps de procédé sûrs.",
+    "Evidence source: barrel-tuning campaign recorded April 16, 2026 and summarized in the public technical notebook.": "Source des résultats : campagne de réglage du fourreau enregistrée le 16 avril 2026 et résumée dans le cahier technique public.",
+    "05 / Electronics and controls": "05 / Électronique et contrôle",
+    "Prototype flexibility with explicit machine ownership.": "Souplesse du prototype, responsabilités clairement définies.",
+    "The integrated control stack is centered on a NUCLEO-H753ZI. It interfaces with thermocouple modules, heater switching, stepper drivers, the injection servo path, safety inputs, and the communication bridge.": "Le système de commande intégré s’articule autour d’un NUCLEO-H753ZI. Il communique avec les modules de thermocouples, la commande des éléments chauffants, les pilotes de moteurs pas à pas, le servomoteur d’injection, les entrées de sécurité et la passerelle de communication.",
+    "A dedicated Origin motherboard has been designed in KiCad to organize the current prototype wiring into a cleaner integration layer. It remains a prototype electronics project and is not presented as a certified production controller.": "Une carte mère Origin dédiée a été conçue dans KiCad afin de regrouper le câblage actuel du prototype dans une couche d’intégration plus propre. Elle reste un projet électronique expérimental et n’est pas présentée comme un contrôleur de production certifié.",
+    "06 / Firmware and operator stack": "06 / Micrologiciel et interface opérateur",
+    "Control remains close to the machine.": "La commande reste au plus près de la machine.",
+    "The Nucleo owns safety admission, heating, movement, and cycle sequencing.": "Le Nucleo gère l’autorisation de fonctionnement, le chauffage, les mouvements et l’enchaînement des cycles.",
+    "The ESP32-C6 acts as a narrow same-network HTTP-to-command bridge.": "L’ESP32-C6 sert de passerelle simple entre les requêtes HTTP du réseau local et les commandes de la machine.",
+    "The Android operator app presents status, supported actions, and service access.": "L’application opérateur Android affiche l’état, les actions disponibles et les fonctions de maintenance.",
+    "A desktop serial monitor and diagnostic sketches support commissioning and fault analysis.": "Un moniteur série de bureau et des outils de diagnostic facilitent la mise en service et l’analyse des défauts.",
+    "The public operator APK is a prototype artifact for supervised demonstrations. It is not a general-purpose machine controller and should not be treated as a production release.": "L’APK opérateur public est un prototype destiné à des démonstrations supervisées. Il ne s’agit pas d’un système de commande généraliste et il ne doit pas être considéré comme une version de production.",
+    "07 / Safety position": "07 / Sécurité du prototype",
+    "Current use is supervised and prototype-only.": "L’utilisation actuelle est supervisée et réservée au prototype.",
+    "The project combines mains-powered heating, hot surfaces, and powered motion. The current machine is operated as a supervised prototype. Emergency-stop behavior, safe startup defaults, fault handling, grounding, power isolation, and guarded access remain critical requirements.": "Le projet combine chauffage sur secteur, surfaces chaudes et mouvements motorisés. La machine actuelle est utilisée comme prototype sous surveillance. Le fonctionnement de l’arrêt d’urgence, les réglages sûrs par défaut au démarrage, la gestion des défauts, la mise à la terre, l’isolation électrique et la protection des zones d’accès restent des exigences essentielles.",
+    "A future product version requires a cleaner enclosure, stronger hardware isolation, validated safety behavior, and a formal review appropriate to its intended users and environment.": "Une future version destinée au marché nécessitera un carénage mieux conçu, une isolation renforcée des circuits, des fonctions de sécurité validées et une évaluation formelle adaptée aux utilisateurs et à l’environnement visés.",
+    "08 / Validation evidence": "08 / Résultats de validation",
+    "The project has crossed from simulation into physical evidence.": "Le projet est passé des simulations à des preuves concrètes.",
+    "A first successful injected part has been produced.": "Une première pièce a été injectée avec succès.",
+    "Thermal behavior has been measured with logged sensors and a thermal camera.": "Le comportement thermique a été mesuré à l’aide de capteurs avec enregistrement des données et d’une caméra thermique.",
+    "Major mechanical, electrical, firmware, and operator subsystems have been integrated.": "Les principaux sous-systèmes mécaniques, électriques, de micrologiciel et d’interface opérateur ont été intégrés.",
+    "A dedicated PCB and a complete operator/control stack have been developed.": "Une carte électronique dédiée et un système complet d’interface opérateur et de commande ont été développés.",
+    "The first part is evidence of system function, not proof of production readiness. Its defects are useful because they identify the next work in venting, fill behavior, tooling, and process calibration.": "La première pièce prouve que le système fonctionne, mais pas qu’il est prêt pour la production. Ses défauts sont utiles, car ils indiquent les prochains travaux à mener sur l’évacuation de l’air, le remplissage, l’outillage et le réglage du procédé.",
+    "Validation record: public technical notebook, centralized June 11, 2026, with original measurements and active software/firmware sources retained.": "Dossier de validation : cahier technique public consolidé le 11 juin 2026, avec conservation des mesures d’origine ainsi que des sources logicielles et du micrologiciel en cours de développement.",
+    "09 / Current limits": "09 / Limites actuelles",
+    "What remains unproven.": "Ce qui reste à démontrer.",
+    "Stable multi-part repeatability across longer runs.": "Une répétabilité stable sur plusieurs pièces et des séries plus longues.",
+    "Long-run life and failure behavior of resin tooling.": "La durée de vie et les modes de défaillance des moules en résine sur de longues séries.",
+    "Fully tuned filling, holding, venting, and ejection behavior.": "Le réglage complet du remplissage, du maintien en pression, de l’évacuation de l’air et de l’éjection.",
+    "Final enclosure safety and production-grade electrical integration.": "La sécurité du carénage final et une intégration électrique de niveau industriel.",
+    "Validated process windows across multiple material families.": "Des plages de paramètres de procédé validées pour plusieurs familles de matériaux.",
+    "10 / Product direction": "10 / Orientation du produit",
+    "Turn the experiment into a dependable platform.": "Transformer l’expérimentation en une plateforme fiable.",
+    "The next Origin direction focuses on repeatability, stronger process sensing, better thermal insulation, refined mold interfaces, safer enclosure design, cleaner electronics, and a simpler operator workflow.": "La prochaine version d’Origin mettra l’accent sur la répétabilité, une surveillance plus poussée du procédé, une meilleure isolation thermique, des interfaces de moule améliorées, un carénage plus sûr, une électronique plus propre et un parcours opérateur plus simple.",
+    "The long-term ambition is a useful workshop and education platform that can produce functional small parts, teach the complete molding process, and help hardware teams make better tooling decisions earlier.": "À long terme, nous voulons créer une plateforme utile pour les ateliers et l’enseignement, capable de produire de petites pièces fonctionnelles, d’expliquer l’ensemble du procédé de moulage et d’aider les équipes de développement matériel à prendre plus tôt de meilleures décisions concernant l’outillage.",
+    "11 / Team": "11 / Équipe",
+    "Engineering lead: mechanics, manufacturing, electronics, integration, and product development.": "Responsable ingénierie : mécanique, fabrication, électronique, intégration et développement produit.",
+    "Team and business lead: strategy, economics, sponsorships, organization, and presentation.": "Responsable équipe et développement commercial : stratégie, économie, sponsoring, organisation et présentation.",
+    "Simulation and analysis lead: SimScale, Python models, mathematics, and data analysis.": "Responsable simulation et analyse : SimScale, modèles Python, mathématiques et analyse de données.",
+    "Embedded programming: Arduino, C++, C, backend development, automations, and system integration.": "Programmation embarquée : Arduino, C++, C, développement back-end, automatisations et intégration des systèmes.",
+    "Public technical dossier / integrated prototype in active calibration.": "Dossier technique public / prototype intégré en cours de mise au point.",
+    "InFlux Origin AI overview": "Présentation d’InFlux Origin pour l’IA",
+    "InFlux Origin structured project context": "Contexte structuré du projet InFlux Origin",
+    "InFlux Origin AI technical context": "Contexte technique d’InFlux Origin destiné à l’IA",
+    "Open InFlux home": "Ouvrir l’accueil InFlux",
+    "InFlux Origin home": "Accueil InFlux Origin",
+    "Project views": "Sections du projet",
+    "Primary navigation": "Navigation principale",
+    "CAD render of the InFlux Origin MK1 machine": "Rendu CAO de la machine InFlux Origin MK1",
+    "Original hand-drawn InFlux injection molding system sketch": "Croquis original dessiné à la main du système de moulage par injection InFlux",
+    "The first hand-drawn InFlux Origin MK1 logo on the cardboard prototype": "Premier logo InFlux Origin MK1 dessiné à la main sur le prototype en carton",
+    "Early InFlux MK1 wireframe plan": "Première esquisse structurelle d’InFlux MK1",
+    "InFlux Origin MK1 integrated machine render": "Rendu de la machine intégrée InFlux Origin MK1",
+    "InFlux packaging and product development concept": "Concept d’emballage et de développement produit InFlux",
+    "Preview of the InFlux Origin MK1 assembly": "Aperçu de l’assemblage InFlux Origin MK1",
+    "Other project stages": "Autres étapes du projet",
+    "InFlux Operator application screens": "Écrans de l’application InFlux Operator",
+    "InFlux Operator dashboard screen": "Tableau de bord de l’application InFlux Operator",
+    "InFlux Operator production and temperature controls": "Commandes de production et de température dans InFlux Operator",
+    "InFlux Operator machine movement controls": "Commandes de déplacement de la machine dans InFlux Operator",
+    "Annotated view of the Origin motherboard design": "Vue annotée de la conception de la carte mère Origin",
+    "Landscape view of the InFlux Origin motherboard PCB layout": "Vue d’ensemble du routage PCB de la carte mère InFlux Origin",
+    "Annotated thermal testing results": "Résultats annotés des essais thermiques",
+    "Thermal camera image captured during InFlux testing": "Image capturée par caméra thermique pendant les essais InFlux",
+    "Thermal testing equipment used on the InFlux machine": "Équipement utilisé pour les essais thermiques de la machine InFlux",
+    "Stefan Tonegari at a Volta Circuits event": "Stefan Tonegari lors d’un événement Volta Circuits",
+    "Pintilei David at a Volta Circuits event": "Pintilei David lors d’un événement Volta Circuits",
+    "Fabian Volintiru portrait not yet published": "Portrait de Fabian Volintiru non encore publié",
+    "Ciprian Ursu portrait not yet published": "Portrait de Ciprian Ursu non encore publié",
+    "Apply to join InFlux using Google Forms (opens in a new tab)": "Postuler pour rejoindre InFlux via Google Forms (s’ouvre dans un nouvel onglet)",
+    "Current InFlux sponsors": "Sponsors actuels d’InFlux",
+    "Volta Circuits team uniform render showing sponsor placement areas": "Rendu de la tenue de l’équipe Volta Circuits illustrant les emplacements réservés aux sponsors",
+    "First successfully injected InFlux part": "Première pièce InFlux injectée avec succès",
+    "InFlux thermal testing in the laboratory": "Essais thermiques d’InFlux en laboratoire",
+    "Landscape view of the InFlux dedicated motherboard design": "Vue d’ensemble de la carte mère dédiée d’InFlux",
+    "Box containing 56 parts injected by InFlux Origin MK1": "Boîte contenant 56 pièces injectées par InFlux Origin MK1",
+    "Mold life validation": "Validation de la durée de vie du moule",
+    "Continuous running validation": "Validation du fonctionnement continu",
+    "Production readiness validation": "Validation de la préparation à la production",
+    "Process calibration validation": "Validation du réglage du procédé",
+    "Interactive 3D assembly of InFlux Origin MK1": "Assemblage 3D interactif d’InFlux Origin MK1"
+});
+
+  const TRANSLATIONS = Object.freeze({
+    ro: RO,
+    fr: FR
+  });
+  const FRENCH_READY = Object.keys(FR).length === Object.keys(RO).length &&
+    Object.keys(RO).every((key) => typeof FR[key] === "string" && FR[key].trim());
+  const SUPPORTED_LANGUAGES = new Set(["en", "ro", ...(FRENCH_READY ? ["fr"] : [])]);
+  const LANGUAGE_STATUS = Object.freeze({
+    en: "English is active.",
+    ro: "Limba română este activă.",
+    fr: "Le français est actif."
+  });
+
   const originalText = new WeakMap();
   const originalAttributes = new WeakMap();
   let currentLanguage = "en";
@@ -426,7 +819,9 @@
   function readStoredLanguage() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return SUPPORTED_LANGUAGES.has(stored) ? stored : memoryLanguage;
+      if (SUPPORTED_LANGUAGES.has(stored)) return stored;
+      if (stored) localStorage.removeItem(STORAGE_KEY);
+      return memoryLanguage;
     } catch {
       return memoryLanguage;
     }
@@ -1096,6 +1491,7 @@
       if (normalize(node.nodeValue) &&
         parent &&
         !parent.closest("[data-no-i18n], script, style, svg, canvas, code, pre, textarea, option, .visually-hidden") &&
+        !parent.closest(".recruitment-apply b") &&
         (includeProjectIndex || !parent.closest(".project-index"))) {
         const style = getComputedStyle(parent);
         const rawText = String(node.nodeValue || "");
@@ -1160,11 +1556,13 @@
       let host = element.parentElement;
       while (host && host !== document.body) {
         const display = getComputedStyle(host).display;
-        if (display !== "inline" && display !== "contents") return host;
+        if (display !== "inline" && display !== "contents") {
+          return host.matches(".recruitment-apply b") ? null : host;
+        }
         host = host.parentElement;
       }
       return element;
-    }))];
+    }).filter(Boolean))];
 
     visible.forEach((element) => {
       const factor = (element.getBoundingClientRect().left - minimumX) / span;
@@ -1355,8 +1753,8 @@
   }
 
   function translatedValue(source, language) {
-    if (language !== "ro") return source;
-    return RO[normalize(source)] || source;
+    const dictionary = TRANSLATIONS[language];
+    return dictionary?.[normalize(source)] || source;
   }
 
   function translateTextNode(node, language) {
@@ -1372,8 +1770,9 @@
     const leading = record.source.match(/^\s*/)?.[0] || "";
     const trailing = record.source.match(/\s*$/)?.[0] || "";
     const sourceKey = normalize(record.source);
-    const next = language === "ro" && RO[sourceKey]
-      ? `${leading}${RO[sourceKey]}${trailing}`
+    const translated = TRANSLATIONS[language]?.[sourceKey];
+    const next = translated
+      ? `${leading}${translated}${trailing}`
       : record.source;
 
     if (node.nodeValue !== next) node.nodeValue = next;
@@ -1536,16 +1935,12 @@
     document.documentElement.lang = nextLanguage;
     translateTree(document.documentElement, nextLanguage);
     updateToggle(nextLanguage);
-    document.documentElement.classList.remove("i18n-ro-pending");
+    document.documentElement.classList.remove("i18n-language-pending", "i18n-ro-pending");
     if (persist) storeLanguage(nextLanguage);
 
     if (announce) {
       const status = document.querySelector("[data-language-status]");
-      if (status) {
-        status.textContent = nextLanguage === "ro"
-          ? "Limba română este activă."
-          : "English is active.";
-      }
+      if (status) status.textContent = LANGUAGE_STATUS[nextLanguage];
     }
 
     window.dispatchEvent(new CustomEvent("influxlanguagechange", {
@@ -1566,8 +1961,20 @@
     const toggle = document.createElement("div");
     toggle.className = "language-toggle";
     toggle.setAttribute("role", "group");
-    toggle.setAttribute("aria-label", "Language / Limbă");
+    toggle.setAttribute("aria-label", FRENCH_READY ? "Language / Limbă / Langue" : "Language / Limbă");
     toggle.setAttribute("data-no-i18n", "");
+    const frenchButton = FRENCH_READY ? `
+      <button type="button" data-language="fr" aria-label="French / Français" aria-pressed="false" draggable="false">
+        <span class="language-toggle__ring" aria-hidden="true">
+          <span class="language-toggle__flag">
+            <svg viewBox="0 0 100 100" focusable="false" aria-hidden="true">
+              <rect width="34" height="100" fill="#0055A4"/>
+              <rect x="33" width="34" height="100" fill="#FFFFFF"/>
+              <rect x="66" width="34" height="100" fill="#EF4135"/>
+            </svg>
+          </span>
+        </span>
+      </button>` : "";
     toggle.innerHTML = `
       <span class="language-toggle__slider" aria-hidden="true"></span>
       <button type="button" data-language="en" aria-label="English / Engleză" aria-pressed="false" draggable="false">
@@ -1594,15 +2001,23 @@
           </span>
         </span>
       </button>
+      ${frenchButton}
       <span class="visually-hidden" aria-live="polite" data-language-status></span>`;
     identity.appendChild(toggle);
+    toggle.style.setProperty("--language-count", String(toggle.querySelectorAll("[data-language]").length));
 
     bindLanguageSlider(toggle);
 
     toggle.addEventListener("keydown", (event) => {
       if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
       event.preventDefault();
-      const language = event.key === "ArrowRight" ? "ro" : "en";
+      const buttons = [...toggle.querySelectorAll("[data-language]")];
+      const currentIndex = Math.max(0, buttons.findIndex((button) =>
+        button.dataset.language === currentLanguage
+      ));
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      const nextIndex = (currentIndex + direction + buttons.length) % buttons.length;
+      const language = buttons[nextIndex].dataset.language;
       requestLanguage(language);
       toggle.querySelector(`[data-language="${language}"]`)?.focus();
     });
@@ -1638,7 +2053,9 @@
 
   function init() {
     injectToggle();
-    memoryLanguage = document.documentElement.lang === "ro" ? "ro" : "en";
+    memoryLanguage = SUPPORTED_LANGUAGES.has(document.documentElement.lang)
+      ? document.documentElement.lang
+      : "en";
     applyLanguage(readStoredLanguage(), { persist: false, announce: false });
     observeDynamicContent();
   }
@@ -1646,6 +2063,8 @@
   window.InFluxI18n = Object.freeze({
     setLanguage: (language) => applyLanguage(language),
     getLanguage: () => currentLanguage,
+    getAvailableLanguages: () => [...SUPPORTED_LANGUAGES],
+    isFrenchReady: () => FRENCH_READY,
     refresh: scheduleRefresh,
     translateValue: (value) => translatedValue(value, currentLanguage)
   });
