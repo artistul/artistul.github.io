@@ -749,7 +749,7 @@ test("contact tab exposes the direct email paths", async ({ page }) => {
   await expect(page.getByRole("link", { name: /Questions\? Email David/ })).toHaveAttribute("href", /mailto:david\.pintilei9@gmail\.com/);
   await expect(page.getByRole("link", { name: /Apply to join InFlux using Google Forms/ })).toHaveAttribute(
     "href",
-    "https://docs.google.com/forms/d/e/REPLACE_WITH_RECRUITMENT_FORM_ID/viewform"
+    "https://docs.google.com/forms/d/e/1FAIpQLSdeUo5bN8V_L0kk_D5xYohvuY3CuL_ZbvVl4gSq0S2-MFM5Xw/viewform?usp=dialog"
   );
   await expect(page.getByRole("link", { name: /Apply to join InFlux using Google Forms/ })).toHaveAttribute("target", "_blank");
 
