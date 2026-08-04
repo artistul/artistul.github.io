@@ -1,0 +1,55 @@
+- generic [ref=e1]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - button "Deschide pagina principală InFlux" [ref=e83] [cursor=pointer]
+      - group "Language / Limbă" [ref=e6]:
+        - button "English / Engleză" [ref=e7]
+        - button "Romanian / Română" [active] [pressed] [ref=e16]
+        - generic [ref=e23]: Limba română este activă.
+    - button "Deschide meniul de navigare" [ref=e84] [cursor=pointer]:
+      - generic [ref=e82]: Meniu
+  - main [ref=e34]:
+    - tabpanel "Acasă" [ref=e85]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - heading "Producție reală. În format desktop." [level=1] [ref=e86]: Producție reală.În format desktop.
+          - paragraph [ref=e39]: "InFlux Origin face legătura dintre un prototip imprimat 3D și producția industrială: injectează termoplastice reale în matrițe din rășină imprimate 3D și este controlată printr-o aplicație simplă pentru operator!"
+          - generic [ref=e40]:
+            - button "Vezi rezultatele" [ref=e87] [cursor=pointer]
+            - button "Explorează mașina" [ref=e88] [cursor=pointer]
+        - generic [ref=e43]:
+          - img "Randare CAD a mașinii InFlux Origin MK1" [ref=e89]
+          - strong [ref=e48]: Origin MK1
+      - region [ref=e90]:
+        - paragraph [ref=e50]: De ce InFlux?
+        - heading "Spațiul dintre prototip și industrie nu ar trebui să fie gol." [level=2] [ref=e91]
+        - paragraph [ref=e52]: Poți imprima un model în câteva ore sau poți investi zeci de mii de euro în producție industrială. De ce să nu existe ceva între ele? Mai rapid decât imprimarea 3D. Cantități semi-industriale. InFlux este răspunsul.
+      - region [ref=e92]:
+        - generic [ref=e54]:
+          - paragraph [ref=e55]: Etapele validării
+          - heading "De la o idee ambițioasă la o mașină funcțională." [level=2] [ref=e93]
+        - generic [ref=e57]:
+          - button "01 Testată termic 6.331 de măsurători în cea mai lungă sesiune de testare." [ref=e94] [cursor=pointer]:
+            - generic [ref=e59]: "01"
+            - strong [ref=e60]: Testată termic
+            - generic [ref=e61]: 6.331 de măsurători în cea mai lungă sesiune de testare.
+          - button "02 Sistem de control integrat Firmware, punte Wi-Fi, aplicație pentru operator și funcții de diagnosticare și întreținere." [ref=e95] [cursor=pointer]:
+            - generic [ref=e63]: "02"
+            - strong [ref=e64]: Sistem de control integrat
+            - generic [ref=e65]: Firmware, punte Wi-Fi, aplicație pentru operator și funcții de diagnosticare și întreținere.
+          - button "03 Piesă injectată Nu încercăm să convingem. Demonstrăm." [ref=e96] [cursor=pointer]:
+            - generic [ref=e67]: "03"
+            - strong [ref=e68]: Piesă injectată
+            - generic [ref=e69]: Nu încercăm să convingem. Demonstrăm.
+      - generic [ref=e70]:
+        - paragraph [ref=e71]: Resurse publice
+        - heading "Conceput pentru a fi analizat, testat și îmbunătățit." [level=2] [ref=e97]
+        - button "Cunoaște echipa ↗" [ref=e98] [cursor=pointer]:
+          - text: Cunoaște echipa
+          - generic [ref=e74]: ↗
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+  - contentinfo [ref=e75]:
+    - button [ref=e76] [cursor=pointer]:
+      - img "InFlux Origin" [ref=e77]
+    - paragraph
+    - button "Înapoi la început ↑" [ref=e99] [cursor=pointer]

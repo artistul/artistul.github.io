@@ -1,0 +1,65 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e3]:
+    - generic [ref=f1e4]:
+      - button "Open InFlux home" [ref=f1e5] [cursor=pointer]
+      - group "Language / Limbă / Langue" [ref=f1e6]:
+        - button "English / Engleză" [pressed] [ref=f1e7]
+        - button "Romanian / Română" [ref=f1e16]
+        - button "French / Français" [ref=f1e23]
+    - tablist "Project views" [ref=f1e31]:
+      - generic [ref=f1e32]:
+        - tab "Home" [ref=f1e33] [cursor=pointer]
+        - tab "Machine Development" [ref=f1e34] [cursor=pointer]
+        - tab "InFlux Ecosystem" [ref=f1e35] [cursor=pointer]
+        - tab "Team" [ref=f1e36] [cursor=pointer]
+        - tab "Proof" [ref=f1e37] [cursor=pointer]
+      - generic [ref=f1e38]:
+        - tab "Contact Us" [selected] [ref=f1e39] [cursor=pointer]
+        - tab "Sponsors" [ref=f1e40] [cursor=pointer]
+  - main [ref=f1e41]:
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+    - tabpanel "Contact Us" [ref=f1e42]:
+      - generic [ref=f1e43]:
+        - heading "Contact Us" [level=1] [ref=f1e44]: ContactUs
+        - paragraph [ref=f1e45]: For sponsorships, collaboration, media or general interest in our project, use the addresses below.
+        - strong [ref=f1e46]: We're here to connect.
+      - generic [ref=f1e47]:
+        - article [ref=f1e48]:
+          - generic [ref=f1e49]: "01"
+          - generic [ref=f1e50]:
+            - heading "Sponsorship" [level=2] [ref=f1e51]
+            - paragraph [ref=f1e52]: Interested in becoming a sponsor? We have multiple ways of promoting your brand, all tailored to your needs.
+          - link "Send sponsorship email tonegari.stefan@gmail.com" [ref=f1e53] [cursor=pointer]:
+            - /url: mailto:tonegari.stefan@gmail.com?subject=InFlux%20sponsorship%20inquiry
+            - generic [ref=f1e54]: Send sponsorship email
+            - strong [ref=f1e55]: tonegari.stefan@gmail.com
+        - article [ref=f1e56]:
+          - generic [ref=f1e57]: "02"
+          - generic [ref=f1e58]:
+            - heading "General Inquiry" [level=2] [ref=f1e59]
+            - paragraph [ref=f1e60]: Questions, collaborations, event invites, media requests or ideas you'd like to discuss with the team. We are open to anything!
+          - link "Send general email david.pintilei9@gmail.com" [ref=f1e61] [cursor=pointer]:
+            - /url: mailto:david.pintilei9@gmail.com?subject=InFlux%20general%20inquiry
+            - generic [ref=f1e62]: Send general email
+            - strong [ref=f1e63]: david.pintilei9@gmail.com
+      - region [ref=f1e64]:
+        - strong [ref=f1e66]: Join
+        - generic [ref=f1e67]:
+          - paragraph [ref=f1e68]: Recruitment
+          - heading "Help build what comes next." [level=2] [ref=f1e69]
+          - paragraph [ref=f1e70]: We are looking for driven people ready to turn ambitious engineering into working hardware, software, and proof.
+          - link "Questions? Email David david.pintilei9@gmail.com" [ref=f1e71] [cursor=pointer]:
+            - /url: mailto:david.pintilei9@gmail.com?subject=InFlux%20recruitment%20inquiry
+            - generic [ref=f1e72]: Questions? Email David
+            - strong [ref=f1e73]: david.pintilei9@gmail.com
+        - link "Apply to join InFlux using Google Forms (opens in a new tab)" [ref=f1e74] [cursor=pointer]:
+          - /url: https://docs.google.com/forms/d/e/1FAIpQLSdeUo5bN8V_L0kk_D5xYohvuY3CuL_ZbvVl4gSq0S2-MFM5Xw/viewform?usp=dialog
+          - generic [ref=f1e75]: Apply through Google Forms
+          - strong [ref=f1e76]:
+            - generic [ref=f1e77]: Apply now
+            - generic [ref=f1e78]: ↗
+  - contentinfo [ref=f1e79]:
+    - button [ref=f1e80] [cursor=pointer]:
+      - img "InFlux Origin" [ref=f1e81]
+    - paragraph
+    - button "Back to top ↑" [ref=f1e82] [cursor=pointer]

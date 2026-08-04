@@ -1,0 +1,63 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - button "Open InFlux home" [ref=e5] [cursor=pointer]
+      - group "Language / Limbă" [ref=e6]:
+        - button "English / Engleză" [pressed] [ref=e7]
+        - button "Romanian / Română" [ref=e16]
+    - tablist "Project views" [ref=e24]:
+      - generic [ref=e25]:
+        - tab "Home" [selected] [ref=e26] [cursor=pointer]
+        - tab "Machine Development" [ref=e27] [cursor=pointer]
+        - tab "InFlux Ecosystem" [ref=e28] [cursor=pointer]
+        - tab "Team" [ref=e29] [cursor=pointer]
+        - tab "Proof" [ref=e30] [cursor=pointer]
+      - generic [ref=e31]:
+        - tab "Contact Us" [ref=e32] [cursor=pointer]
+        - tab "Sponsors" [ref=e33] [cursor=pointer]
+  - main [ref=e34]:
+    - tabpanel "Home" [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - heading "Real manufacturing. Desktop scale." [level=1] [ref=e38]: Real manufacturing.Desktop scale.
+          - paragraph [ref=e39]: InFlux Origin bridges the gap between a 3D printed prototype and industrial manufacturing with real thermoplastic shots, resin 3D printed molds, and an easy-to-use operator app!
+          - generic [ref=e40]:
+            - button "See the evidence" [ref=e41] [cursor=pointer]
+            - button "Explore the machine" [ref=e42] [cursor=pointer]
+        - generic [ref=e43]:
+          - generic [ref=e44]: 47.538917 N, 25.401444 E
+          - img "CAD render of the InFlux Origin MK1 machine" [ref=e46]
+          - strong [ref=e48]: Origin MK1
+      - region [ref=e49]:
+        - paragraph [ref=e50]: Why InFlux?
+        - heading "The middle ground should not be empty." [level=2] [ref=e51]
+        - paragraph [ref=e52]: You can print a model in hours or dump tens of thousands of euros into industrial manufacturing. Why not something in between? Faster than 3D printing. Semi-industrial quantities. Influx is the answer.
+      - region [ref=e53]:
+        - generic [ref=e54]:
+          - paragraph [ref=e55]: Evidence route
+          - heading "From an ambitious idea to a working machine." [level=2] [ref=e56]
+        - generic [ref=e57]:
+          - button "01 Thermal tested 6,331 samples in the longest captured campaign." [ref=e58] [cursor=pointer]:
+            - generic [ref=e59]: "01"
+            - strong [ref=e60]: Thermal tested
+            - generic [ref=e61]: 6,331 samples in the longest captured campaign.
+          - button "02 Control stack built Firmware, Wi-Fi bridge, operator app, and servicing functions." [ref=e62] [cursor=pointer]:
+            - generic [ref=e63]: "02"
+            - strong [ref=e64]: Control stack built
+            - generic [ref=e65]: Firmware, Wi-Fi bridge, operator app, and servicing functions.
+          - button "03 Part injected We don't try to convince. We prove." [ref=e66] [cursor=pointer]:
+            - generic [ref=e67]: "03"
+            - strong [ref=e68]: Part injected
+            - generic [ref=e69]: We don't try to convince. We prove.
+      - generic [ref=e70]:
+        - paragraph [ref=e71]: Public resources
+        - heading "Built to be inspected, questioned, and improved." [level=2] [ref=e72]
+        - button "Meet the team ↗" [ref=e73] [cursor=pointer]:
+          - text: Meet the team
+          - generic [ref=e74]: ↗
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+  - contentinfo [ref=e75]:
+    - button [ref=e76] [cursor=pointer]:
+      - img "InFlux Origin" [ref=e77]
+    - paragraph
+    - button "Back to top ↑" [ref=e78] [cursor=pointer]

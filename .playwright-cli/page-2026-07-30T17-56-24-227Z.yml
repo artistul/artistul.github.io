@@ -1,0 +1,64 @@
+- iframe [ref=f1e2]:
+  - generic [ref=f2e1]:
+    - banner [ref=f2e3]:
+      - generic [ref=f2e4]:
+        - button "Deschide pagina principală InFlux" [ref=f2e5] [cursor=pointer]
+        - group "Language / Limbă" [ref=f2e6]:
+          - button "English / Engleză" [ref=f2e7]
+          - button "Romanian / Română" [pressed] [ref=f2e16]
+      - tablist "Secțiunile proiectului" [ref=f2e24]:
+        - generic [ref=f2e25]:
+          - tab "Acasă" [selected] [ref=f2e26] [cursor=pointer]
+          - tab "Dezvoltarea mașinii" [ref=f2e27] [cursor=pointer]
+          - tab "Ecosistemul InFlux" [ref=f2e28] [cursor=pointer]
+          - tab "Echipă" [ref=f2e29] [cursor=pointer]
+          - tab "Validare" [ref=f2e30] [cursor=pointer]
+        - generic [ref=f2e31]:
+          - tab "Contactează-ne" [ref=f2e32] [cursor=pointer]
+          - tab "Sponsori" [ref=f2e33] [cursor=pointer]
+    - main [ref=f2e34]:
+      - tabpanel "Acasă" [ref=f2e35]:
+        - generic [ref=f2e36]:
+          - generic [ref=f2e37]:
+            - heading "Producție reală. În format desktop." [level=1] [ref=f2e38]: Producție reală.În format desktop.
+            - paragraph [ref=f2e39]: "InFlux Origin face legătura dintre un prototip imprimat 3D și producția industrială: injectează termoplastice reale în matrițe din rășină imprimate 3D și este controlată printr-o aplicație simplă pentru operator!"
+            - generic [ref=f2e40]:
+              - button "Vezi rezultatele" [ref=f2e41] [cursor=pointer]
+              - button "Explorează mașina" [ref=f2e42] [cursor=pointer]
+          - generic [ref=f2e43]:
+            - generic [ref=f2e44]: 47.538917 N, 25.401444 E
+            - img "Randare CAD a mașinii InFlux Origin MK1" [ref=f2e46]
+            - strong [ref=f2e48]: Origin MK1
+        - region [ref=f2e49]:
+          - paragraph [ref=f2e50]: De ce InFlux?
+          - heading "Spațiul dintre prototip și industrie nu ar trebui să fie gol." [level=2] [ref=f2e51]
+          - paragraph [ref=f2e52]: Poți imprima un model în câteva ore sau poți investi zeci de mii de euro în producție industrială. De ce să nu existe ceva între ele? Mai rapid decât imprimarea 3D. Cantități semi-industriale. InFlux este răspunsul.
+        - region [ref=f2e53]:
+          - generic [ref=f2e54]:
+            - paragraph [ref=f2e55]: Etapele validării
+            - heading "De la o idee ambițioasă la o mașină funcțională." [level=2] [ref=f2e56]
+          - generic [ref=f2e57]:
+            - button "01 Testată termic 6.331 de măsurători în cea mai lungă sesiune de testare." [ref=f2e58] [cursor=pointer]:
+              - generic [ref=f2e59]: "01"
+              - strong [ref=f2e60]: Testată termic
+              - generic [ref=f2e61]: 6.331 de măsurători în cea mai lungă sesiune de testare.
+            - button "02 Sistem de control integrat Firmware, punte Wi-Fi, aplicație pentru operator și funcții de diagnosticare și întreținere." [ref=f2e62] [cursor=pointer]:
+              - generic [ref=f2e63]: "02"
+              - strong [ref=f2e64]: Sistem de control integrat
+              - generic [ref=f2e65]: Firmware, punte Wi-Fi, aplicație pentru operator și funcții de diagnosticare și întreținere.
+            - button "03 Piesă injectată Nu încercăm să convingem. Demonstrăm." [ref=f2e66] [cursor=pointer]:
+              - generic [ref=f2e67]: "03"
+              - strong [ref=f2e68]: Piesă injectată
+              - generic [ref=f2e69]: Nu încercăm să convingem. Demonstrăm.
+        - generic [ref=f2e70]:
+          - paragraph [ref=f2e71]: Resurse publice
+          - heading "Conceput pentru a fi analizat, testat și îmbunătățit." [level=2] [ref=f2e72]
+          - button "Cunoaște echipa ↗" [ref=f2e73] [cursor=pointer]:
+            - text: Cunoaște echipa
+            - generic [ref=f2e74]: ↗
+      - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+    - contentinfo [ref=f2e75]:
+      - button [ref=f2e76] [cursor=pointer]:
+        - img "InFlux Origin" [ref=f2e77]
+      - paragraph
+      - button "Înapoi la început ↑" [ref=f2e78] [cursor=pointer]

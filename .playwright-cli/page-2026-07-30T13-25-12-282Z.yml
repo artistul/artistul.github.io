@@ -1,0 +1,191 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "InFlux Origin home" [ref=e4] [cursor=pointer]:
+        - /url: index.html
+        - generic [ref=e6]:
+          - strong [ref=e7]: InFlux
+          - generic [ref=e8]: Origin MK1
+      - group "Language / Limbă" [ref=e9]:
+        - button "English / Engleză" [pressed] [ref=e10]
+        - button "Romanian / Română" [ref=e19]
+    - navigation "Primary navigation" [ref=e27]:
+      - link "Machine Versions" [ref=e28] [cursor=pointer]:
+        - /url: index.html?tab=versions
+      - link "InFlux Ecosystem" [ref=e29] [cursor=pointer]:
+        - /url: index.html?tab=projects
+      - link "Proof" [ref=e30] [cursor=pointer]:
+        - /url: index.html?tab=proof
+      - link "Downloads" [ref=e31] [cursor=pointer]:
+        - /url: index.html?tab=downloads
+    - link "Contact Us" [ref=e32] [cursor=pointer]:
+      - /url: contact/
+  - main [ref=e33]:
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - paragraph [ref=e36]: Public technical dossier
+        - heading "InFlux Origin MK1" [level=1] [ref=e37]
+        - paragraph [ref=e38]: A desktop injection molding platform integrating mechanics, thermal control, machine firmware, operator software, safety logic, and experimental tooling.
+        - generic [ref=e39]:
+          - link "Download notebook" [ref=e40] [cursor=pointer]:
+            - /url: assets/influx-origin-technical-notebook.pdf
+          - link "Back to project hub" [ref=e41] [cursor=pointer]:
+            - /url: index.html
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: Current state
+          - strong [ref=e45]: Integrated prototype in active calibration
+        - generic [ref=e46]:
+          - generic [ref=e47]: Primary objective
+          - strong [ref=e48]: Repeatable small-part thermoplastic injection
+        - generic [ref=e49]:
+          - generic [ref=e50]: Tooling direction
+          - strong [ref=e51]: Rapid resin molds with controlled cooling
+        - generic [ref=e52]:
+          - generic [ref=e53]: Control path
+          - strong [ref=e54]: Android operator → ESP bridge → Nucleo firmware
+        - generic [ref=e55]:
+          - generic [ref=e56]: Team
+          - strong [ref=e57]: Volta Circuits
+    - generic [ref=e58]:
+      - complementary "Contents" [ref=e59]:
+        - button "Contents"
+        - generic [ref=e60]:
+          - link "1. Project definition" [ref=e61] [cursor=pointer]:
+            - /url: "#definition"
+          - link "2. System architecture" [ref=e62] [cursor=pointer]:
+            - /url: "#architecture"
+          - link "3. Mechanical system" [ref=e63] [cursor=pointer]:
+            - /url: "#mechanical"
+          - link "4. Thermal system" [ref=e64] [cursor=pointer]:
+            - /url: "#thermal"
+          - link "5. Electronics and controls" [ref=e65] [cursor=pointer]:
+            - /url: "#controls"
+          - link "6. Firmware and operator stack" [ref=e66] [cursor=pointer]:
+            - /url: "#software"
+          - link "7. Safety position" [ref=e67] [cursor=pointer]:
+            - /url: "#safety"
+          - link "8. Validation evidence" [ref=e68] [cursor=pointer]:
+            - /url: "#validation"
+          - link "9. Current limits" [ref=e69] [cursor=pointer]:
+            - /url: "#limits"
+          - link "10. Product direction" [ref=e70] [cursor=pointer]:
+            - /url: "#roadmap"
+          - link "11. Team" [ref=e71] [cursor=pointer]:
+            - /url: "#team"
+      - article [ref=e72]:
+        - generic [ref=e73]:
+          - paragraph [ref=e74]: 01 / Project definition
+          - heading "Manufacturing evidence before industrial tooling." [level=2] [ref=e75]
+          - paragraph [ref=e76]: InFlux Origin MK1 is a desktop-scale injection molding prototype built to help teams learn from real thermoplastic parts before committing to conventional production tooling. It is intended for process learning, functional validation, education, and future short-run experimentation.
+          - paragraph [ref=e77]: The project does not claim to replace an industrial injection molding machine. Its purpose is to reduce the distance between a 3D printed model and a professionally tooled production part by making the molding process more accessible, measurable, and iterative.
+        - generic [ref=e78]:
+          - paragraph [ref=e79]: 02 / System architecture
+          - heading "A complete machine, not an isolated mechanism." [level=2] [ref=e80]
+          - paragraph [ref=e81]: "The platform is organized into six connected layers:"
+          - list [ref=e82]:
+            - listitem [ref=e83]: Structural frame and aligned movement system.
+            - listitem [ref=e84]: Heated barrel, nozzle, and piston-driven injection path.
+            - listitem [ref=e85]: Mold support, closing movement, and rapid tooling package.
+            - listitem [ref=e86]: Power distribution, sensors, motion drivers, and emergency inputs.
+            - listitem [ref=e87]: Nucleo machine firmware and ESP32-C6 communication bridge.
+            - listitem [ref=e88]: Android operator interface and diagnostic support tools.
+          - paragraph [ref=e89]: The Nucleo controller owns machine state, heating, motion, safety checks, and cycle behavior. The ESP bridge translates same-network operator requests into the machine command protocol. The Android application presents status and sends supported commands.
+          - heading "Confirmed platform summary" [level=3] [ref=e90]
+          - generic [ref=e91]:
+            - generic [ref=e92]:
+              - term [ref=e93]: Machine controller
+              - definition [ref=e94]: NUCLEO-H753ZI
+            - generic [ref=e95]:
+              - term [ref=e96]: Communication bridge
+              - definition [ref=e97]: ESP32-C6 / local HTTP to acknowledged UART commands
+            - generic [ref=e98]:
+              - term [ref=e99]: Operator interface
+              - definition [ref=e100]: Android application for status and supported commands
+            - generic [ref=e101]:
+              - term [ref=e102]: Thermal sensing
+              - definition [ref=e103]: Multiple K-type thermocouples across the heated barrel
+            - generic [ref=e104]:
+              - term [ref=e105]: Tooling direction
+              - definition [ref=e106]: 3D-printed photopolymer resin molds with controlled water cooling
+            - generic [ref=e107]:
+              - term [ref=e108]: Current status
+              - definition [ref=e109]: Supervised integrated prototype in active calibration
+        - generic [ref=e110]:
+          - paragraph [ref=e111]: 03 / Mechanical system
+          - heading "Alignment and load paths decide whether the process is repeatable." [level=2] [ref=e112]
+          - paragraph [ref=e113]: The current structure uses aluminum extrusion, interface plates, linear guidance, lead-screw movement, and a servo-driven injection axis. The architecture remains adjustable because the prototype is still being calibrated around real component behavior and mold geometry.
+          - heading "Mechanical priorities" [level=3] [ref=e114]
+          - list [ref=e115]:
+            - listitem [ref=e116]: Keep the nozzle, mold entry, and moving plates aligned across repeated cycles.
+            - listitem [ref=e117]: Carry injection and clamping forces through structure rather than fragile tooling.
+            - listitem [ref=e118]: Make critical supports and service areas accessible during calibration.
+            - listitem [ref=e119]: Measure and reduce backlash, frame twist, and platen racking.
+        - generic [ref=e120]:
+          - paragraph [ref=e121]: 04 / Thermal system
+          - heading "Temperature is a process variable, not a visual effect." [level=2] [ref=e122]
+          - paragraph [ref=e123]: The barrel is heated in multiple zones and measured with K-type thermocouples. Logged tests and thermal-camera passes are used to inspect heat-up, stabilization, cooldown, sensor behavior, heat loss, and local hot spots.
+          - paragraph [ref=e124]: The longest captured campaign contains 6,331 samples across approximately 108.6 minutes. Thermal modeling was compared with SimScale, with reported agreement around ±8% for the compared cases. These results guide insulation, sensor placement, nozzle design, cooling, and safe timing decisions.
+          - paragraph [ref=e125]: "Evidence source: barrel-tuning campaign recorded April 16, 2026 and summarized in the public technical notebook."
+        - generic [ref=e126]:
+          - paragraph [ref=e127]: 05 / Electronics and controls
+          - heading "Prototype flexibility with explicit machine ownership." [level=2] [ref=e128]
+          - paragraph [ref=e129]: The integrated control stack is centered on a NUCLEO-H753ZI. It interfaces with thermocouple modules, heater switching, stepper drivers, the injection servo path, safety inputs, and the communication bridge.
+          - paragraph [ref=e130]: A dedicated Origin motherboard has been designed in KiCad to organize the current prototype wiring into a cleaner integration layer. It remains a prototype electronics project and is not presented as a certified production controller.
+        - generic [ref=e131]:
+          - paragraph [ref=e132]: 06 / Firmware and operator stack
+          - heading "Control remains close to the machine." [level=2] [ref=e133]
+          - list [ref=e134]:
+            - listitem [ref=e135]: The Nucleo owns safety admission, heating, movement, and cycle sequencing.
+            - listitem [ref=e136]: The ESP32-C6 acts as a narrow same-network HTTP-to-command bridge.
+            - listitem [ref=e137]: The Android operator app presents status, supported actions, and service access.
+            - listitem [ref=e138]: A desktop serial monitor and diagnostic sketches support commissioning and fault analysis.
+          - paragraph [ref=e139]: The public operator APK is a prototype artifact for supervised demonstrations. It is not a general-purpose machine controller and should not be treated as a production release.
+        - generic [ref=e140]:
+          - paragraph [ref=e141]: 07 / Safety position
+          - heading "Current use is supervised and prototype-only." [level=2] [ref=e142]
+          - paragraph [ref=e143]: The project combines mains-powered heating, hot surfaces, and powered motion. The current machine is operated as a supervised prototype. Emergency-stop behavior, safe startup defaults, fault handling, grounding, power isolation, and guarded access remain critical requirements.
+          - paragraph [ref=e144]: A future product version requires a cleaner enclosure, stronger hardware isolation, validated safety behavior, and a formal review appropriate to its intended users and environment.
+        - generic [ref=e145]:
+          - paragraph [ref=e146]: 08 / Validation evidence
+          - heading "The project has crossed from simulation into physical evidence." [level=2] [ref=e147]
+          - list [ref=e148]:
+            - listitem [ref=e149]: A first successful injected part has been produced.
+            - listitem [ref=e150]: Thermal behavior has been measured with logged sensors and a thermal camera.
+            - listitem [ref=e151]: Major mechanical, electrical, firmware, and operator subsystems have been integrated.
+            - listitem [ref=e152]: A dedicated PCB and a complete operator/control stack have been developed.
+          - paragraph [ref=e153]: The first part is evidence of system function, not proof of production readiness. Its defects are useful because they identify the next work in venting, fill behavior, tooling, and process calibration.
+          - paragraph [ref=e154]: "Validation record: public technical notebook, centralized June 11, 2026, with original measurements and active software/firmware sources retained."
+        - generic [ref=e155]:
+          - paragraph [ref=e156]: 09 / Current limits
+          - heading "What remains unproven." [level=2] [ref=e157]
+          - list [ref=e158]:
+            - listitem [ref=e159]: Stable multi-part repeatability across longer runs.
+            - listitem [ref=e160]: Long-run life and failure behavior of resin tooling.
+            - listitem [ref=e161]: Fully tuned filling, holding, venting, and ejection behavior.
+            - listitem [ref=e162]: Final enclosure safety and production-grade electrical integration.
+            - listitem [ref=e163]: Validated process windows across multiple material families.
+        - generic [ref=e164]:
+          - paragraph [ref=e165]: 10 / Product direction
+          - heading "Turn the experiment into a dependable platform." [level=2] [ref=e166]
+          - paragraph [ref=e167]: The next Origin direction focuses on repeatability, stronger process sensing, better thermal insulation, refined mold interfaces, safer enclosure design, cleaner electronics, and a simpler operator workflow.
+          - paragraph [ref=e168]: The long-term ambition is a useful workshop and education platform that can produce functional small parts, teach the complete molding process, and help hardware teams make better tooling decisions earlier.
+        - generic [ref=e169]:
+          - paragraph [ref=e170]: 11 / Team
+          - heading "Volta Circuits" [level=2] [ref=e171]
+          - list [ref=e172]:
+            - listitem [ref=e173]:
+              - strong [ref=e174]: Stefan Tonegari
+              - generic [ref=e175]: "Engineering lead: mechanics, manufacturing, electronics, integration, and product development."
+            - listitem [ref=e176]:
+              - strong [ref=e177]: Fabian Volintiru
+              - generic [ref=e178]: "Team and business lead: strategy, economics, sponsorships, organization, and presentation."
+            - listitem [ref=e179]:
+              - strong [ref=e180]: Pintilei David
+              - generic [ref=e181]: "Simulation and analysis lead: SimScale, Python models, mathematics, and data analysis."
+            - listitem [ref=e182]:
+              - strong [ref=e183]: Ciprian Ursu
+              - generic [ref=e184]: "Embedded programming: Arduino, C++, C, backend development, automations, and system integration."
+  - contentinfo [ref=e185]:
+    - generic [ref=e186]: InFlux Origin MK1
+    - generic [ref=e187]: Public technical dossier / integrated prototype in active calibration.

@@ -1,0 +1,28 @@
+- generic [active] [ref=f3e1]:
+  - banner [ref=f3e3]:
+    - generic [ref=f3e4]:
+      - button "Deschide pagina principală InFlux" [ref=f3e5] [cursor=pointer]
+      - group "Language / Limbă" [ref=f3e6]:
+        - button "English / Engleză" [ref=f3e7]
+        - button "Romanian / Română" [pressed] [ref=f3e9]
+    - button "Deschide meniul de navigare" [ref=f3e12] [cursor=pointer]:
+      - generic [ref=f3e15]: Meniu
+  - main [ref=f3e16]:
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+    - tabpanel "Contactează-ne" [ref=f3e17]:
+      - generic [ref=f3e18]:
+        - heading "Contactează-ne" [level=1] [ref=f3e19]: Contactează-
+        - paragraph [ref=f3e20]: Pentru sponsorizări, colaborări, presă sau interes general față de proiect, folosește adresele de mai jos.
+        - strong [ref=f3e21]: Suntem aici să
+      - generic [ref=f3e22]:
+        - article [ref=f3e23]
+        - article [ref=f3e24]
+      - region "Ajută-ne să construim ce urmează." [ref=f3e25]:
+        - link "Aplică pentru a te alătura echipei InFlux prin Google Forms (se deschide într-o filă nouă)" [ref=f3e28] [cursor=pointer]:
+          - /url: https://docs.google.com/forms/d/e/REPLACE_WITH_RECRUITMENT_FORM_ID/viewform
+          - generic [ref=f3e29]: Aplică prin Google Forms
+  - contentinfo [ref=f3e30]:
+    - button [ref=f3e31] [cursor=pointer]:
+      - img "InFlux Origin" [ref=f3e32]
+    - paragraph
+    - button "Înapoi la început ↑" [ref=f3e33] [cursor=pointer]

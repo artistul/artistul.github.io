@@ -1,0 +1,64 @@
+- iframe [ref=e2]:
+  - generic [ref=f1e1]:
+    - banner [ref=f1e3]:
+      - generic [ref=f1e4]:
+        - button "Open InFlux home" [ref=f1e5] [cursor=pointer]
+        - group "Language / Limbă" [ref=f1e6]:
+          - button "English / Engleză" [pressed] [ref=f1e7]
+          - button "Romanian / Română" [ref=f1e16]
+      - tablist "Project views" [ref=f1e24]:
+        - generic [ref=f1e25]:
+          - tab "Home" [selected] [ref=f1e26] [cursor=pointer]
+          - tab "Machine Development" [ref=f1e27] [cursor=pointer]
+          - tab "InFlux Ecosystem" [ref=f1e28] [cursor=pointer]
+          - tab "Team" [ref=f1e29] [cursor=pointer]
+          - tab "Proof" [ref=f1e30] [cursor=pointer]
+        - generic [ref=f1e31]:
+          - tab "Contact Us" [ref=f1e32] [cursor=pointer]
+          - tab "Sponsors" [ref=f1e33] [cursor=pointer]
+    - main [ref=f1e34]:
+      - tabpanel "Home" [ref=f1e35]:
+        - generic [ref=f1e36]:
+          - generic [ref=f1e37]:
+            - heading "Real manufacturing. Desktop scale." [level=1] [ref=f1e38]: Real manufacturing.Desktop scale.
+            - paragraph [ref=f1e39]: InFlux Origin bridges the gap between a 3D printed prototype and industrial manufacturing with real thermoplastic shots, resin 3D printed molds, and an easy-to-use operator app!
+            - generic [ref=f1e40]:
+              - button "See the evidence" [ref=f1e41] [cursor=pointer]
+              - button "Explore the machine" [ref=f1e42] [cursor=pointer]
+          - generic [ref=f1e43]:
+            - generic [ref=f1e44]: 47.538917 N, 25.401444 E
+            - img "CAD render of the InFlux Origin MK1 machine" [ref=f1e46]
+            - strong [ref=f1e48]: Origin MK1
+        - region [ref=f1e49]:
+          - paragraph [ref=f1e50]: Why InFlux?
+          - heading "The middle ground should not be empty." [level=2] [ref=f1e51]
+          - paragraph [ref=f1e52]: You can print a model in hours or dump tens of thousands of euros into industrial manufacturing. Why not something in between? Faster than 3D printing. Semi-industrial quantities. Influx is the answer.
+        - region [ref=f1e53]:
+          - generic [ref=f1e54]:
+            - paragraph [ref=f1e55]: Evidence route
+            - heading "From an ambitious idea to a working machine." [level=2] [ref=f1e56]
+          - generic [ref=f1e57]:
+            - button "01 Thermal tested 6,331 samples in the longest captured campaign." [ref=f1e58] [cursor=pointer]:
+              - generic [ref=f1e59]: "01"
+              - strong [ref=f1e60]: Thermal tested
+              - generic [ref=f1e61]: 6,331 samples in the longest captured campaign.
+            - button "02 Control stack built Firmware, Wi-Fi bridge, operator app, and servicing functions." [ref=f1e62] [cursor=pointer]:
+              - generic [ref=f1e63]: "02"
+              - strong [ref=f1e64]: Control stack built
+              - generic [ref=f1e65]: Firmware, Wi-Fi bridge, operator app, and servicing functions.
+            - button "03 Part injected We don't try to convince. We prove." [ref=f1e66] [cursor=pointer]:
+              - generic [ref=f1e67]: "03"
+              - strong [ref=f1e68]: Part injected
+              - generic [ref=f1e69]: We don't try to convince. We prove.
+        - generic [ref=f1e70]:
+          - paragraph [ref=f1e71]: Public resources
+          - heading "Built to be inspected, questioned, and improved." [level=2] [ref=f1e72]
+          - button "Meet the team ↗" [ref=f1e73] [cursor=pointer]:
+            - text: Meet the team
+            - generic [ref=f1e74]: ↗
+      - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+    - contentinfo [ref=f1e75]:
+      - button [ref=f1e76] [cursor=pointer]:
+        - img "InFlux Origin" [ref=f1e77]
+      - paragraph
+      - button "Back to top ↑" [ref=f1e78] [cursor=pointer]

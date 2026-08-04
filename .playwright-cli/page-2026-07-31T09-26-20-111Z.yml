@@ -1,0 +1,65 @@
+- generic [active] [ref=f3e1]:
+  - banner [ref=f3e3]:
+    - generic [ref=f3e4]:
+      - button "Ouvrir l’accueil InFlux" [ref=f3e5] [cursor=pointer]
+      - group "Language / Limbă / Langue" [ref=f3e6]:
+        - button "English / Engleză" [ref=f3e7]
+        - button "Romanian / Română" [ref=f3e16]
+        - button "French / Français" [pressed] [ref=f3e23]
+    - tablist "Sections du projet" [ref=f3e31]:
+      - generic [ref=f3e32]:
+        - tab "Accueil" [ref=f3e33] [cursor=pointer]
+        - tab "Développement de la machine" [ref=f3e34] [cursor=pointer]
+        - tab "Écosystème InFlux" [ref=f3e35] [cursor=pointer]
+        - tab "Équipe" [ref=f3e36] [cursor=pointer]
+        - tab "Validation" [ref=f3e37] [cursor=pointer]
+      - generic [ref=f3e38]:
+        - tab "Contactez-nous" [selected] [ref=f3e39] [cursor=pointer]
+        - tab "Sponsors" [ref=f3e40] [cursor=pointer]
+  - main [ref=f3e41]:
+    - text: 01 02 03 01 02 03 01 02 03 01 02 03 01 02 03
+    - tabpanel "Contactez-nous" [ref=f3e42]:
+      - generic [ref=f3e43]:
+        - heading "Contactez-nous" [level=1] [ref=f3e44]
+        - paragraph [ref=f3e45]: Pour toute demande de sponsoring, de collaboration, de presse ou pour en savoir plus sur notre projet, utilisez les adresses ci-dessous.
+        - strong [ref=f3e46]: Nous sommes là pour échanger.
+      - generic [ref=f3e47]:
+        - article [ref=f3e48]:
+          - generic [ref=f3e49]: "01"
+          - generic [ref=f3e50]:
+            - heading "Sponsoring" [level=2] [ref=f3e51]
+            - paragraph [ref=f3e52]: Vous souhaitez devenir sponsor ? Nous proposons plusieurs façons de mettre votre marque en valeur, adaptées à vos besoins.
+          - link "Envoyer une demande de sponsoring tonegari.stefan@gmail.com" [ref=f3e53] [cursor=pointer]:
+            - /url: mailto:tonegari.stefan@gmail.com?subject=InFlux%20sponsorship%20inquiry
+            - generic [ref=f3e54]: Envoyer une demande de sponsoring
+            - strong [ref=f3e55]: tonegari.stefan@gmail.com
+        - article [ref=f3e56]:
+          - generic [ref=f3e57]: "02"
+          - generic [ref=f3e58]:
+            - heading "Demandes générales" [level=2] [ref=f3e59]
+            - paragraph [ref=f3e60]: "Questions, collaborations, invitations à des événements, demandes médias ou idées à discuter avec l’équipe : nous sommes ouverts à toutes les propositions !"
+          - link "Envoyer un e-mail david.pintilei9@gmail.com" [ref=f3e61] [cursor=pointer]:
+            - /url: mailto:david.pintilei9@gmail.com?subject=InFlux%20general%20inquiry
+            - generic [ref=f3e62]: Envoyer un e-mail
+            - strong [ref=f3e63]: david.pintilei9@gmail.com
+      - region [ref=f3e64]:
+        - strong [ref=f3e66]: REJOIGNEZ
+        - generic [ref=f3e67]:
+          - paragraph [ref=f3e68]: Recrutement
+          - heading "Aidez-nous à construire la suite." [level=2] [ref=f3e69]
+          - paragraph [ref=f3e70]: Nous recherchons des personnes motivées, prêtes à transformer des projets d’ingénierie ambitieux en solutions matérielles et logicielles fonctionnelles, appuyées par des résultats concrets.
+          - link "Des questions ? Écrivez à David david.pintilei9@gmail.com" [ref=f3e71] [cursor=pointer]:
+            - /url: mailto:david.pintilei9@gmail.com?subject=InFlux%20recruitment%20inquiry
+            - generic [ref=f3e72]: Des questions ? Écrivez à David
+            - strong [ref=f3e73]: david.pintilei9@gmail.com
+        - link "Postuler pour rejoindre InFlux via Google Forms (s’ouvre dans un nouvel onglet)" [ref=f3e74] [cursor=pointer]:
+          - /url: https://docs.google.com/forms/d/e/1FAIpQLSdeUo5bN8V_L0kk_D5xYohvuY3CuL_ZbvVl4gSq0S2-MFM5Xw/viewform?usp=dialog
+          - generic [ref=f3e75]: Postuler via Google Forms
+          - strong [ref=f3e76]:
+            - generic [ref=f3e77]: Postuler
+            - generic [ref=f3e78]: ↗
+  - contentinfo [ref=f3e79]:
+    - button [ref=f3e80] [cursor=pointer]:
+      - img "InFlux Origin" [ref=f3e81]
+    - paragraph
+    - button "Retour en haut ↑" [ref=f3e82] [cursor=pointer]
