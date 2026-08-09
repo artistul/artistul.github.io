@@ -1671,7 +1671,16 @@ html[lang="ro"] .contact-hero h1 span { margin-left: 0; }
   .achievements-hero,
   .achievement-record { width: min(100% - 32px, var(--max)); }
   .achievements-heading h1 { font-size: clamp(62px, 20vw, 92px); }
-  .achievement-podium { min-height: 0; display: flex; flex-direction: column; border-bottom: 0; }
+  .achievement-podium {
+    width: 100vw;
+    min-height: 0;
+    margin-inline: calc(50% - 50vw);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    border-bottom: 0;
+  }
   .podium-place {
     --mobile-step-inset: 0px;
     display: grid;
@@ -1684,8 +1693,14 @@ html[lang="ro"] .contact-hero h1 span { margin-left: 0; }
   .podium-place-3 { --mobile-step-inset: 12px; order: 3; }
   .podium-place-4 { --mobile-step-inset: 18px; order: 4; }
   .podium-place-5 { --mobile-step-inset: 24px; order: 5; }
-  .podium-copy { min-height: 0; padding: 20px 16px 20px 0; }
-  .podium-title { min-height: 0; }
+  .podium-copy {
+    min-height: 0;
+    align-items: center;
+    padding: 20px 16px;
+    text-align: center;
+  }
+  .podium-title { min-height: 0; align-items: center; }
+  .podium-results { width: 100%; padding: 0; }
   .podium-copy h2,
   .podium-place-1 .podium-copy h2 { font-size: clamp(25px, 8vw, 36px); }
   .podium-copy time { display: block; }

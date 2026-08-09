@@ -1193,11 +1193,37 @@ test("achievements podium and complete timeline stay ranked and responsive", asy
   expect(desktopLayout.podiumBottom).toBeLessThanOrEqual(desktopLayout.viewportHeight);
   expect(desktopLayout.firstTimelineYears).toEqual(["2026", "2026", "2026", "2026", "2026"]);
 
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.reload();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth === window.innerWidth)).toBe(true);
+  for (const viewport of [
+    { width: 320, height: 568 },
+    { width: 390, height: 844 },
+    { width: 407, height: 812 }
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.reload();
+    const mobileLayout = await page.locator(".achievement-podium").evaluate((podium) => {
+      const bounds = podium.getBoundingClientRect();
+      const rowWidths = [...podium.children].map((row) => Math.round(row.getBoundingClientRect().width));
+      return {
+        left: Math.round(bounds.left),
+        right: Math.round(bounds.right),
+        width: Math.round(bounds.width),
+        viewportWidth: window.innerWidth,
+        pageWidth: document.documentElement.scrollWidth,
+        rowWidths
+      };
+    });
+    expect(mobileLayout).toEqual({
+      left: 0,
+      right: viewport.width,
+      width: viewport.width,
+      viewportWidth: viewport.width,
+      pageWidth: viewport.width,
+      rowWidths: Array(5).fill(viewport.width)
+    });
+  }
   await expect(page.locator(".podium-place-1")).toHaveCSS("order", "1");
   await expect(page.locator(".podium-place-5")).toHaveCSS("order", "5");
+  await expect(page.locator(".podium-copy").first()).toHaveCSS("text-align", "center");
 });
 
 test("mobile dossier contents collapse and anchors clear the header", async ({ page }) => {
