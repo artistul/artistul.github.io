@@ -40,7 +40,7 @@
       }
     } catch {}
   </script>
-  <script src="i18n.js?v=2026-07-31-static-arrow" defer></script>
+  <script src="i18n.js?v=2026-08-09-achievements-lavinia" defer></script>
   <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -178,6 +178,8 @@
           aria-selected="false" tabindex="-1">Machine Development</button>
         <button id="tab-projects" type="button" data-nav="projects" role="tab" aria-controls="projects"
           aria-selected="false" tabindex="-1">InFlux Ecosystem</button>
+        <button id="tab-achievements" type="button" data-nav="achievements" role="tab" aria-controls="achievements"
+          aria-selected="false" tabindex="-1">Achievements</button>
         <button id="tab-team" type="button" data-nav="team" role="tab" aria-controls="team" aria-selected="false"
           tabindex="-1">Team</button>
         <button id="tab-proof" type="button" data-nav="proof" role="tab" aria-controls="proof" aria-selected="false"
@@ -471,6 +473,43 @@
         </article>
       </div>
 
+    </section>
+
+    <section class="tab-panel achievements-panel" id="achievements" data-panel="achievements" role="tabpanel"
+      aria-labelledby="tab-achievements" tabindex="0">
+      <header class="achievements-hero">
+        <div class="achievements-heading reveal">
+          <p class="section-index">Volta Circuits record</p>
+          <h1>Built to<br /><span>go further.</span></h1>
+        </div>
+        <div class="achievements-intro reveal">
+          <strong><span data-achievement-count>16</span> achievements</strong>
+          <p>One continuous record of competition, recognition, and engineering progress.</p>
+        </div>
+        <ol class="achievement-podium" data-achievement-podium aria-label="Five most important achievements"></ol>
+        <a class="achievement-scroll-cue" href="#achievement-record">
+          <span>Complete record</span><b aria-hidden="true">↓</b>
+        </a>
+      </header>
+
+      <section class="achievement-record" id="achievement-record" aria-labelledby="achievement-record-title">
+        <header class="achievement-record-heading reveal">
+          <p class="section-index">Complete timeline</p>
+          <h2 id="achievement-record-title">Every step<br />in one line.</h2>
+          <p class="achievement-record-summary"><span data-achievement-count>16</span> achievements · 3 years</p>
+          <nav class="achievement-year-nav" aria-label="Jump to achievement year">
+            <a href="#achievements-2026" aria-current="true">2026</a>
+            <a href="#achievements-2025">2025</a>
+            <a href="#achievements-2024">2024</a>
+          </nav>
+          <div class="achievement-overview" aria-label="Achievement overview">
+            <p><strong data-achievement-scope-count="national">0</strong><span>National</span></p>
+            <p class="achievement-overview--international"><strong data-achievement-scope-count="international">0</strong><span>International</span></p>
+            <p><strong data-achievement-scope-count="organizer">0</strong><span>Organizer roles</span></p>
+          </div>
+        </header>
+        <ol class="achievement-timeline" data-achievement-timeline></ol>
+      </section>
     </section>
 
     <section class="tab-panel" id="team" data-panel="team" role="tabpanel" aria-labelledby="tab-team" tabindex="0">
@@ -1193,7 +1232,7 @@
     <p></p>
     <button class="back-top" type="button" data-top>Back to top ↑</button>
   </footer>
-  <script src="script.js?v=2026-06-25-contact-nav-cta"></script>
+  <script src="script.js?v=2026-08-09-achievements-lavinia"></script>
 </body>
 
 </html>

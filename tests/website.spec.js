@@ -41,6 +41,18 @@ test("English, Romanian, and French toggle sitewide with persistent accessible s
   await page.getByRole("tab", { name: "Echipă" }).click();
   await expect(page).toHaveTitle("Echipă | InFlux Origin");
   await expect(page.getByText("Patru discipline.")).toBeVisible();
+  await expect(page.locator("#team").getByText("Lavinia Ichim", { exact: true })).toBeVisible();
+  await expect(page.locator("#team").getByText("Ingineră junior", { exact: true })).toBeVisible();
+
+  await page.goto("/index.html?tab=achievements");
+  await expect(page).toHaveTitle("Palmares | InFlux Origin");
+  await expect(page.getByRole("tab", { name: "Palmares" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".achievements-heading")).toContainText("Palmaresul Volta Circuits");
+  await expect(page.locator(".achievement-entry").first()).toContainText("Competiție națională");
+  await expect(page.locator(".podium-place-1 .podium-results")).toContainText("Etapa finală");
+  await expect(page.locator(".podium-place-1 .podium-results")).toContainText("Locul I");
+  await expect(page.getByRole("heading", { name: "DaVinci Technical Innovation Competition", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Student for a Day", exact: true })).toBeVisible();
 
   await page.goto("/contact/");
   await expect(page.locator("html")).toHaveAttribute("lang", "ro");
@@ -48,6 +60,8 @@ test("English, Romanian, and French toggle sitewide with persistent accessible s
   await expect(page.getByRole("heading", { name: "Contactează-ne" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ajută-ne să construim ce urmează." })).toBeVisible();
   await expect(page.getByRole("link", { name: /Aplică pentru a te alătura echipei InFlux/ })).toBeVisible();
+  await expect(page.locator("#team").getByText("Lavinia Ichim", { exact: true })).toHaveCount(1);
+  await expect(page.locator("#team").getByText("Fabian Volintiru", { exact: true })).toHaveCount(0);
   const romanianHeadingType = await page.locator(".contact-option h2").first().evaluate((heading) => {
     const style = getComputedStyle(heading);
     return {
@@ -63,11 +77,22 @@ test("English, Romanian, and French toggle sitewide with persistent accessible s
   await expect(page).toHaveTitle("Dosar tehnic | InFlux Origin MK1");
   await expect(page.getByText("Dosar tehnic public", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "InFlux Origin MK1" })).toBeVisible();
+  await expect(page.getByText("Lavinia Ichim", { exact: true })).toBeVisible();
 
   await page.locator('[data-language="fr"]').click();
   await expect(page.locator("html")).toHaveAttribute("lang", "fr");
   await expect(page).toHaveTitle("Dossier technique | InFlux Origin MK1");
   await expect(page.getByText("Dossier technique public", { exact: true })).toBeVisible();
+
+  await page.goto("/index.html?tab=achievements");
+  await expect(page).toHaveTitle("Palmarès | InFlux Origin");
+  await expect(page.getByRole("tab", { name: "Palmarès" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".achievements-heading")).toContainText("Palmarès de Volta Circuits");
+  await expect(page.locator(".achievement-entry").first()).toContainText("Compétition nationale");
+  await expect(page.locator(".podium-place-1 .podium-results")).toContainText("Phase finale");
+  await expect(page.locator(".podium-place-1 .podium-results")).toContainText("1re place");
+  await expect(page.getByRole("heading", { name: "DaVinci Technical Innovation Competition", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Student for a Day", exact: true })).toBeVisible();
 
   await page.goto("/contact/");
   await expect(page.locator("html")).toHaveAttribute("lang", "fr");
@@ -127,6 +152,26 @@ test("English, Romanian, and French toggle sitewide with persistent accessible s
   await page.goto("/index.html");
   await expect(page.getByRole("tab", { name: "Team" })).toBeVisible();
   await expect(page.locator('[data-language="en"]')).toHaveAttribute("aria-pressed", "true");
+});
+
+test("localized proof metadata keeps units and milestone labels current", async ({ page }) => {
+  await page.goto("/index.html?tab=proof");
+
+  await page.evaluate(() => window.InFluxI18n.setLanguage("ro"));
+  await expect(page.locator("[role='progressbar']").first()).toHaveAttribute(
+    "aria-valuetext",
+    "56 cicluri din 250 cicluri (22.4%)"
+  );
+  await expect(page.locator(".fluid-milestone").first()).toHaveAttribute("title", "Prag atins: 25 cicluri");
+  await expect(page.locator(".fluid-goal").first()).toHaveText("250 cicluri");
+
+  await page.evaluate(() => window.InFluxI18n.setLanguage("fr"));
+  await expect(page.locator("[role='progressbar']").nth(1)).toHaveAttribute(
+    "aria-valuetext",
+    "3 heures sur 24 heures (12.5%)"
+  );
+  await expect(page.locator(".fluid-milestone").first()).toHaveAttribute("title", "Jalon atteint : 25 cycles");
+  await expect(page.locator(".fluid-goal").nth(1)).toHaveText("24 heures");
 });
 
 test("the complete French dictionary enables direct restoration", async ({ page }) => {
@@ -514,6 +559,7 @@ test("English, Romanian, and French content uses identical font families, weight
     "/index.html",
     "/index.html?tab=versions",
     "/index.html?tab=projects",
+    "/index.html?tab=achievements",
     "/index.html?tab=team",
     "/index.html?tab=contact",
     "/index.html?tab=sponsorship",
@@ -1064,6 +1110,94 @@ test("visible sponsor media loads from the clean route", async ({ page }) => {
   await expect.poll(() => page.locator("#sponsorship img").evaluateAll((images) =>
     images.every((image) => image.currentSrc && image.naturalWidth > 0)
   )).toBe(true);
+});
+
+test("achievements podium and complete timeline stay ranked and responsive", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/index.html?tab=achievements");
+
+  await expect(page).toHaveTitle("Achievements | InFlux Origin");
+  await expect(page.getByRole("tab", { name: "Achievements" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".podium-place")).toHaveCount(5);
+  await expect(page.locator(".achievement-entry")).toHaveCount(16);
+  await expect(page.locator(".achievement-entry--international")).toHaveCount(2);
+  await expect(page.locator(".achievement-entry--national")).toHaveCount(12);
+  await expect(page.locator(".achievement-entry--specialist")).toHaveCount(2);
+  await expect(page.locator(".achievement-entry--organizer")).toHaveCount(2);
+  await expect(page.getByText("Specialist / regional competition", { exact: true })).toHaveCount(0);
+  await expect(page.locator(".podium-place-1 .podium-results")).toContainText("Final stage");
+  await expect(page.locator(".podium-place-1 .podium-results")).toContainText("First place");
+  await expect(page.locator(".achievement-stages").first()).not.toContainText("Etapa finală");
+  expect(await page.locator(".achievement-stages").evaluateAll((tracks) =>
+    tracks.filter((track) => track.children.length > 1).length
+  )).toBe(4);
+  expect(await page.locator(".podium-place").evaluateAll((items) =>
+    items.map((item) => Number(item.dataset.rank))
+  )).toEqual([1, 2, 3, 4, 5]);
+  expect(await page.locator(".podium-place h2").allTextContents()).toEqual([
+    "DaVinci 2026",
+    "RoSEF 2026",
+    "ONCS",
+    "FRI 2026",
+    "MILSET Abu Dhabi"
+  ]);
+  expect(await page.locator(".podium-title > span").allTextContents()).toEqual([
+    "National",
+    "National",
+    "National",
+    "National",
+    "International"
+  ]);
+  expect(await page.locator(".podium-place").evaluateAll((items) =>
+    [...items]
+      .sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left)
+      .map((item) => Number(item.dataset.rank))
+  )).toEqual([4, 2, 1, 3, 5]);
+  expect(await page.locator(".podium-step").evaluateAll((steps) => steps.every((step) => {
+    const stand = step.getBoundingClientRect();
+    const numeral = step.querySelector("b").getBoundingClientRect();
+    return numeral.top >= stand.top && numeral.right <= stand.right
+      && numeral.bottom <= stand.bottom && numeral.left >= stand.left;
+  }))).toBe(true);
+  await expect(page.locator(".achievement-entry h3", { hasText: "ONCS" })).toHaveCount(2);
+  await expect(page.locator(".achievement-entry h3", { hasText: "DaVinci Technical Innovation Competition" })).toHaveCount(1);
+  await expect(page.locator(".achievement-entry h3", { hasText: "Student for a Day" })).toHaveCount(1);
+  await expect(page.locator(".achievement-body > header small")).toHaveCount(0);
+  await expect(page.locator(".achievement-outcome em")).toHaveCount(0);
+  await expect(page.locator(".achievement-meta span")).toHaveCount(0);
+  for (const selector of [".achievement-entry--participation", ".achievement-entry--organizer"]) {
+    await expect(page.locator(`${selector} .achievement-body`).first()).toHaveCSS("opacity", "1");
+    await expect(page.locator(`${selector} .achievement-stages`).first()).toHaveCSS("opacity", "1");
+    await expect(page.locator(`${selector} h3`).first()).toHaveCSS("text-decoration-line", "none");
+    await expect(page.locator(`${selector} .achievement-outcome strong`).first()).toHaveCSS("text-decoration-line", "none");
+  }
+  expect(await page.locator("[data-prototype='true']").count()).toBe(21);
+  await expect(page.locator(".achievement-year-nav a")).toHaveCount(3);
+  await expect(page.locator(".achievement-record-summary")).toHaveText("16 achievements · 3 years");
+  await expect(page.locator(".achievement-key")).toHaveCount(0);
+  expect(await page.locator("[data-achievement-scope-count]").allTextContents()).toEqual(["12", "2", "2"]);
+  await expect(page.locator(".achievement-overview p")).toHaveCount(3);
+  await expect(page.locator(".achievement-year-nav a[aria-current='true']")).toHaveText("2026");
+  await expect(page.locator(".achievement-stages--multi small span")).toHaveCount(0);
+  expect(await page.locator(".achievement-entry.reveal").count()).toBe(0);
+
+  const desktopLayout = await page.evaluate(() => ({
+    widthFits: document.documentElement.scrollWidth === window.innerWidth,
+    podiumBottom: Math.round(document.querySelector(".achievement-podium").getBoundingClientRect().bottom),
+    viewportHeight: window.innerHeight,
+    firstTimelineYears: [...document.querySelectorAll(".achievement-meta time")]
+      .slice(0, 5)
+      .map((time) => time.textContent.trim())
+  }));
+  expect(desktopLayout.widthFits).toBe(true);
+  expect(desktopLayout.podiumBottom).toBeLessThanOrEqual(desktopLayout.viewportHeight);
+  expect(desktopLayout.firstTimelineYears).toEqual(["2026", "2026", "2026", "2026", "2026"]);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.reload();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth === window.innerWidth)).toBe(true);
+  await expect(page.locator(".podium-place-1")).toHaveCSS("order", "1");
+  await expect(page.locator(".podium-place-5")).toHaveCSS("order", "5");
 });
 
 test("mobile dossier contents collapse and anchors clear the header", async ({ page }) => {

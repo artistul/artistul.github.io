@@ -47,16 +47,16 @@
       "role": "Engineering lead"
     },
     {
-      "name": "Fabian Volintiru",
-      "role": "Team and business lead"
-    },
-    {
       "name": "Pintilei David",
       "role": "Simulation and analysis lead"
     },
     {
       "name": "Ciprian Ursu",
       "role": "Embedded programming contributor"
+    },
+    {
+      "name": "Lavinia Ichim",
+      "role": "Engineering rookie"
     }
   ],
   "collaboration_paths": [
@@ -83,5 +83,5 @@
     }
   ],
   "citation_guidance": "Describe InFlux Origin MK1 as a supervised prototype in active calibration. Do not imply certification, production readiness, stable long-run repeatability, or proven resin-tool life.",
-  "last_updated": "2026-06-24"
+  "last_updated": "2026-08-09"
 }
