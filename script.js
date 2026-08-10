@@ -55,63 +55,6 @@ const HUB = {
   ]
 };
 
-// Team-provided achievement ledger. Prestige describes the competition arena;
-// outcomes describe what the team achieved at each stage inside that arena.
-const ACHIEVEMENTS = [
-  { id: "davinci-2026", rank: 1, year: "2026", competition: "DaVinci Technical Innovation Competition", shortName: "DaVinci 2026", prestige: "national", type: "competitive", outcomes: [
-    { stage: "Final stage", result: "First place", status: "winner" }
-  ]},
-  { id: "rosef-2026", rank: 2, year: "2026", competition: "Romanian Science and Engineering Fair", shortName: "RoSEF 2026", prestige: "national", type: "competitive", outcomes: [
-    { stage: "National stage", result: "Second place", status: "podium" }
-  ]},
-  { id: "oncs-2026", rank: 3, year: "2026", competition: "ONCS", shortName: "ONCS", prestige: "national", type: "competitive", outcomes: [
-    { stage: "County stage", result: "First place", status: "winner" },
-    { stage: "National stage", result: "Participation", status: "participant" }
-  ]},
-  { id: "fri-2026", rank: 4, year: "2026", competition: "FIRST Robotics Initiative", shortName: "FRI 2026", prestige: "national", type: "competitive", outcomes: [
-    { stage: "Playoffs", result: "Alliance Captain", status: "finalist" },
-    { stage: "Ranking", result: "6th place", status: "qualified" }
-  ]},
-  { id: "student-pentru-o-zi-2026", year: "2026", competition: "Student for a Day", shortName: "Student for a Day", prestige: "national", type: "competitive", outcomes: [
-    { stage: "Technical Creativity · 11th grade", result: "First place", status: "winner" }
-  ]},
-  { id: "bolts-and-speed-2026", year: "2026", competition: "Bolts and Speed", shortName: "Bolts and Speed", prestige: "national", type: "competitive", outcomes: [
-    { stage: "Drag Racing", result: "Second place", status: "podium" }
-  ]},
-  { id: "milset-2025", rank: 5, year: "2025", competition: "MILSET Expo-Sciences International", shortName: "MILSET Abu Dhabi", prestige: "international", type: "competitive", location: "Abu Dhabi", outcomes: [
-    { stage: "Delegation award", result: "Best Delegation", status: "winner" }
-  ]},
-  { id: "orig-2025", year: "2025", competition: "Open Robotics Intelligent Grid", shortName: "Open Robotics 2025", prestige: "national", type: "competitive", outcomes: [
-    { stage: "Alliance competition", result: "Finalist alliance", status: "finalist" },
-    { stage: "Storyteller Award", result: "First place", status: "winner" }
-  ]},
-  { id: "rosef-2025", year: "2025", competition: "Romanian Science and Engineering Fair", shortName: "RoSEF 2025", prestige: "national", type: "competitive", outcomes: [
-    { stage: "National stage", result: "Second place", status: "podium" }
-  ]},
-  { id: "oncs-2025", year: "2025", competition: "ONCS", shortName: "ONCS 2025", prestige: "national", type: "competitive", outcomes: [
-    { stage: "County stage", result: "First place", status: "winner" },
-    { stage: "National stage", result: "Participation", status: "participant" }
-  ]},
-  { id: "suceava-league-meet-2025", year: "2025", competition: "Suceava League Meet", shortName: "Suceava League Meet", prestige: "specialist", type: "organizer", outcomes: [
-    { stage: "FTC Meet", result: "Organizers", status: "organizer" }
-  ]},
-  { id: "ftc-national-2024", year: "2024", competition: "FIRST Tech Challenge Romania", shortName: "FTC 2024", prestige: "national", type: "competitive", outcomes: [
-    { stage: "National stage", result: "Qualified", status: "qualified" }
-  ]},
-  { id: "orig-2024", year: "2024", competition: "Open Robotics Intelligent Grid", shortName: "Open Robotics 2024", prestige: "national", type: "competitive", outcomes: [
-    { stage: "Final ranking", result: "Third place", status: "podium" }
-  ]},
-  { id: "belt-and-road-2024", year: "2024", competition: "Belt and Road Teenager Maker Camp", shortName: "Belt and Road Maker Camp", prestige: "international", type: "participation", location: "China", outcomes: [
-    { stage: "Teenager Maker Camp and Teacher Workshop", result: "Participation", status: "participant" }
-  ]},
-  { id: "league-meet-penguins-2024", year: "2024", competition: "League Meet of Penguins", shortName: "League Meet of Penguins", prestige: "specialist", type: "organizer", outcomes: [
-    { stage: "FTC Meet", result: "Organizers", status: "organizer" }
-  ]},
-  { id: "cansat-2024", year: "2024", competition: "CanSat Romania", shortName: "CanSat 2024", prestige: "national", type: "competitive", outcomes: [
-    { stage: "National competition", result: "Award winners", status: "award" }
-  ]}
-];
-
 const ROUTE_TABS = {
   "/sponsorship/": "sponsorship",
   "/sponsorship/index.html": "sponsorship",
@@ -495,83 +438,19 @@ function renderDownloads() {
     </a>`).join("");
 }
 
-function renderAchievements() {
+function enhanceAchievements() {
   const podium = document.querySelector("[data-achievement-podium]");
   const timeline = document.querySelector("[data-achievement-timeline]");
   if (!podium || !timeline) return;
-
-  const escapeText = (value) => String(value).replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  })[character]);
-  const prestigeLabels = {
-    international: "International",
-    national: "National",
-    specialist: "Specialist / regional"
-  };
-  const renderOutcome = (outcome) => `
-    <li class="achievement-outcome achievement-outcome--${outcome.status}">
-      <span class="outcome-mark" aria-hidden="true"></span>
-      <div>
-        <small>${escapeText(outcome.stage)}</small>
-        <strong>${escapeText(outcome.result)}</strong>
-      </div>
-    </li>`;
-  const topFive = ACHIEVEMENTS.filter(({ rank }) => rank).sort((a, b) => a.rank - b.rank);
-  const timelineAchievements = [...ACHIEVEMENTS].sort((a, b) => {
-    const aYear = /^\d{4}$/.test(a.year) ? Number(a.year) : -1;
-    const bYear = /^\d{4}$/.test(b.year) ? Number(b.year) : -1;
-    return bYear - aYear;
-  });
-
-  podium.innerHTML = topFive.map((achievement) => `
-    <li class="podium-place podium-place-${achievement.rank} podium-place--${achievement.prestige}" data-rank="${achievement.rank}" data-prototype="true" aria-label="Rank ${achievement.rank}, ${escapeText(achievement.shortName)}">
-      <div class="podium-copy">
-        <div class="podium-title">
-          <span>${prestigeLabels[achievement.prestige]}</span>
-          <h2>${escapeText(achievement.shortName)}</h2>
-        </div>
-        <ul class="podium-results">
-          ${achievement.outcomes.map((outcome) => `<li><small>${escapeText(outcome.stage)}</small><strong>${escapeText(outcome.result)}</strong></li>`).join("")}
-        </ul>
-        <time>${escapeText(achievement.year)}</time>
-      </div>
-      <div class="podium-step" aria-hidden="true"><b>${String(achievement.rank).padStart(2, "0")}</b></div>
-    </li>`).join("");
-
-  let activeYear = "";
-  timeline.innerHTML = timelineAchievements.map((achievement) => {
-    const yearMarker = achievement.year === activeYear ? "" : `
-      <li id="achievements-${escapeText(achievement.year)}" class="achievement-year-marker reveal" aria-label="Achievements from ${escapeText(achievement.year)}"><span>${escapeText(achievement.year)}</span></li>`;
-    activeYear = achievement.year;
-    return `${yearMarker}
-      <li class="achievement-entry achievement-entry--${achievement.prestige} achievement-entry--${achievement.type}"
-        data-prestige="${achievement.prestige}" data-prototype="true">
-        <div class="achievement-meta">
-          <time>${escapeText(achievement.year)}</time>
-        </div>
-        <span class="achievement-node" aria-hidden="true"></span>
-        <article class="achievement-body">
-          <header>
-            <div>
-              <h3>${escapeText(achievement.competition)}</h3>
-              ${achievement.location ? `<p>${escapeText(achievement.location)}</p>` : ""}
-            </div>
-            <b>${achievement.type === "organizer" ? "Organizer role" : `${prestigeLabels[achievement.prestige]} competition`}</b>
-          </header>
-          <ol class="achievement-stages${achievement.outcomes.length > 1 ? " achievement-stages--multi" : ""}" aria-label="Results and competition stages">
-            ${achievement.outcomes.map((outcome) => renderOutcome(outcome)).join("")}
-          </ol>
-        </article>
-      </li>`;
-  }).join("");
+  const entries = [...timeline.querySelectorAll(".achievement-entry")];
 
   document.querySelectorAll("[data-achievement-count]").forEach((node) => {
-    node.textContent = String(ACHIEVEMENTS.length);
+    node.textContent = String(entries.length);
   });
   const scopeCounts = {
-    national: ACHIEVEMENTS.filter(({ prestige }) => prestige === "national").length,
-    international: ACHIEVEMENTS.filter(({ prestige }) => prestige === "international").length,
-    organizer: ACHIEVEMENTS.filter(({ type }) => type === "organizer").length
+    national: entries.filter(({ dataset }) => dataset.prestige === "national").length,
+    international: entries.filter(({ dataset }) => dataset.prestige === "international").length,
+    organizer: entries.filter((entry) => entry.classList.contains("achievement-entry--organizer")).length
   };
   document.querySelectorAll("[data-achievement-scope-count]").forEach((node) => {
     node.textContent = String(scopeCounts[node.dataset.achievementScopeCount] || 0);
@@ -597,7 +476,7 @@ document.querySelectorAll('a[href^="assets/"], a[href="technical.html"]').forEac
 });
 
 renderDownloads();
-renderAchievements();
+enhanceAchievements();
 activateTab(currentTabFromUrl(), { fromHistory: true, instant: true, keepScroll: true });
 if (window.location.hash) {
   requestAnimationFrame(() => requestAnimationFrame(() => {

@@ -867,8 +867,8 @@ test("contact tab exposes the direct email paths", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "General Inquiry" })).toBeVisible();
   await expect(page.locator(".contact-identity")).toHaveCount(0);
   await expect(page.locator(".contact-option .action")).toHaveCount(0);
-  await expect(page.getByRole("link", { name: /tonegari\.stefan@gmail\.com/ })).toHaveAttribute("href", /mailto:tonegari\.stefan@gmail\.com/);
-  await expect(page.locator(".contact-option").nth(1).getByRole("link", { name: /david\.pintilei9@gmail\.com/ })).toHaveAttribute("href", /mailto:david\.pintilei9@gmail\.com/);
+  await expect(page.getByRole("link", { name: /sponsorships@influxorigin\.ro/ })).toHaveAttribute("href", /mailto:sponsorships@influxorigin\.ro/);
+  await expect(page.locator(".contact-option").nth(1).getByRole("link", { name: /contact@influxorigin\.ro/ })).toHaveAttribute("href", /mailto:contact@influxorigin\.ro/);
   await expect(page.getByRole("heading", { name: "Help build what comes next." })).toBeVisible();
   await expect(page.locator(".recruitment-band")).toBeVisible();
   await expect(page.getByRole("link", { name: /Questions\? Email David/ })).toHaveAttribute("href", /mailto:david\.pintilei9@gmail\.com/);
@@ -884,7 +884,7 @@ test("contact tab exposes the direct email paths", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
-test("sponsors tab shows current sponsor tiers and visibility render", async ({ page }) => {
+test("sponsors tab shows the full partnership hierarchy, benefits, and current sponsors", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=sponsorship");
 
@@ -892,10 +892,30 @@ test("sponsors tab shows current sponsor tiers and visibility render", async ({ 
   await expect(page.getByRole("tab", { name: "Sponsors" })).toHaveAttribute("aria-selected", "true");
   await expect(page.locator("#sponsorship .contact-option")).toHaveCount(0);
   await expect(page.locator("#sponsorship .panel-hero")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Thank you to our sponsors!" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Interested in becoming a sponsor? Contact us! ↗" })).toHaveAttribute("href", "contact/");
+  await expect(page.getByRole("heading", { name: "Build the next machine with us." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Become a sponsor ↗" })).toHaveAttribute("href", "contact/");
+  await expect(page.getByRole("heading", { name: "Choose how your brand shows up." })).toBeVisible();
+  await expect(page.locator(".sponsor-level")).toHaveCount(4);
+  await expect(page.locator(".sponsor-level-head > span")).toHaveText([
+    "Supporter",
+    "Silver Sponsor",
+    "Gold Sponsor",
+    "Diamond Sponsor"
+  ]);
+  await expect(page.locator(".sponsor-level-head > strong")).toHaveText([
+    "0–999 lei",
+    "1,000–3,499 lei",
+    "3,500–9,999 lei",
+    "10,000+ lei"
+  ]);
+  await expect(page.locator(".sponsor-benefits li")).toHaveCount(11);
+  await expect(page.locator(".sponsor-level-diamond")).toContainText("Includes Gold");
+  await expect(page.locator(".sponsor-caveat")).toContainText("T-shirt placement depends on production timing");
+  await expect(page.getByRole("link", { name: "Discuss a partnership ↗" })).toHaveAttribute("href", "contact/");
+  await expect(page.getByRole("link", { name: "Request custom visibility ↗" })).toHaveAttribute("href", "contact/");
   await expect(page.locator(".sponsor-logo-wall img")).toHaveCount(6);
   await expect(page.locator(".sponsor-logo-wall img").first()).toHaveAttribute("src", "/assets/sponsor-01-taggo.png");
+  await page.locator(".sponsor-logo-wall").scrollIntoViewIfNeeded();
   await expect.poll(() => page.locator("#sponsorship img").evaluateAll((images) =>
     images.every((image) => image.currentSrc && image.naturalWidth > 0)
   )).toBe(true);
@@ -910,13 +930,22 @@ test("sponsors tab shows current sponsor tiers and visibility render", async ({ 
   await expect.poll(() => page.locator(".uniform-render img").evaluate((image) =>
     Boolean(image.currentSrc && image.naturalWidth > 0)
   )).toBe(true);
-  await page.getByRole("link", { name: "Interested in becoming a sponsor? Contact us! ↗" }).click();
+  await page.getByRole("link", { name: "Become a sponsor ↗" }).click();
   await expect(page.getByRole("tab", { name: "Contact Us" })).toHaveAttribute("aria-selected", "true");
   await expect(page).toHaveTitle("Contact Us | InFlux Origin");
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/index.html?tab=sponsorship");
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  for (const language of ["en", "ro", "fr"]) {
+    await page.evaluate((nextLanguage) => window.InFluxI18n.setLanguage(nextLanguage), language);
+    await expect(page.locator("html")).toHaveAttribute("lang", language);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    const tierBoxes = await page.locator(".sponsor-level").evaluateAll((levels) => levels.map((level) => {
+      const box = level.getBoundingClientRect();
+      return { left: box.left, right: box.right, width: box.width };
+    }));
+    expect(tierBoxes.every((box) => box.left >= 0 && box.right <= 390 && box.width > 300)).toBe(true);
+  }
 });
 
 test("reference-led versions and project stages render", async ({ page }) => {
@@ -1107,9 +1136,29 @@ test("visible sponsor media loads from the clean route", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/sponsorship/");
   await expect(page.locator("#sponsorship")).toHaveClass(/is-active/);
+  await page.locator(".sponsor-logo-wall").scrollIntoViewIfNeeded();
+  await page.locator(".uniform-render").scrollIntoViewIfNeeded();
   await expect.poll(() => page.locator("#sponsorship img").evaluateAll((images) =>
     images.every((image) => image.currentSrc && image.naturalWidth > 0)
   )).toBe(true);
+});
+
+test("complete achievements dataset is present without JavaScript", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto("/index.html");
+
+  await expect(page.locator(".achievement-podium .podium-place")).toHaveCount(5);
+  await expect(page.locator(".achievement-entry")).toHaveCount(16);
+  await expect(page.locator(".achievement-outcome")).toHaveCount(20);
+  await expect(page.locator(".achievement-year-marker")).toHaveCount(3);
+  await expect(page.locator("[data-achievement-scope-count]")).toHaveText(["12", "2", "2"]);
+  await expect(page.locator('[data-achievement-id="davinci-2026"]')).toContainText("DaVinci Technical Innovation Competition");
+  await expect(page.locator('[data-achievement-id="cansat-2024"]')).toContainText("Award winners");
+
+  const ids = await page.locator("[data-achievement-id]").evaluateAll((entries) => entries.map((entry) => entry.dataset.achievementId));
+  expect(new Set(ids).size).toBe(16);
+  await context.close();
 });
 
 test("achievements podium and complete timeline stay ranked and responsive", async ({ page }) => {
