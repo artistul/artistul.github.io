@@ -48,10 +48,13 @@ test("English, Romanian, and French toggle sitewide with persistent accessible s
   await expect(page).toHaveTitle("Premii | InFlux Origin");
   await expect(page.getByRole("tab", { name: "Premii" })).toHaveAttribute("aria-selected", "true");
   await expect(page.locator(".achievements-heading")).toContainText("Premiile Volta Circuits");
+  await expect(page.locator(".achievement-section-switcher a")).toHaveText(["01Urmează", "02Premii", "03Presă"]);
+  await expect(page.locator(".upcoming-invitation")).toHaveText("Acceptăm aproape întotdeauna invitațiile.");
+  await expect(page.locator(".upcoming-entry").first()).toContainText("25–28 august 2026");
   await expect(page.locator(".achievement-entry").first()).toContainText("Competiție națională");
   await expect(page.locator(".podium-place-1 .podium-results")).toContainText("Etapa finală");
   await expect(page.locator(".podium-place-1 .podium-results")).toContainText("Locul I");
-  await expect(page.getByRole("heading", { name: "DaVinci Technical Innovation Competition", exact: true })).toBeVisible();
+  await expect(page.locator("#achievement-record").getByRole("heading", { name: "DaVinci Technical Innovation Competition", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Student for a Day", exact: true })).toBeVisible();
 
   await page.goto("/index.html?tab=proof");
@@ -93,10 +96,13 @@ test("English, Romanian, and French toggle sitewide with persistent accessible s
   await expect(page).toHaveTitle("Prix | InFlux Origin");
   await expect(page.getByRole("tab", { name: "Prix" })).toHaveAttribute("aria-selected", "true");
   await expect(page.locator(".achievements-heading")).toContainText("Prix de Volta Circuits");
+  await expect(page.locator(".achievement-section-switcher a")).toHaveText(["01À venir", "02Prix", "03Presse"]);
+  await expect(page.locator(".upcoming-invitation")).toHaveText("Nous acceptons presque toujours les invitations.");
+  await expect(page.locator(".upcoming-entry").first()).toContainText("25–28 août 2026");
   await expect(page.locator(".achievement-entry").first()).toContainText("Compétition nationale");
   await expect(page.locator(".podium-place-1 .podium-results")).toContainText("Phase finale");
   await expect(page.locator(".podium-place-1 .podium-results")).toContainText("1re place");
-  await expect(page.getByRole("heading", { name: "DaVinci Technical Innovation Competition", exact: true })).toBeVisible();
+  await expect(page.locator("#achievement-record").getByRole("heading", { name: "DaVinci Technical Innovation Competition", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Student for a Day", exact: true })).toBeVisible();
 
   await page.goto("/contact/");
@@ -901,8 +907,23 @@ test("sponsors tab shows the full partnership hierarchy, benefits, and current s
   await expect(page.locator(".sponsor-case")).toHaveCount(0);
   await expect(page.locator('.sponsor-socials a[href="https://www.instagram.com/volta_circuits/"]')).toHaveAttribute("target", "_blank");
   await expect(page.locator('.sponsor-socials a[href="https://www.tiktok.com/@volta.circuits"]')).toHaveAttribute("target", "_blank");
-  await expect(page.locator(".sponsor-socials strong")).toHaveText(["@volta.circuits", "@volta.circuits"]);
-  await expect(page.locator(".sponsor-social-icon svg")).toHaveCount(2);
+  await expect(page.locator('.sponsor-socials a[href="https://volta-circuits-ftc.com/ro"]')).toHaveAttribute("target", "_blank");
+  await expect(page.locator(".sponsor-socials strong")).toHaveText(["@volta.circuits", "@volta.circuits", "Volta Circuits FTC"]);
+  await expect(page.locator(".sponsor-social-icon svg")).toHaveCount(3);
+  await expect(page.locator("#sponsorship .sponsor-value")).toHaveCount(1);
+  await expect(page.locator("#sponsorship .sponsor-value-fact")).toHaveCount(4);
+  await expect(page.locator("#sponsorship .sponsor-impact-ledger li")).toHaveCount(4);
+  await expect(page.locator("#sponsorship .sponsor-impact-ledger li > span")).toHaveCount(0);
+  await expect(page.locator("#sponsorship .sponsor-value-fact dt b")).toHaveText(["5+", "50–200", "16–19", "1,300+"]);
+  await expect(page.getByRole("heading", { name: "Your brand, in front of the next generation of engineers." })).toBeVisible();
+  await expect(page.locator("#sponsorship .sponsor-value-closing")).toHaveText("You are not simply placing a logo. You are funding our projects.");
+  await expect(page.locator("#sponsorship .sponsor-value svg")).toHaveCount(0);
+  expect(await page.evaluate(() => {
+    const socials = document.querySelector("#sponsorship .sponsor-socials");
+    const value = document.querySelector("#sponsorship .sponsor-value");
+    const program = document.querySelector("#sponsorship .sponsor-program");
+    return Boolean(socials && value && program && (socials.compareDocumentPosition(value) & Node.DOCUMENT_POSITION_FOLLOWING) && (value.compareDocumentPosition(program) & Node.DOCUMENT_POSITION_FOLLOWING));
+  })).toBe(true);
   await expect(page.getByRole("link", { name: "Become a sponsor ↗" })).toHaveAttribute("href", "contact/");
   await expect(page.getByRole("heading", { name: "Choose how your brand shows up." })).toBeVisible();
   await expect(page.locator(".sponsor-level")).toHaveCount(4);
@@ -947,9 +968,27 @@ test("sponsors tab shows the full partnership hierarchy, benefits, and current s
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/index.html?tab=sponsorship");
+  const sponsorValueLabels = {
+    en: "Why sponsor us?",
+    ro: "De ce să ne sponsorizezi?",
+    fr: "Pourquoi nous sponsoriser ?"
+  };
+  const sponsorPresenceHeadings = {
+    en: "We bring robotics to people.",
+    ro: "Aducem robotica mai aproape de oameni.",
+    fr: "Nous rapprochons la robotique du public."
+  };
+  const sponsorValueClosings = {
+    en: "You are not simply placing a logo. You are funding our projects.",
+    ro: "Nu doar îți amplasezi logo‑ul. Ne finanțezi proiectele.",
+    fr: "Vous ne faites pas que placer un logo. Vous financez nos projets."
+  };
   for (const language of ["en", "ro", "fr"]) {
     await page.evaluate((nextLanguage) => window.InFluxI18n.setLanguage(nextLanguage), language);
     await expect(page.locator("html")).toHaveAttribute("lang", language);
+    await expect(page.locator("#sponsorship .sponsor-value .section-index").first()).toHaveText(sponsorValueLabels[language]);
+    await expect(page.locator("#sponsorship .sponsor-value-presence h3")).toHaveText(sponsorPresenceHeadings[language]);
+    await expect(page.locator("#sponsorship .sponsor-value-closing")).toHaveText(sponsorValueClosings[language]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     const tierBoxes = await page.locator(".sponsor-level").evaluateAll((levels) => levels.map((level) => {
       const box = level.getBoundingClientRect();
@@ -1176,7 +1215,11 @@ test("complete achievements dataset is present without JavaScript", async ({ bro
   await expect(page.locator("[data-achievement-scope-count]")).toHaveText(["12", "2", "2"]);
   await expect(page.locator('[data-achievement-id="davinci-2026"]')).toContainText("DaVinci Technical Innovation Competition");
   await expect(page.locator('[data-achievement-id="cansat-2024"]')).toContainText("Award winners");
-  await expect(page.locator(".achievement-section-switcher a")).toHaveCount(2);
+  await expect(page.locator(".achievement-section-switcher a")).toHaveCount(3);
+  await expect(page.locator(".upcoming-entry")).toHaveCount(9);
+  await expect(page.locator('[data-upcoming-status="qualified"]')).toHaveCount(3);
+  await expect(page.locator('[data-upcoming-status="tba"]')).toHaveCount(4);
+  await expect(page.locator(".upcoming-entry", { hasText: "Qube2Space" })).toContainText("Dates TBA");
   await expect(page.locator(".press-entry")).toHaveCount(10);
   await expect(page.locator(".press-entry img")).toHaveCount(10);
   await expect(page.locator(".press-entry .press-entry-link")).toHaveCount(10);
@@ -1191,7 +1234,7 @@ test("press appearances form a static, image-led horizontal record", async ({ pa
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/index.html?tab=achievements");
 
-  await expect(page.locator(".achievement-section-switcher a")).toHaveText(["01Achievements", "02Press"]);
+  await expect(page.locator(".achievement-section-switcher a")).toHaveText(["01Upcoming", "02Achievements", "03Press"]);
   await expect(page.locator(".press-entry")).toHaveCount(10);
   await expect(page.locator(".press-entry img")).toHaveCount(10);
   await expect(page.locator("[data-press-count]")).toHaveText("10");
@@ -1206,6 +1249,7 @@ test("press appearances form a static, image-led horizontal record", async ({ pa
 
   const track = page.locator("[data-press-timeline]");
   await track.scrollIntoViewIfNeeded();
+  await expect(page.locator('.achievement-section-switcher a[href="#press-coverage"]')).toHaveAttribute("aria-current", "true");
   expect(await track.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(true);
   await expect(page.locator("[data-press-previous]")).toBeDisabled();
   const before = await track.evaluate((node) => node.scrollLeft);
@@ -1250,6 +1294,21 @@ test("achievements podium and complete timeline stay ranked and responsive", asy
   await expect(page).toHaveTitle("Achievements | InFlux Origin");
   await expect(page.getByRole("tab", { name: "Achievements" })).toHaveAttribute("aria-selected", "true");
   await expect(page.locator(".podium-place")).toHaveCount(5);
+  await expect(page.locator(".achievement-section-switcher a")).toHaveText(["01Upcoming", "02Achievements", "03Press"]);
+  await expect(page.locator('.achievement-section-switcher a[href="#upcoming-events"]')).toHaveAttribute("aria-current", "true");
+  await expect(page.locator(".upcoming-entry")).toHaveCount(9);
+  await expect(page.locator(".upcoming-entry--qualified")).toHaveCount(3);
+  await expect(page.locator(".upcoming-entry--scheduled")).toHaveCount(2);
+  await expect(page.locator(".upcoming-entry--tba")).toHaveCount(4);
+  await expect(page.locator("[data-upcoming-count]")).toHaveText("9");
+  await expect(page.locator(".upcoming-invitation")).toHaveText("We almost always accept invitations.");
+  await expect(page.locator(".upcoming-entry").first()).toContainText("Volta Circuits Summer School");
+  await expect(page.locator(".upcoming-entry", { hasText: "Open Robotics Intelligent Grid" })).toContainText("Qualified");
+  await expect(page.locator(".upcoming-entry", { hasText: "Qube2Space" })).toContainText("Dates TBA");
+  expect(await page.evaluate(() =>
+    document.querySelector("#upcoming-events").getBoundingClientRect().top
+      < document.querySelector("#achievement-record").getBoundingClientRect().top
+  )).toBe(true);
   await expect(page.locator(".achievement-entry")).toHaveCount(16);
   await expect(page.locator(".achievement-entry--international")).toHaveCount(2);
   await expect(page.locator(".achievement-entry--national")).toHaveCount(12);

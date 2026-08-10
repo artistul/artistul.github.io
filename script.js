@@ -443,9 +443,13 @@ function enhanceAchievements() {
   const timeline = document.querySelector("[data-achievement-timeline]");
   if (!podium || !timeline) return;
   const entries = [...timeline.querySelectorAll(".achievement-entry")];
+  const upcomingEntries = [...document.querySelectorAll("[data-upcoming-timeline] .upcoming-entry")];
 
   document.querySelectorAll("[data-achievement-count]").forEach((node) => {
     node.textContent = String(entries.length);
+  });
+  document.querySelectorAll("[data-upcoming-count]").forEach((node) => {
+    node.textContent = String(upcomingEntries.length);
   });
   const scopeCounts = {
     national: entries.filter(({ dataset }) => dataset.prestige === "national").length,
@@ -599,10 +603,13 @@ function enhancePressTimeline() {
   }, true);
 
   const updateSectionLink = () => {
-    const press = document.querySelector("#press-coverage");
-    const activeHref = press && press.getBoundingClientRect().top <= window.innerHeight * .4
-      ? "#press-coverage"
-      : "#achievement-record";
+    const threshold = window.innerHeight * .4;
+    let activeHref = sectionLinks[0]?.getAttribute("href") || "#upcoming-events";
+    sectionLinks.forEach((link) => {
+      const href = link.getAttribute("href");
+      const target = href ? document.querySelector(href) : null;
+      if (target && target.getBoundingClientRect().top <= threshold) activeHref = href;
+    });
     sectionLinks.forEach((link) => {
       if (link.getAttribute("href") === activeHref) link.setAttribute("aria-current", "true");
       else link.removeAttribute("aria-current");
