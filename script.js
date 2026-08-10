@@ -471,6 +471,153 @@ function enhanceAchievements() {
   timeline.querySelectorAll(".achievement-year-marker").forEach((node) => yearObserver.observe(node));
 }
 
+function enhancePressTimeline() {
+  const track = document.querySelector("[data-press-timeline]");
+  if (!track) return;
+
+  const entries = [...track.querySelectorAll(".press-entry")];
+  const previous = document.querySelector("[data-press-previous]");
+  const next = document.querySelector("[data-press-next]");
+  const progress = document.querySelector("[data-press-progress]");
+  const railShell = track.closest(".press-rail-shell") || track;
+  const sectionLinks = [...document.querySelectorAll(".achievement-section-switcher a")];
+
+  document.querySelectorAll("[data-press-count]").forEach((node) => {
+    node.textContent = String(entries.length);
+  });
+
+  let updateFrame = 0;
+  const updateRail = () => {
+    updateFrame = 0;
+    const maximum = Math.max(0, track.scrollWidth - track.clientWidth);
+    const ratio = maximum ? Math.min(1, Math.max(0, track.scrollLeft / maximum)) : 1;
+    progress?.style.setProperty("--press-progress", String(ratio));
+    if (previous) previous.disabled = track.scrollLeft <= 2;
+    if (next) next.disabled = track.scrollLeft >= maximum - 2;
+  };
+  const requestRailUpdate = () => {
+    if (!updateFrame) updateFrame = requestAnimationFrame(updateRail);
+  };
+  const moveRail = (direction) => {
+    stopWheelMotion();
+    track.scrollBy({ left: direction * Math.max(280, track.clientWidth * .78), behavior: "smooth" });
+  };
+
+  previous?.addEventListener("click", () => moveRail(-1));
+  next?.addEventListener("click", () => moveRail(1));
+  track.addEventListener("scroll", requestRailUpdate, { passive: true });
+  window.addEventListener("resize", requestRailUpdate, { passive: true });
+  let wheelFrame = 0;
+  let wheelTarget = track.scrollLeft;
+  let wheelLastFrame = 0;
+  let wheelReleaseTimer = 0;
+  const reduceWheelMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const releaseWheelMode = () => {
+    clearTimeout(wheelReleaseTimer);
+    wheelReleaseTimer = setTimeout(() => track.classList.remove("is-wheel-scrolling"), 180);
+  };
+  const stopWheelMotion = () => {
+    if (wheelFrame) cancelAnimationFrame(wheelFrame);
+    wheelFrame = 0;
+    wheelLastFrame = 0;
+    wheelTarget = track.scrollLeft;
+    clearTimeout(wheelReleaseTimer);
+    track.classList.remove("is-wheel-scrolling");
+  };
+  const animateWheel = (timestamp) => {
+    if (!wheelLastFrame) wheelLastFrame = timestamp;
+    const elapsed = Math.min(40, Math.max(1, timestamp - wheelLastFrame));
+    wheelLastFrame = timestamp;
+    const distance = wheelTarget - track.scrollLeft;
+
+    if (Math.abs(distance) <= .5) {
+      track.scrollLeft = wheelTarget;
+      wheelFrame = 0;
+      wheelLastFrame = 0;
+      releaseWheelMode();
+      return;
+    }
+
+    const response = 1 - Math.exp(-elapsed / 70);
+    track.scrollLeft += distance * response;
+    wheelFrame = requestAnimationFrame(animateWheel);
+  };
+  railShell.addEventListener("wheel", (event) => {
+    const maximum = Math.max(0, track.scrollWidth - track.clientWidth);
+    if (!maximum) return;
+    const rawMovement = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    const unit = event.deltaMode === 1 ? 32 : event.deltaMode === 2 ? track.clientWidth : 1;
+    const movement = rawMovement * unit * 1.15;
+    const activePosition = wheelFrame ? wheelTarget : track.scrollLeft;
+    const atStart = activePosition <= 2;
+    const atEnd = activePosition >= maximum - 2;
+    if ((movement < 0 && atStart) || (movement > 0 && atEnd)) return;
+    event.preventDefault();
+    track.classList.add("is-wheel-scrolling");
+    clearTimeout(wheelReleaseTimer);
+    wheelTarget = Math.min(maximum, Math.max(0, activePosition + movement));
+    if (reduceWheelMotion) {
+      track.scrollLeft = wheelTarget;
+      releaseWheelMode();
+      return;
+    }
+    if (!wheelFrame) wheelFrame = requestAnimationFrame(animateWheel);
+  }, { passive: false });
+
+  let drag = null;
+  let suppressClick = false;
+  track.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "mouse" || event.button !== 0) return;
+    stopWheelMotion();
+    drag = { pointerId: event.pointerId, startX: event.clientX, startScroll: track.scrollLeft, moved: false };
+    track.setPointerCapture(event.pointerId);
+    track.classList.add("is-dragging");
+  });
+  track.addEventListener("pointermove", (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const distance = event.clientX - drag.startX;
+    if (Math.abs(distance) > 5) drag.moved = true;
+    if (!drag.moved) return;
+    event.preventDefault();
+    track.scrollLeft = drag.startScroll - distance;
+  });
+  const finishDrag = (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    suppressClick = drag.moved;
+    if (suppressClick) setTimeout(() => { suppressClick = false; }, 0);
+    drag = null;
+    track.classList.remove("is-dragging");
+    if (track.hasPointerCapture(event.pointerId)) track.releasePointerCapture(event.pointerId);
+  };
+  track.addEventListener("pointerup", finishDrag);
+  track.addEventListener("pointercancel", finishDrag);
+  track.addEventListener("click", (event) => {
+    if (!suppressClick) return;
+    event.preventDefault();
+    event.stopPropagation();
+    suppressClick = false;
+  }, true);
+
+  const updateSectionLink = () => {
+    const press = document.querySelector("#press-coverage");
+    const activeHref = press && press.getBoundingClientRect().top <= window.innerHeight * .4
+      ? "#press-coverage"
+      : "#achievement-record";
+    sectionLinks.forEach((link) => {
+      if (link.getAttribute("href") === activeHref) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    });
+  };
+  window.addEventListener("scroll", updateSectionLink, { passive: true });
+  sectionLinks.forEach((link) => link.addEventListener("click", () => {
+    sectionLinks.forEach((candidate) => candidate.removeAttribute("aria-current"));
+    link.setAttribute("aria-current", "true");
+  }));
+
+  updateRail();
+  updateSectionLink();
+}
+
 document.querySelectorAll('a[href^="assets/"], a[href="technical.html"]').forEach((link) => {
   link.setAttribute("href", resolveSitePath(link.getAttribute("href")));
 });
@@ -478,6 +625,7 @@ document.querySelectorAll('a[href^="assets/"], a[href="technical.html"]').forEac
 renderDownloads();
 enhanceAchievements();
 activateTab(currentTabFromUrl(), { fromHistory: true, instant: true, keepScroll: true });
+enhancePressTimeline();
 if (window.location.hash) {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const link = projectIndexLinks.find((candidate) =>

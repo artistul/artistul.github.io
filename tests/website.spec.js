@@ -45,14 +45,19 @@ test("English, Romanian, and French toggle sitewide with persistent accessible s
   await expect(page.locator("#team").getByText("Ingineră junior", { exact: true })).toBeVisible();
 
   await page.goto("/index.html?tab=achievements");
-  await expect(page).toHaveTitle("Palmares | InFlux Origin");
-  await expect(page.getByRole("tab", { name: "Palmares" })).toHaveAttribute("aria-selected", "true");
-  await expect(page.locator(".achievements-heading")).toContainText("Palmaresul Volta Circuits");
+  await expect(page).toHaveTitle("Premii | InFlux Origin");
+  await expect(page.getByRole("tab", { name: "Premii" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".achievements-heading")).toContainText("Premiile Volta Circuits");
   await expect(page.locator(".achievement-entry").first()).toContainText("Competiție națională");
   await expect(page.locator(".podium-place-1 .podium-results")).toContainText("Etapa finală");
   await expect(page.locator(".podium-place-1 .podium-results")).toContainText("Locul I");
   await expect(page.getByRole("heading", { name: "DaVinci Technical Innovation Competition", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Student for a Day", exact: true })).toBeVisible();
+
+  await page.goto("/index.html?tab=proof");
+  await expect(page).toHaveTitle("Dovezi | InFlux Origin");
+  await expect(page.getByRole("tab", { name: "Dovezi" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("#proof .section-index").first()).toHaveText("Dovezi ale prototipului");
 
   await page.goto("/contact/");
   await expect(page.locator("html")).toHaveAttribute("lang", "ro");
@@ -85,9 +90,9 @@ test("English, Romanian, and French toggle sitewide with persistent accessible s
   await expect(page.getByText("Dossier technique public", { exact: true })).toBeVisible();
 
   await page.goto("/index.html?tab=achievements");
-  await expect(page).toHaveTitle("Palmarès | InFlux Origin");
-  await expect(page.getByRole("tab", { name: "Palmarès" })).toHaveAttribute("aria-selected", "true");
-  await expect(page.locator(".achievements-heading")).toContainText("Palmarès de Volta Circuits");
+  await expect(page).toHaveTitle("Prix | InFlux Origin");
+  await expect(page.getByRole("tab", { name: "Prix" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".achievements-heading")).toContainText("Prix de Volta Circuits");
   await expect(page.locator(".achievement-entry").first()).toContainText("Compétition nationale");
   await expect(page.locator(".podium-place-1 .podium-results")).toContainText("Phase finale");
   await expect(page.locator(".podium-place-1 .podium-results")).toContainText("1re place");
@@ -375,7 +380,7 @@ test("ecosystem index stays protected, translated, and linked during the melt", 
   await expect(links.locator("small")).toHaveText([
     "Interfață de control",
     "Electronică de control",
-    "Rezultate de validare"
+    "Dovezi de validare"
   ]);
   await expect(links.locator("strong").first()).toHaveCSS("text-transform", "uppercase");
   await expect(links.locator("small").first()).toHaveCSS("text-transform", "uppercase");
@@ -893,6 +898,11 @@ test("sponsors tab shows the full partnership hierarchy, benefits, and current s
   await expect(page.locator("#sponsorship .contact-option")).toHaveCount(0);
   await expect(page.locator("#sponsorship .panel-hero")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Build the next machine with us." })).toBeVisible();
+  await expect(page.locator(".sponsor-case")).toHaveCount(0);
+  await expect(page.locator('.sponsor-socials a[href="https://www.instagram.com/volta_circuits/"]')).toHaveAttribute("target", "_blank");
+  await expect(page.locator('.sponsor-socials a[href="https://www.tiktok.com/@volta.circuits"]')).toHaveAttribute("target", "_blank");
+  await expect(page.locator(".sponsor-socials strong")).toHaveText(["@volta.circuits", "@volta.circuits"]);
+  await expect(page.locator(".sponsor-social-icon svg")).toHaveCount(2);
   await expect(page.getByRole("link", { name: "Become a sponsor ↗" })).toHaveAttribute("href", "contact/");
   await expect(page.getByRole("heading", { name: "Choose how your brand shows up." })).toBeVisible();
   await expect(page.locator(".sponsor-level")).toHaveCount(4);
@@ -926,6 +936,7 @@ test("sponsors tab shows the full partnership hierarchy, benefits, and current s
   expect(sponsorHeights[1]).toBeGreaterThan(sponsorHeights[3]);
   expect(sponsorHeights[1]).toBe(sponsorHeights[2]);
   await expect(page.getByRole("heading", { name: "Your brand can travel with the team." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "See our press coverage ↗" })).toHaveAttribute("href", "/?tab=achievements#press-coverage");
   await expect(page.locator(".uniform-render img")).toHaveAttribute("src", "/assets/sponsorship-uniform-render.jpeg");
   await expect.poll(() => page.locator(".uniform-render img").evaluate((image) =>
     Boolean(image.currentSrc && image.naturalWidth > 0)
@@ -946,6 +957,16 @@ test("sponsors tab shows the full partnership hierarchy, benefits, and current s
     }));
     expect(tierBoxes.every((box) => box.left >= 0 && box.right <= 390 && box.width > 300)).toBe(true);
   }
+});
+
+test("sponsor visibility links directly to press coverage", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/index.html?tab=sponsorship");
+
+  await page.locator("#sponsorship .sponsor-press-link").click();
+  await expect(page).toHaveURL(/\?tab=achievements#press-coverage$/);
+  await expect(page.getByRole("tab", { name: "Achievements" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("#press-coverage")).toBeInViewport();
 });
 
 test("reference-led versions and project stages render", async ({ page }) => {
@@ -1155,10 +1176,71 @@ test("complete achievements dataset is present without JavaScript", async ({ bro
   await expect(page.locator("[data-achievement-scope-count]")).toHaveText(["12", "2", "2"]);
   await expect(page.locator('[data-achievement-id="davinci-2026"]')).toContainText("DaVinci Technical Innovation Competition");
   await expect(page.locator('[data-achievement-id="cansat-2024"]')).toContainText("Award winners");
+  await expect(page.locator(".achievement-section-switcher a")).toHaveCount(2);
+  await expect(page.locator(".press-entry")).toHaveCount(10);
+  await expect(page.locator(".press-entry img")).toHaveCount(10);
+  await expect(page.locator(".press-entry .press-entry-link")).toHaveCount(10);
+  await expect(page.locator("#press-coverage")).not.toContainText("Royal Engineers");
 
   const ids = await page.locator("[data-achievement-id]").evaluateAll((entries) => entries.map((entry) => entry.dataset.achievementId));
   expect(new Set(ids).size).toBe(16);
   await context.close();
+});
+
+test("press appearances form a static, image-led horizontal record", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/index.html?tab=achievements");
+
+  await expect(page.locator(".achievement-section-switcher a")).toHaveText(["01Achievements", "02Press"]);
+  await expect(page.locator(".press-entry")).toHaveCount(10);
+  await expect(page.locator(".press-entry img")).toHaveCount(10);
+  await expect(page.locator("[data-press-count]")).toHaveText("10");
+
+  const assetResults = await page.locator(".press-entry img").evaluateAll(async (images) =>
+    Promise.all(images.map(async (image) => {
+      const response = await fetch(image.src);
+      return response.ok && (response.headers.get("content-type") || "").startsWith("image/");
+    }))
+  );
+  expect(assetResults.every(Boolean)).toBe(true);
+
+  const track = page.locator("[data-press-timeline]");
+  await track.scrollIntoViewIfNeeded();
+  expect(await track.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(true);
+  await expect(page.locator("[data-press-previous]")).toBeDisabled();
+  const before = await track.evaluate((node) => node.scrollLeft);
+  await page.locator("[data-press-next]").click();
+  await expect.poll(() => track.evaluate((node) => node.scrollLeft)).toBeGreaterThan(before);
+  await track.evaluate((node) => { node.scrollLeft = 0; });
+  await page.locator(".press-rail-controls").hover();
+  await page.mouse.wheel(0, 520);
+  const wheelMotion = await track.evaluate((node) => new Promise((resolve) => {
+    const samples = [];
+    const started = performance.now();
+    const sample = () => {
+      samples.push(node.scrollLeft);
+      if (performance.now() - started >= 180) resolve(samples);
+      else requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }));
+  expect(wheelMotion.at(-1)).toBeGreaterThan(0);
+  expect(new Set(wheelMotion.map((position) => Math.round(position))).size).toBeGreaterThan(3);
+  expect(wheelMotion.every((position, index) => index === 0 || position >= wheelMotion[index - 1])).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth === window.innerWidth)).toBe(true);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.reload();
+  await page.locator("#press-coverage").scrollIntoViewIfNeeded();
+  const mobile = await track.evaluate((node) => ({
+    pageWidth: document.documentElement.scrollWidth,
+    viewportWidth: window.innerWidth,
+    cardWidth: Math.round(node.querySelector(".press-entry").getBoundingClientRect().width),
+    trackScrollable: node.scrollWidth > node.clientWidth
+  }));
+  expect(mobile.pageWidth).toBe(mobile.viewportWidth);
+  expect(mobile.cardWidth).toBeLessThan(mobile.viewportWidth);
+  expect(mobile.trackScrollable).toBe(true);
 });
 
 test("achievements podium and complete timeline stay ranked and responsive", async ({ page }) => {

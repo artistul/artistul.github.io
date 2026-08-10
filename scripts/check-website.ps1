@@ -20,6 +20,8 @@ $contactRoute = [IO.File]::ReadAllText((Join-Path $root "contact\index.html"))
 $llms = [IO.File]::ReadAllText((Join-Path $root "llms.txt"))
 $llmsFull = [IO.File]::ReadAllText((Join-Path $root "llms-full.txt"))
 $aiContext = [IO.File]::ReadAllText((Join-Path $root "ai-context.json"))
+$roTranslationMatch = [regex]::Match($i18nScript, '(?s)const RO = Object\.freeze\(\{(?<body>.*?)\}\);\s*const FR')
+$roTranslations = $roTranslationMatch.Groups['body'].Value
 
 $failures = [System.Collections.Generic.List[string]]::new()
 
@@ -33,6 +35,8 @@ Assert-Website ($index -notmatch '<model-viewer') "3D model must be created only
 Assert-Website ($index -match 'data-load-model') "3D load action is missing"
 Assert-Website ($script -match 'loadModelViewerRuntime') "conditional model-viewer loader is missing"
 Assert-Website ($i18nScript -match 'const FR = Object\.freeze' -and $i18nScript -match 'FRENCH_READY' -and $i18nScript -match 'French / Français') "French language scaffold is incomplete"
+Assert-Website ($roTranslationMatch.Success -and $roTranslations -notmatch '(?i)palmares|autocolant') "Romanian translations must never use palmares or autocolant"
+Assert-Website ($roTranslations -match '"Achievements": "Premii"' -and $roTranslations -match '"Proof": "Dovezi"') "Romanian Premii and Dovezi labels are missing"
 Assert-Website ($script -match 'machine-assembly-optimized\.glb') "optimized 3D model is not used"
 Assert-Website ($index -match 'role="tabpanel"') "tabpanel semantics are missing"
 Assert-Website ($index -match 'aria-controls="versions"') "tab-to-panel relationship is missing"
@@ -57,7 +61,8 @@ Assert-Website ("$index`n$technical`n$sponsorshipRoute`n$contactRoute" -notmatch
 Assert-Website ($index -match 'rel="canonical"' -and $technical -match 'rel="canonical"') "canonical metadata is missing"
 Assert-Website (Test-Path (Join-Path $root "CNAME")) "GitHub Pages custom-domain file is missing"
 Assert-Website ($index -match 'https://influxorigin\.ro/' -and $technical -match 'https://influxorigin\.ro/technical\.html') "custom-domain canonical metadata is missing"
-Assert-Website ($index -match '2026-08-10-sponsor-hierarchy' -and $technical -match '2026-06-25-contact-red-identity') "explicit cache version is missing"
+Assert-Website ($index -match '2026-08-10-sticker-copy' -and $technical -match '2026-08-10-sticker-copy') "explicit cache version is missing"
+Assert-Website ("$index`n$sponsorshipRoute`n$contactRoute" -notmatch 'sponsor-case|Why sponsor us\?') "removed sponsor case is still published"
 Assert-Website ($script -match 'dataset\.fluidPhysics' -and $script -match 'stiffness' -and $script -match 'pressurePulse') "independent fluid physics are missing"
 Assert-Website ($index -notmatch 'fluid-body-shine|data-fluid-sheen|stop-color="#ffffff"' -and $styles -notmatch 'fluid-sheen') "white fluid sheen layer is still published"
 Assert-Website ($index -match 'Ciprian Ursu' -and $technical -match 'Ciprian Ursu') "Ciprian Ursu team patch is missing"
@@ -68,8 +73,16 @@ Assert-Website ($index -match 'data-start="5000"' -and $index -match 'data-flipp
 Assert-Website ($index -match '<h2>Sketches</h2>' -and $index -match '<h2>The beginning of InFlux</h2>' -and $index -match '<h2>Plan for MK1</h2>' -and $index -match '<h2>MK1</h2>' -and $index -match '<h2>Next up</h2>' -and $index -match 'InFlux Ecosystem') "updated section hierarchy labels are missing"
 Assert-Website ($index -match 'data-nav="sponsorship"' -and $index -match 'data-nav="contact"' -and $index -match 'sponsorships@influxorigin\.ro' -and $index -match 'contact@influxorigin\.ro' -and $index -match 'sponsorship-uniform-render\.jpeg') "sponsors/contact content is incomplete"
 Assert-Website ($index -match 'Build the next machine' -and $index -match 'class="sponsor-level sponsor-level-diamond"' -and $index -match 'T-shirt placement depends on production timing' -and $index -match 'data-nav-link="contact"' -and $index -match 'sponsor-01-taggo\.png' -and $index -match 'sponsor-02-termohabitat-fotovoltaice\.svg' -and $index -match 'sponsor-03-centrul-medical-biotest\.png' -and $index -match 'sponsor-06-banca-transilvania\.png') "sponsor hierarchy or logo wall is incomplete"
+Assert-Website (($index -match 'https://www\.instagram\.com/volta_circuits/' -and $index -match 'https://www\.tiktok\.com/@volta\.circuits') -and ($sponsorshipRoute -match 'https://www\.instagram\.com/volta_circuits/' -and $sponsorshipRoute -match 'https://www\.tiktok\.com/@volta\.circuits') -and ($contactRoute -match 'https://www\.instagram\.com/volta_circuits/' -and $contactRoute -match 'https://www\.tiktok\.com/@volta\.circuits')) "sponsor social links are incomplete"
+Assert-Website (("$index`n$sponsorshipRoute`n$contactRoute" -split 'class="text-link sponsor-press-link"').Count -eq 4 -and "$index`n$sponsorshipRoute`n$contactRoute" -match 'href="/\?tab=achievements#press-coverage"') "sponsor visibility press link is incomplete"
 Assert-Website (([regex]::Matches($index, 'data-achievement-id="[^"]+"')).Count -eq 16 -and ([regex]::Matches($index, 'class="achievement-outcome achievement-outcome--')).Count -eq 20 -and ([regex]::Matches($index, 'class="podium-place podium-place-')).Count -eq 5) "complete achievements dataset is not present in static HTML"
 Assert-Website ($script -notmatch 'const ACHIEVEMENTS' -and $script -notmatch 'podium\.innerHTML' -and $script -notmatch 'timeline\.innerHTML') "achievements must be progressively enhanced from static HTML"
+Assert-Website (([regex]::Matches($index, 'class="press-entry(?:\s|\")')).Count -eq 10 -and ([regex]::Matches($index, 'assets/press/[^\"]+\.webp')).Count -eq 10) "complete press dataset and images are not present in static HTML"
+Assert-Website ($index -match 'class="achievement-section-switcher' -and $index -match 'id="press-coverage"' -and $index -notmatch 'Royal Engineers') "press section controls or requested editorial filter are missing"
+$pressImages = [regex]::Matches($index, 'assets/press/[^\"]+\.webp') | ForEach-Object { Join-Path $root $_.Value }
+Assert-Website (($pressImages | Where-Object { -not (Test-Path -LiteralPath $_) }).Count -eq 0) "one or more press images are missing"
+$pressImageHashes = $pressImages | ForEach-Object { (Get-FileHash -Algorithm SHA256 -LiteralPath $_).Hash }
+Assert-Website (($pressImageHashes | Sort-Object -Unique).Count -eq $pressImageHashes.Count) "press timeline contains duplicate image files"
 Assert-Website ($index -match 'assets/proof-56-parts\.jpg' -and (Test-Path (Join-Path $root "assets\proof-56-parts.jpg"))) "56-part proof evidence is missing"
 Assert-Website ("$index`n$script" -notmatch 'STEP.+GLB' -and $index -notmatch 'Orbit and zoom') "redundant 3D micro-label copy is still published"
 Assert-Website (Test-Path (Join-Path $root "robots.txt")) "robots.txt is missing"
@@ -86,7 +99,7 @@ Assert-Website ($sitemap -notmatch '/machine/|/components/|/team/|/evidence/|/do
 Assert-Website ($sitemap -match 'https://influxorigin\.ro/technical\.html') "technical dossier is missing from sitemap"
 Assert-Website ($sitemap -match 'https://influxorigin\.ro/sponsorship/' -and $sitemap -match 'https://influxorigin\.ro/contact/') "indexable sponsor/contact routes are missing from sitemap"
 Assert-Website (Test-Path (Join-Path $root "assets\checksums.txt")) "artifact checksums are missing"
-Assert-Website ("$index`n$technical`n$script" -notmatch '[\u00C2\u00E2]') "mojibake characters detected"
+Assert-Website ("$index`n$technical`n$script" -cnotmatch '\u00C3|\u00C2|\u00E2\u20AC|\u00E2\u2020|\uFFFD') "mojibake characters detected"
 
 foreach ($route in @("machine", "components", "team", "evidence", "downloads", "resources")) {
   $routePath = Join-Path $root "$route\index.html"
