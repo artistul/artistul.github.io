@@ -224,6 +224,15 @@ setMenuState(false);
 
 function activateTab(tab, options = {}) {
   const target = HUB.tabs[tab] ? tab : "home";
+  const targetPanel = panels.find((panel) => panel.dataset.panel === target);
+
+  // The indexable contact and sponsorship routes intentionally contain only
+  // their required static panels. Route missing tabs through the full hub.
+  if (!targetPanel) {
+    window.location.assign(urlForTab(target));
+    return;
+  }
+
   const menuWasOpen = nav?.classList.contains("is-open");
 
   panels.forEach((panel) => {

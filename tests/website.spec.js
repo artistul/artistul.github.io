@@ -1203,6 +1203,18 @@ test("visible sponsor media loads from the clean route", async ({ page }) => {
   )).toBe(true);
 });
 
+test("achievements stays available from clean indexable routes", async ({ page }) => {
+  for (const route of ["/sponsorship/", "/contact/"]) {
+    await page.goto(route);
+    const achievementsTab = page.getByRole("tab", { name: "Achievements" });
+    await expect(achievementsTab).toBeVisible();
+    await achievementsTab.click();
+    await expect(page).toHaveURL(/\/\?tab=achievements$/);
+    await expect(page.getByRole("tab", { name: "Achievements" })).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#achievements")).toBeVisible();
+  }
+});
+
 test("complete achievements dataset is present without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
