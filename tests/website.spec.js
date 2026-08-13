@@ -908,8 +908,19 @@ test("sponsors tab shows the full partnership hierarchy, benefits, and current s
   await expect(page.locator('.sponsor-socials a[href="https://www.instagram.com/volta_circuits/"]')).toHaveAttribute("target", "_blank");
   await expect(page.locator('.sponsor-socials a[href="https://www.tiktok.com/@volta.circuits"]')).toHaveAttribute("target", "_blank");
   await expect(page.locator('.sponsor-socials a[href="https://volta-circuits-ftc.com/ro"]')).toHaveAttribute("target", "_blank");
-  await expect(page.locator(".sponsor-socials strong")).toHaveText(["@volta.circuits", "@volta.circuits", "Volta Circuits FTC"]);
-  await expect(page.locator(".sponsor-social-icon svg")).toHaveCount(3);
+  await expect(page.locator('.sponsor-socials a[href="https://www.indiegogo.com/en/projects/influx/influx-injection-molding"]')).toHaveAttribute("target", "_blank");
+  await expect(page.locator(".sponsor-socials strong")).toHaveText(["@volta.circuits", "@volta.circuits", "Volta Circuits FTC", "Support InFlux"]);
+  await expect(page.locator(".sponsor-social-icon svg")).toHaveCount(4);
+  await expect(page.locator(".sponsor-social-crowdfunding")).toContainText("Want to support us as an individual? Explore our crowdfunding campaign.");
+  const socialCardStyles = await page.locator(".sponsor-socials a").evaluateAll((cards) => cards.map((card) => {
+    const style = getComputedStyle(card);
+    return [style.backgroundColor, style.borderColor, style.padding, style.minHeight];
+  }));
+  expect(new Set(socialCardStyles.map((style) => JSON.stringify(style))).size).toBe(1);
+  const socialCardWidths = await page.locator(".sponsor-socials a").evaluateAll((cards) =>
+    cards.map((card) => card.getBoundingClientRect().width)
+  );
+  expect(socialCardWidths[3]).toBeGreaterThan(socialCardWidths[0] * 2.8);
   await expect(page.locator("#sponsorship .sponsor-value")).toHaveCount(1);
   await expect(page.locator("#sponsorship .sponsor-value-fact")).toHaveCount(4);
   await expect(page.locator("#sponsorship .sponsor-impact-ledger li")).toHaveCount(4);
@@ -983,12 +994,18 @@ test("sponsors tab shows the full partnership hierarchy, benefits, and current s
     ro: "Nu doar îți amplasezi logo‑ul. Ne finanțezi proiectele.",
     fr: "Vous ne faites pas que placer un logo. Vous financez nos projets."
   };
+  const crowdfundingCopy = {
+    en: "Want to support us as an individual? Explore our crowdfunding campaign.",
+    ro: "Vrei să ne susții ca persoană fizică? Descoperă campania noastră de finanțare participativă.",
+    fr: "Vous souhaitez nous soutenir à titre individuel ? Découvrez notre campagne de financement participatif."
+  };
   for (const language of ["en", "ro", "fr"]) {
     await page.evaluate((nextLanguage) => window.InFluxI18n.setLanguage(nextLanguage), language);
     await expect(page.locator("html")).toHaveAttribute("lang", language);
     await expect(page.locator("#sponsorship .sponsor-value .section-index").first()).toHaveText(sponsorValueLabels[language]);
     await expect(page.locator("#sponsorship .sponsor-value-presence h3")).toHaveText(sponsorPresenceHeadings[language]);
     await expect(page.locator("#sponsorship .sponsor-value-closing")).toHaveText(sponsorValueClosings[language]);
+    await expect(page.locator("#sponsorship .sponsor-social-crowdfunding small")).toHaveText(crowdfundingCopy[language]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     const tierBoxes = await page.locator(".sponsor-level").evaluateAll((levels) => levels.map((level) => {
       const box = level.getBoundingClientRect();

@@ -3699,6 +3699,14 @@ html[lang="ro"] .recruitment-mark strong {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+.sponsor-social-crowdfunding .sponsor-social-icon path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sponsor-social-crowdfunding { grid-column: 1 / -1; }
 .sponsor-social-copy {
   min-width: 0;
   display: grid;
